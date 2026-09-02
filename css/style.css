@@ -1218,3 +1218,45 @@ main, header, footer { position: relative; z-index: 3; }
   border: 1px dashed rgba(227,196,124,.4); background: rgba(227,196,124,.06);
   color: var(--gold); font-size: 14px; line-height: 2; white-space: pre-wrap;
 }
+
+/* ---------- 核心功能（主页） / 登录 ---------- */
+.feat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px,1fr)); gap: 18px; }
+.feat-card {
+  border: 1px solid var(--line-soft); border-radius: 14px; padding: 26px 22px;
+  text-align: center; text-decoration: none; color: inherit;
+  background: linear-gradient(165deg, rgba(20,27,46,.85), rgba(11,14,23,.92));
+  transition: transform .3s, border-color .3s, box-shadow .3s; display: block;
+}
+.feat-card:hover { transform: translateY(-4px); border-color: var(--line); box-shadow: 0 0 22px var(--glow); }
+.feat-card .g { font-size: 26px; color: var(--gold); display: block; margin-bottom: 10px; }
+.feat-card h4 { font-family: var(--serif); font-size: 17px; letter-spacing: .12em; margin-bottom: 6px; color: var(--moon); }
+.feat-card p { color: var(--text-dim); font-size: 12.5px; line-height: 1.8; }
+.nav-user { margin-left: auto; } /* 登录入口放在导航最右 */
+.login-modal-mask {
+  position: fixed; inset: 0; z-index: 200; background: rgba(5,7,12,.78);
+  display: none; align-items: center; justify-content: center; padding: 18px;
+}
+.login-modal-mask.show { display: flex; }
+.login-modal {
+  width: min(400px, 92vw); background: linear-gradient(170deg, rgba(16,24,40,.99), rgba(7,10,18,.99));
+  border: 1px solid var(--line); border-radius: 18px; padding: 28px 26px; position: relative;
+  box-shadow: 0 24px 80px rgba(0,0,0,.6);
+}
+.login-modal h3 { font-family: var(--serif); letter-spacing: .2em; color: var(--gold); text-align: center; margin-bottom: 4px; }
+.login-modal .sub { text-align: center; color: var(--text-dim); font-size: 12.5px; margin-bottom: 16px; }
+.login-modal input {
+  width: 100%; padding: 11px 13px; margin-bottom: 10px; border-radius: 10px;
+  border: 1px solid rgba(244,239,230,.18); background: var(--night2); color: var(--moon); font-size: 14px; outline: none;
+}
+.login-modal input:focus { border-color: var(--gold); }
+.login-modal .err { color: #ff9b9b; font-size: 12.5px; min-height: 16px; margin-bottom: 6px; text-align: center; }
+.login-modal .close-x { position: absolute; right: 14px; top: 12px; cursor: pointer; color: var(--text-dim); font-size: 18px; }
+.orders-empty { text-align:center; color: var(--text-dim); padding: 30px 0; }
+.order-row {
+  border: 1px solid var(--line-soft); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px;
+  display: flex; flex-wrap: wrap; gap: 10px 18px; justify-content: space-between; align-items: center;
+  background: rgba(16,24,40,.55);
+}
+.order-row .on { color: var(--gold); letter-spacing: .06em; }
+.order-row .st { font-size: 12px; border: 1px solid var(--line); border-radius: 999px; padding: 1px 10px; color: var(--moon); }
+.order-row .it { color: var(--text-dim); font-size: 12.5px; flex-basis: 100%; }
