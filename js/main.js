@@ -747,3 +747,81 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   });
   inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') btn.click(); });
 })();
+
+/* ---------- AI 光语助手（悬浮对话 + 星图志选石；未加载配置时自动降级） ---------- */
+(function initAi() {
+  // 右下角悬浮助手
+  if (window.sbAI && !document.getElementById('aiFab')) {
+    var root = document.createElement('div');
+    root.className = 'ai-widget';
+    root.innerHTML =
+      '<button type="button" class="ai-fab" id="aiFab">✨ 光语助手</button>' +
+      '<div class="ai-panel" id="aiPanel">' +
+        '<div class="ai-head">予光 · 光语助手<span class="ai-close" id="aiClose">✕</span></div>' +
+        '<div class="ai-body" id="aiBody"><p class="ai-tip">问我定制流程、功能用法、晶石意象，或只是想聊聊。文化意象仅供参考，不构成任何承诺。</p></div>' +
+        '<div class="ai-foot"><input id="aiInput" placeholder="输入你的问题…" autocomplete="off"><button type="button" id="aiSend">发送</button></div>' +
+      '</div>';
+    document.body.appendChild(root);
+    var panel = root.querySelector('#aiPanel');
+    var bodyEl = root.querySelector('#aiBody');
+    var inp = root.querySelector('#aiInput');
+    var fab = root.querySelector('#aiFab');
+    var closeBtn = root.querySelector('#aiClose');
+    var sendBtn = root.querySelector('#aiSend');
+    var history = [];
+    var open = false;
+    function addMsg(text, who) {
+      var d = document.createElement('div');
+      d.className = 'ai-msg ' + who;
+      d.textContent = text;
+      bodyEl.appendChild(d);
+      bodyEl.scrollTop = bodyEl.scrollHeight;
+      return d;
+    }
+    function ask() {
+      var q = (inp.value || '').trim();
+      if (!q) return;
+      inp.value = '';
+      addMsg(q, 'me');
+      var wait = addMsg('…', 'ai');
+      history.push({ role: 'user', content: q });
+      window.sbAI({ mode: 'chat', question: q, history: history })
+        .then(function (r) {
+          if (bodyEl.contains(wait)) bodyEl.removeChild(wait);
+          if (r && r.ok) { history.push({ role: 'assistant', content: r.answer }); addMsg(r.answer, 'ai'); }
+          else addMsg('（AI 暂时走神了，稍后再试；急事可加客服微信）', 'ai');
+        })
+        .catch(function () {
+          if (bodyEl.contains(wait)) bodyEl.removeChild(wait);
+          addMsg('（网络开了个小差，稍后再试）', 'ai');
+        });
+    }
+    fab.addEventListener('click', function () { open = !open; root.classList.toggle('open', open); if (open) inp.focus(); });
+    closeBtn.addEventListener('click', function () { open = false; root.classList.remove('open'); });
+    sendBtn.addEventListener('click', ask);
+    inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') ask(); });
+  }
+
+  // 星图志「AI 帮你选石」
+  var needBtn = document.getElementById('aiStonesBtn');
+  var needInp = document.getElementById('aiNeed');
+  var needRes = document.getElementById('aiStonesRes');
+  if (needBtn && needInp && needRes) {
+    if (!window.sbAI) {
+      needBtn.disabled = true;
+      needRes.textContent = '（离线版暂不可用，请访问线上版使用 AI）';
+      return;
+    }
+    needBtn.addEventListener('click', function () {
+      var need = (needInp.value || '').trim() || '日常佩戴';
+      needRes.textContent = '思考中……';
+      needBtn.disabled = true;
+      window.sbAI({ mode: 'stones', need: need })
+        .then(function (r) {
+          needRes.textContent = (r && r.ok) ? r.answer : ('（' + ((r && r.error) || '暂不可用，请稍后再试') + '）');
+        })
+        .catch(function () { needRes.textContent = '（网络开小差了，稍后再试）'; })
+        .then(function () { needBtn.disabled = false; });
+    });
+  }
+})();
