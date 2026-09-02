@@ -378,6 +378,15 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     if (active.dataset.panel === 'east') renderEast();
     else if (active.dataset.panel === 'west') renderWest();
     else renderUnion();
+    syncOrderItem();
+  }
+
+  function syncOrderItem() {
+    var inp = document.getElementById("orderItems");
+    if (!inp) return;
+    try {
+      inp.value = JSON.stringify([{ name: $('pName').textContent, sub: $('pSub').textContent, main: $('rMain').textContent, aux: $('rAux').textContent, metal: $('rMetal').textContent, chain: $('rChain').textContent, quote: $('pLight').textContent }]);
+    } catch (e) {}
   }
 
   function setStone(colorA, colorB) {
@@ -624,26 +633,38 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   }
 })();
 
-/* ---------- 通用提交表单（咨询/投稿 → messages 表；未连库时提示站外联系） ---------- */
+/* ---------- 通用提交表单（咨询/投稿→messages；定制意向→orders，客服确认制） ---------- */
 (function initForms() {
   document.querySelectorAll('.sb-form').forEach(function (f) {
     var status = f.querySelector('.form-status');
     var btn = f.querySelector('button[type="submit"]');
     f.addEventListener('submit', function (e) {
       e.preventDefault();
-      var body = { type: f.dataset.type || 'message' };
-      ['name', 'contact', 'content'].forEach(function (k) {
-        var el = f.querySelector('[name="' + k + '"]');
-        if (el && el.value) body[k] = el.value.trim();
-      });
+      var table = f.dataset.table || 'messages';
+      var type = f.dataset.type || 'message';
+      var body = {};
+      if (table === 'orders') {
+        var ph = f.querySelector('[name="phone"]');
+        var nt = f.querySelector('[name="note"]');
+        var it = f.querySelector('[name="items"]');
+        if (ph && ph.value) body.phone = ph.value.trim();
+        if (nt && nt.value) body.note = nt.value.trim();
+        try { if (it && it.value) body.items = JSON.parse(it.value); } catch (err) { body.items = []; }
+      } else {
+        body.type = type;
+        ['name', 'contact', 'content'].forEach(function (k) {
+          var el = f.querySelector('[name="' + k + '"]');
+          if (el && el.value) body[k] = el.value.trim();
+        });
+      }
       if (!window.sb) {
         if (status) status.textContent = '离线版无法在线提交，请通过下方微信或邮箱联系我们 ✦';
         return;
       }
       if (btn) btn.disabled = true;
-      window.sb('messages', { method: 'POST', body: JSON.stringify(body) })
+      window.sb(table, { method: 'POST', body: JSON.stringify(body) })
         .then(function () {
-          if (status) status.textContent = '已收到你的留言 ✦ 我们会在 1 个工作日内回复（若加急请直接加客服微信）。';
+          if (status) status.textContent = (table === 'orders' ? '已收到你的定制意向 ✦ 我们将在 1 个工作日内与你二次确认后制作。' : '已收到你的留言 ✦ 我们会在 1 个工作日内回复。');
           f.reset();
           if (btn) btn.disabled = false;
         })
