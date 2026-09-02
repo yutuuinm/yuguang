@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>系列总览 · 予光</title>
+<meta name="description" content="予光四大系列——东方·生肖五行、西方·星座星盘、合盘·双生、本命·高级定制。选一套星空语言，定制一枚只属于你的光。">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <img class="nav-logo" src="予光.jpg" alt="予光 logo">
+    <a class="nav-brand" href="index.html">予光</a>
+    <button class="menu-btn" id="menuBtn" aria-label="菜单">☰</button>
+    <nav class="nav-links" id="navLinks">
+      <a href="index.html">首页</a>
+      <a href="collections.html">系列</a>
+      <a href="studio.html">定制工坊</a>
+      <a href="story.html">品牌故事</a>
+      <a href="intro.html">认识予光</a>
+      <a href="promise.html">承诺</a>
+      <a class="btn-gold" href="studio.html">开始定制</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="page-hero">
+    <h1 class="reveal visible">四大系列</h1>
+    <p class="reveal visible">两套古老的星空语言，归于同一只手</p>
+  </section>
+
+  <section class="section">
+    <div class="wrap coll-list">
+
+      <!-- 01 东方 -->
+      <div class="coll-card reveal">
+        <div class="coll-num">01</div>
+        <div class="coll-info">
+          <h3>予光 · 东方</h3>
+          <div class="coll-en">East · 生肖五行</div>
+          <p class="coll-ask">你从哪里来 →</p>
+          <p>十二个时辰，十二种活法。按本命五行定主石，按你想要守护的方位配卦象，生肖暗刻成纹——一枚只属于你时辰的光。</p>
+          <div class="coll-tags">
+            <span class="chip">本命五行定石</span>
+            <span class="chip">八卦方位 · 可选</span>
+            <span class="chip">生肖暗刻</span>
+          </div>
+        </div>
+        <div class="coll-actions">
+          <a class="btn-gold" href="studio.html#east">去定制</a>
+          <a class="btn-ghost" href="product.html">看示例款</a>
+        </div>
+      </div>
+
+      <!-- 02 西方 -->
+      <div class="coll-card reveal">
+        <div class="coll-num">02</div>
+        <div class="coll-info">
+          <h3>予光 · 西方</h3>
+          <div class="coll-en">West · 星座星盘</div>
+          <p class="coll-ask">你此刻是谁 →</p>
+          <p>太阳是本我，月亮是情绪，上升是递给世界的名片。三盘一线：太阳定主石、月亮定辅石、上升定链型，成一件完整的你。</p>
+          <div class="coll-tags">
+            <span class="chip">太阳 · 主石</span>
+            <span class="chip">月亮 · 辅石</span>
+            <span class="chip">上升 · 链型</span>
+          </div>
+        </div>
+        <div class="coll-actions">
+          <a class="btn-gold" href="studio.html#west">去定制</a>
+        </div>
+      </div>
+
+      <!-- 03 合盘 -->
+      <div class="coll-card reveal">
+        <div class="coll-num">03</div>
+        <div class="coll-info">
+          <h3>予光 · 合盘 · 双生</h3>
+          <div class="coll-en">Union · 两个人的光</div>
+          <p class="coll-ask">两个人的光，合起来是一轮满月 →</p>
+          <p>双人定制的日月扣：各自单独佩戴是完整的自己，合在一起是一轮满月。是热恋的纪念，也是关系中的一份仪式与表达。</p>
+          <div class="coll-tags">
+            <span class="chip">日月互扣</span>
+            <span class="chip">双人定制</span>
+            <span class="chip">纪念与修复仪式</span>
+          </div>
+        </div>
+        <div class="coll-actions">
+          <a class="btn-gold" href="studio.html#union">去定制</a>
+        </div>
+      </div>
+
+      <!-- 04 本命 -->
+      <div class="coll-card reveal">
+        <div class="coll-num">04</div>
+        <div class="coll-info">
+          <h3>予光 · 本命 · 高级定制</h3>
+          <div class="coll-en">Destiny · 一生的坐标</div>
+          <p class="coll-ask">把整片星空，戴在身上 →</p>
+          <p>八字与本命卦、完整星盘的艺术化呈现：金属篆刻 + 水晶矩阵 + 专属光语长文，每件手写编号，限量制作。</p>
+          <div class="coll-tags">
+            <span class="chip">八字 / 本命卦</span>
+            <span class="chip">完整星盘</span>
+            <span class="chip">限量手作</span>
+          </div>
+        </div>
+        <div class="coll-actions">
+          <a class="btn-ghost" href="mailto:hello@yuguang.example">预约设计</a>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="promise-note reveal" style="margin-top:72px;">每一件作品，都随附一张「光语卡」与一只夜蓝礼盒——<br>打开盒子，微光亮起。</p>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="brand-line">予光</div>
+        <p style="color:var(--text-dim);font-size:14px;">黑暗中总有光伴你前行，虽微弱，但足够照亮。<br>予光——把光给你；我，就是光。</p>
+      </div>
+      <div>
+        <h5>探索</h5>
+        <a href="story.html">品牌故事</a>
+        <a href="collections.html">系列总览</a>
+        <a href="index.html#lights">微光时刻</a>
+        <a href="promise.html">我们的承诺</a>
+      </div>
+      <div>
+        <h5>服务</h5>
+        <a href="studio.html">定制工坊</a>
+        <a href="promise.html">承诺与隐私</a>
+        <a href="faq.html">常见问题</a>
+        <a href="mailto:hello@yuguang.example">hello@yuguang.example</a>
+      </div>
+    </div>
+    <div class="disclaimer">
+      免责声明：予光所有产品均为饰品。其中涉及的生肖、八卦、星座、星盘等符号及其解读，源自中国传统文化与流行文化中的象征寓意，属装饰与自我表达范畴，不构成任何医疗、心理或行为建议，也不对任何效果作出承诺。愿你戴着它，把自己的日子过成想要的样子。© 予光 YUGUANG · 网站为初步设计原型
+    </div>
+  </div>
+</footer>
+
+<script src="js/supabase-config.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
