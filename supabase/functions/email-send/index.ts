@@ -1,24 +1,11 @@
 // ============================================================
-// 予光 · Supabase Edge Function：email-send
-// 作用：客户提交定制意向/留言后，用 SMTP 发送通知邮件到商家邮箱
-// 部署：Supabase CLI → npx supabase functions deploy email-send
-// Secrets（绝不写进网页）：
-//   SMTP_HOST=smtp.qq.com  SMTP_PORT=465
-//   SMTP_USER=你的发件邮箱（需开启 SMTP 授权码）
-//   SMTP_PASS=邮箱授权码
-//   MAIL_TO=收件邮箱（可逗号分隔多个）
-//   FUNC_TOKEN=自定义防滥用口令（前端调用时带 x-func-token，可留空=不校验）
-// 前端：提交成功后调用
-//   https://<ref>.supabase.co/functions/v1/email-send  （POST {kind,subject?,fields}）
+// 予光 · Supabase Edge Function：email-send（设置表驱动 v2）
+// 配置来源（优先级）：环境变量 > settings 表（service role 读取，管理员可在 Table Editor 改）
+//   settings 表 key='mail'：{"smtp_user","smtp_pass","smtp_host","smtp_port","to":["a@x.com","b@x.com"]}
+// 环境变量可覆盖：SMTP_USER/SMTP_PASS/SMTP_HOST/SMTP_PORT/MAIL_TO/FUNC_TOKEN
+// 前端调用：POST https://<ref>.supabase.co/functions/v1/email-send {kind,subject?,fields?,to?}
 // ============================================================
 import nodemailer from "npm:nodemailer@6.9.9";
-
-const SMTP_HOST = Deno.env.get("SMTP_HOST") || "smtp.qq.com";
-const SMTP_PORT = Number(Deno.env.get("SMTP_PORT") || 465);
-const SMTP_USER = Deno.env.get("SMTP_USER") || "";
-const SMTP_PASS = Deno.env.get("SMTP_PASS") || "";
-const RECIPIENT = Deno.env.get("MAIL_TO") || "";
-const FUNC_TOKEN = Deno.env.get("FUNC_TOKEN") || "";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -26,42 +13,72 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
 };
 
+async function getDbMail(SB_URL, SK) {
+  try {
+    const r = await fetch(SB_URL + "/rest/v1/settings?select=value&key=eq.mail", {
+      headers: { apikey: SK, Authorization: "Bearer " + SK },
+    });
+    if (!r.ok) return null;
+    const rows = await r.json();
+    const v = rows && rows[0] && rows[0].value;
+    if (!v) return null;
+    return typeof v === "string" ? JSON.parse(v.replace(/^"(.*)"$/, "$1")) : v;
+  } catch (_) { return null; }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method === "GET") {
     return new Response(JSON.stringify({
-      ok: true, name: "予光 email-send", smtpUser: SMTP_USER || "(未配置)", recipient: RECIPIENT,
+      ok: true, name: "予光 email-send",
+      smtpUser: Deno.env.get("SMTP_USER") || "(settings 表 mail.smtp_user)",
+      note: "POST {kind,fields} 发通知邮件；收件人取 settings.mail.to 列表",
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
   try {
+    const FUNC_TOKEN = Deno.env.get("FUNC_TOKEN") || "";
     if (FUNC_TOKEN && req.headers.get("x-func-token") !== FUNC_TOKEN) {
       return new Response(JSON.stringify({ ok: false, error: "token 校验失败" }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
     const payload = await req.json();
-    if (!SMTP_USER || !SMTP_PASS || !RECIPIENT) throw new Error("SMTP 未配置");
-    const kind = payload.kind || "intent";
-    const title = kind === "order"
-      ? "【予光】新定制意向"
-      : kind === "gallery_submit"
-      ? "【予光】光集投稿意向"
-      : "【予光】新留言";
+    const SB_URL = Deno.env.get("SUPABASE_URL") || "";
+    const SK = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+    const db = SK ? await getDbMail(SB_URL, SK) : null;
+
+    const smtpUser = Deno.env.get("SMTP_USER") || (db && db.smtp_user) || "";
+    const smtpPass = Deno.env.get("SMTP_PASS") || (db && db.smtp_pass) || "";
+    const smtpHost = Deno.env.get("SMTP_HOST") || (db && db.smtp_host) || "smtp.qq.com";
+    const smtpPort = Number(Deno.env.get("SMTP_PORT") || (db && db.smtp_port) || 465);
+    if (!smtpUser || !smtpPass) throw new Error("发件邮箱未配置（settings.mail 或 Secrets）");
+
+    // 收件人：请求 to > settings.mail.to 数组 > 环境 MAIL_TO
+    const dbTo = (db && db.to) || [];
+    const envTo = String(Deno.env.get("MAIL_TO") || "").split(/[,，;；\s]+/).filter(Boolean);
+    const list = payload.to ? String(payload.to).split(/[,，;；\s]+/).filter(Boolean)
+      : (Array.isArray(dbTo) && dbTo.length ? dbTo : envTo);
+    if (!list.length) throw new Error("未配置收件邮箱（settings.mail.to）");
+
+    const kind = payload.kind || "message";
+    const title = kind === "order" ? "【予光】新定制意向"
+      : kind === "gallery_submit" ? "【予光】光集投稿意向"
+      : kind === "message" ? "【予光】新留言" : "【予光】新消息";
     const lines = Object.entries(payload.fields || payload)
-      .filter(([k]) => !["subject", "kind", "to"].includes(k))
-      .map(([k, v]) => k + "：" + (Array.isArray(v) || typeof v === "object" ? JSON.stringify(v, null, 2) : String(v)));
+      .filter(([k]) => !["kind", "subject", "to"].includes(k))
+      .map(([k, v]) => k + "：" + (v && typeof v === "object" ? JSON.stringify(v, null, 2) : String(v)));
+
     const transporter = nodemailer.createTransport({
-      host: SMTP_HOST, port: SMTP_PORT, secure: SMTP_PORT === 465,
-      auth: { user: SMTP_USER, pass: SMTP_PASS },
+      host: smtpHost, port: smtpPort, secure: smtpPort === 465,
+      auth: { user: smtpUser, pass: smtpPass },
     });
-    const toList = String(payload.to || RECIPIENT).split(/[,，;；\s]+/).filter(Boolean);
     await transporter.sendMail({
-      from: `予光定制 <${SMTP_USER}>`,
-      to: toList.length ? toList : [RECIPIENT],
+      from: `予光定制 <${smtpUser}>`,
+      to: list,
       subject: payload.subject || title,
-      text: "予光收到了新的一条客户信息：\n\n" + lines.join("\n") + "\n\n—— 予光 YUGUANG",
+      text: "予光收到一条新的客户信息：\n\n" + lines.join("\n") + "\n\n—— 予光 YUGUANG",
     });
-    return new Response(JSON.stringify({ ok: true }), {
+    return new Response(JSON.stringify({ ok: true, to: list }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
