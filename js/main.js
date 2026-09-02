@@ -74,6 +74,32 @@ const GLYPH = {
   天秤: '♎', 天蝎: '♏', 射手: '♐', 摩羯: '♑', 水瓶: '♒', 双鱼: '♓',
 };
 
+// 光集：客户作品图片库（图片存放 site/img/customers/，条目在此登记，页面自动陈列）
+// 未来接入 Supabase 后可由 gallery 表驱动：sb('gallery?select=*&order=sort')
+const GALLERY_ITEMS = [
+  {
+    src: 'img/customers/示例图片.jpg',
+    name: '巳蛇 · 离光',
+    tag: '东方线 · 示例',
+    story: '示例客户作品：本命火 · 离卦，红纹石主石。正式上线后这里将按客户授权展出真实作品。',
+    quote: '「安静炽烈，你的光不喧哗，但没人能忽略。」',
+  },
+  {
+    src: 'img/customers/customer-2.jpg',
+    name: '等待她的光',
+    tag: '西方线',
+    story: '她的星座主石正在路上——放入图片并在 GALLERY_ITEMS 登记后即自动展出。',
+    quote: '「你的光在深处，等一个愿意走进来的人。」',
+  },
+  {
+    src: 'img/customers/customer-3.jpg',
+    name: '两个人的满月',
+    tag: '合盘线',
+    story: '双生系列客户照位——放入图片并在 GALLERY_ITEMS 登记后即自动展出。',
+    quote: '「两个人的光，合起来是一轮满月。」',
+  },
+];
+
 /* ---------- 工具 ---------- */
 function $(id) { return document.getElementById(id); }
 
@@ -339,7 +365,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   const saveBtn = $('saveBtn');
   if (saveBtn) {
     saveBtn.addEventListener('click', () => {
-      alert('原型示意：已加入礼盒 ✦\n正式版将进入：刻字 → 下单 → 夜蓝礼盒收货仪式。\n（本原型不收集任何信息，不算命、不承诺效果）');
+      alert('原型示意：已加入礼盒 ✦\n正式版将进入：确认订单信息 → 下单 → 夜蓝礼盒收货仪式。\n（本原型不收集任何信息，不算命、不承诺效果）');
     });
   }
 
@@ -421,4 +447,27 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     $('pLight').textContent = a.quote + '　' + b.quote + '　两个人的光，合起来是一轮满月。各自佩戴时，你们都是完整的自己。';
     setStone(a.stone[1], b.stone[1]);
   }
+})();
+
+/* ---------- 光集渲染（客户作品库） ---------- */
+(function initGallery() {
+  var grid = document.getElementById('galleryGrid');
+  if (!grid) return;
+  var cards = GALLERY_ITEMS.map(function (it, i) {
+    return (
+      '<figure class="g-card reveal" style="transition-delay:' + (i * 60) + 'ms">' +
+        '<div class="g-img">' +
+          '<img src="' + it.src + '" alt="' + it.name + '" loading="lazy" onerror="this.style.display=\'none\';">' +
+          '<div class="ph">客户图片占位<br>' + it.src + '</div>' +
+        '</div>' +
+        '<figcaption class="g-cap">' +
+          '<div class="g-name">' + it.name + '</div>' +
+          '<span class="g-tag">' + it.tag + '</span>' +
+          '<p class="g-story">' + it.story + '</p>' +
+          '<div class="g-quote">' + it.quote + '</div>' +
+        '</figcaption>' +
+      '</figure>'
+    );
+  });
+  grid.innerHTML = cards.join('');
 })();
