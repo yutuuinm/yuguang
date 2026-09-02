@@ -1,4 +1,4 @@
-/* 予光 · Supabase 数据接口预留（纯静态时零影响）
+/* 予光 · Supabase 数据接口预留（部署时自动注入每个页面）
    ─────────────────────────────────────────────
    1) 在 supabase.com 新建项目
    2) 把 Project URL 与 anon public key 填入下方 SUPABASE 配置
