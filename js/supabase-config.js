@@ -1,13 +1,12 @@
-/* 予光 · Supabase 数据接口预留（部署时自动注入每个页面）
+/* 予光 · Supabase 数据接口（已配置）
    ─────────────────────────────────────────────
-   1) 在 supabase.com 新建项目
-   2) 把 Project URL 与 anon public key 填入下方 SUPABASE 配置
-   3) 此后即可用 window.sb() 读取/写入数据（示例见文件底部）
-   说明：密钥留空时所有接口静默返回 null，网站保持纯静态照常运行。
+   Project URL / anon key 来自 supabase.com → Settings → API
+   使用约定：window.sb('表?查询') 读，sb('表',{method:'POST',body}) 写
+   注意：anon 仅能按 RLS 策略访问；请勿在公开代码中放入 service_role。
 */
 window.SUPABASE = {
-  url: '', // 例如 'https://xxxxxxxx.supabase.co'
-  anon: '' // 例如 'eyJhbGciOiJIUzI1NiIs...'
+  url: 'https://iswxrfxugxvqcjuqzhst.supabase.co',
+  anon: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlzd3hyZnh1Z3h2cWNqdXF6aHN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNDQ1MTMsImV4cCI6MjEwMzkyMDUxM30.t9VW2vBoG1upxGwKa-J8nheU9E3BDMxvYkEfZbAdQyU'
 };
 
 /* 轻量 REST 接口：sb('products?select=*') 或 sb('messages',{method:'POST',body}) */
@@ -29,14 +28,11 @@ window.sb = function (pathname, opts) {
   });
 };
 
-/* ── 预留调用示例（填入密钥后取消注释即可启用）──
-// 读取商品/系列
-window.sb('products?select=*&order=created_at').then(function (rows) {
-  console.log('Supabase 商品数据：', rows);
-});
-// 提交一条访客留言（表名可改为 messages/orders）
-window.sb('messages', {
-  method: 'POST',
-  body: JSON.stringify({ name: '访客', text: '想了解双生系列' })
-});
-*/
+/* 把图片字段转成可展示地址：
+   - 已含 http / 站内 img/ 开头 → 原样返回
+   - 其余（如 storage 路径 yuguang/xx.jpg）→ 拼接公开存储桶 */
+window.sbImg = function (v) {
+  if (!v) return '';
+  if (v.indexOf('http') === 0 || v.indexOf('img/') === 0) return v;
+  return window.SUPABASE.url + '/storage/v1/object/public/' + v;
+};
