@@ -665,6 +665,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       window.sb(table, { method: 'POST', body: JSON.stringify(body) })
         .then(function () {
           if (status) status.textContent = (table === 'orders' ? '已收到你的定制意向 ✦ 我们将在 1 个工作日内与你二次确认后制作。' : '已收到你的留言 ✦ 我们会在 1 个工作日内回复。');
+          if (window.notifyEmail) window.notifyEmail(table, body);
           f.reset();
           if (btn) btn.disabled = false;
         })
