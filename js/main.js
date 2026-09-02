@@ -181,7 +181,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       vy: 3 + Math.random() * 3.4,
       life: 1,
     });
-    if (Math.random() < 0.3) {
+    if (Math.random() < 0.5) {
       meteors.push({
         x: Math.random() * W * 0.9,
         y: Math.random() * H * 0.45,
@@ -191,8 +191,8 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       });
     }
   }
-  let meteorTimer = 90; // 开场约 1.5 秒后出现第一颗
-  const meteorInterval = 1500; // 流星收尾与下一颗之间的间隔基准
+  let meteorTimer = 30; // 开场约 1.5 秒后出现第一颗
+  const meteorInterval = 700; // 流星收尾与下一颗之间的间隔基准
 
   let t = 0;
   function draw() {
@@ -646,6 +646,8 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       var body = {};
       if (table === 'orders') {
         var ph = f.querySelector('[name="phone"]');
+        var ac = window.ygAccount ? window.ygAccount() : '';
+        if (ac) body.account = ac;
         var nt = f.querySelector('[name="note"]');
         var it = f.querySelector('[name="items"]');
         if (ph && ph.value) body.phone = ph.value.trim();
@@ -827,42 +829,75 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   }
 })();
 
-/* ---------- 会员：登录/注册/我的订单（在线版；离线无配置自动跳过） ---------- */
-(function initAuth() {
+/* ---------- 会员 v2：白桦式账号（账号+密码；注册需手机号，昵称/邮箱选填；头像=昵称/账号首字） ---------- */
+(function initAuthV2() {
   var cfg = window.SUPABASE;
   if (!cfg || !cfg.url) return;
   var API = cfg.url + '/functions/v1/account-api';
   var token = localStorage.getItem('yg_token') || '';
+  var account = localStorage.getItem('yg_account') || '';
+  var role = localStorage.getItem('yg_role') || 'user';
   var navLinks = document.getElementById('navLinks');
   if (!navLinks) return;
+
+  // 头像字符：昵称首字，无则账号首字
+  function avatarChar() {
+    var n = localStorage.getItem('yg_nick') || '';
+    var a = account || '光';
+    var s = (n || a).trim();
+    return s.charAt(0);
+  }
+  function refreshChip() {
+    if (account) {
+      var a = avatarChar();
+      var label = localStorage.getItem('yg_nick') || account;
+      chip.textContent = a + ' ' + label;
+      chip.setAttribute('data-logged', '1');
+    } else { chip.textContent = '登录 / 注册'; chip.removeAttribute('data-logged'); }
+  }
+
   var chip = document.createElement('a');
   chip.className = 'nav-user';
   chip.href = 'javascript:void(0)';
-  chip.style.cssText = 'color:var(--gold);font-size:13px;letter-spacing:.08em;white-space:nowrap;';
+  chip.style.cssText = 'color:var(--gold);font-size:13px;letter-spacing:.06em;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;';
   navLinks.appendChild(chip);
 
   var mask = document.createElement('div');
   mask.className = 'login-modal-mask';
   mask.innerHTML =
-    '<div class="login-modal"><span class="close-x">✕</span><h3>予光会员</h3><div class="sub">登录后可在「我的订单」查看定制进度</div>' +
-    '<input id="lgPhone" placeholder="手机号" autocomplete="off"><input id="lgPwd" type="password" placeholder="密码（至少 6 位）">' +
+    '<div class="login-modal"><span class="close-x">✕</span><h3>予光会员</h3><div class="sub" id="lgSub">登录后可在「我的订单」查看进度</div>' +
+    '<input id="lgAccount" placeholder="账号（登录用）" autocomplete="off">' +
+    '<input id="lgPhone" type="tel" placeholder="手机号（注册必填）" style="display:none;">' +
+    '<input id="lgNick" placeholder="昵称（选填，用于头像）" style="display:none;">' +
+    '<input id="lgEmail" type="email" placeholder="邮箱（选填）" style="display:none;">' +
+    '<input id="lgPwd" type="password" placeholder="密码（至少 6 位）">' +
     '<div class="err" id="lgErr"></div>' +
     '<button class="btn-gold" style="width:100%;" id="lgGo" type="button">登录</button>' +
     '<div style="margin-top:12px;text-align:center;color:var(--text-dim);font-size:12px;"><span id="lgSwitch" style="cursor:pointer;color:var(--gold);">没有账号？注册</span></div>' +
     '</div>';
   document.body.appendChild(mask);
+  var acctEl = mask.querySelector('#lgAccount');
   var phoneEl = mask.querySelector('#lgPhone');
+  var nickEl = mask.querySelector('#lgNick');
+  var mailEl = mask.querySelector('#lgEmail');
   var pwdEl = mask.querySelector('#lgPwd');
   var errEl = mask.querySelector('#lgErr');
   var goEl = mask.querySelector('#lgGo');
   var sw = mask.querySelector('#lgSwitch');
   var mode = 'login';
 
-  function refreshChip() {
-    var p = localStorage.getItem('yg_phone') || '';
-    if (p) { chip.textContent = '👤 ' + (p.length > 7 ? p.slice(0, 3) + '****' + p.slice(-4) : p); chip.setAttribute('data-logged', '1'); }
-    else { chip.textContent = '登录 / 注册'; chip.removeAttribute('data-logged'); }
+  function setMode(md) {
+    mode = md;
+    var reg = md === 'register';
+    phoneEl.style.display = reg ? 'block' : 'none';
+    nickEl.style.display = reg ? 'block' : 'none';
+    mailEl.style.display = reg ? 'block' : 'none';
+    goEl.textContent = reg ? '注册并登录' : '登录';
+    sw.textContent = reg ? '已有账号？登录' : '没有账号？注册';
+    errEl.textContent = '';
   }
+  sw.addEventListener('click', function () { setMode(mode === 'login' ? 'register' : 'login'); });
+
   function api(body) {
     return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-sess': token }, body: JSON.stringify(body) }).then(function (r) { return r.json(); });
   }
@@ -871,15 +906,14 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     var tip = document.getElementById('ordersTip');
     if (!list) return;
     api({ op: 'orders' }).then(function (r) {
-      if (!r.ok || !r.orders) { list.innerHTML = '<p class="orders-empty">未能加载订单（' + ((r && r.error) || '请稍后再试') + '）</p>'; return; }
-      if (!r.orders.length) { list.innerHTML = '<p class="orders-empty">还没有订单 ✦ 去定制工坊，生成你的第一枚光吧。</p>'; }
+      if (!r.ok || !r.orders) { list.innerHTML = '<p class="orders-empty">未能加载订单（' + ((r && r.error) || '请稍后') + '）</p>'; return; }
+      if (!r.orders.length) list.innerHTML = '<p class="orders-empty">还没有订单 ✦ 去定制工坊，生成你的第一枚光吧。</p>';
       else {
         list.innerHTML = r.orders.map(function (o) {
           var items = [];
           try { var arr = (typeof o.items === 'string') ? JSON.parse(o.items) : (o.items || []); items = arr.map(function (x) { return x.name || ''; }); } catch (e) {}
-          var nm = items.join('、') || '定制订单';
           var st = { new: '待确认', paid: '已确认', making: '制作中', shipped: '已发货', done: '已完成', refund: '退款中' }[o.status] || o.status;
-          return '<div class="order-row"><span class="on">' + o.order_no + '</span><span>¥' + (o.amount || '—') + '</span><span class="st">' + st + '</span><span class="it">' + nm + ' · ' + String(o.created_at || '').replace('T', ' ').slice(0, 16) + '</span></div>';
+          return '<div class="order-row"><span class="on">' + (o.order_no || '') + '</span><span>¥' + (o.amount || '—') + '</span><span class="st">' + st + '</span><span class="it">' + (items.join('、') || '定制订单') + ' · ' + String(o.created_at || '').replace('T', ' ').slice(0, 16) + '</span></div>';
         }).join('');
       }
       if (tip) tip.textContent = '共 ' + r.orders.length + ' 笔订单';
@@ -887,6 +921,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       if (sec) sec.style.display = 'block';
     }).catch(function () { list.innerHTML = '<p class="orders-empty">网络开小差了，请稍后再试</p>'; });
   }
+
   chip.addEventListener('click', function () {
     if (chip.getAttribute('data-logged') === '1') {
       var sec = document.getElementById('myOrders');
@@ -896,29 +931,40 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       var list = document.getElementById('ordersList');
       if (list && !list.innerHTML) loadOrders();
     } else {
-      mode = 'login'; goEl.textContent = '登录'; sw.textContent = '没有账号？注册'; errEl.textContent = '';
-      mask.classList.add('show'); phoneEl.focus();
+      setMode('login'); acctEl.value = ''; pwdEl.value = '';
+      mask.classList.add('show'); acctEl.focus();
     }
   });
   mask.querySelector('.close-x').addEventListener('click', function () { mask.classList.remove('show'); });
   mask.addEventListener('click', function (e) { if (e.target === mask) mask.classList.remove('show'); });
-  sw.addEventListener('click', function () {
-    mode = (mode === 'login' ? 'register' : 'login');
-    goEl.textContent = (mode === 'login' ? '登录' : '注册并登录');
-    sw.textContent = (mode === 'login' ? '没有账号？注册' : '已有账号？登录');
-    errEl.textContent = '';
-  });
+
   function submit() {
-    var ph = (phoneEl.value || '').trim();
-    var pw = pwdEl.value;
-    if (!ph || pw.length < 6) { errEl.textContent = '请填写手机号与至少 6 位密码'; return; }
+    var body = { op: mode, account: (acctEl.value || '').trim(), password: pwdEl.value };
+    if (mode === 'register') {
+      body.phone = (phoneEl.value || '').trim();
+      body.nickname = (nickEl.value || '').trim();
+      body.email = (mailEl.value || '').trim();
+      if (!body.phone) { errEl.textContent = '注册需填写手机号'; return; }
+    }
+    if (!body.account || body.password.length < 6) { errEl.textContent = '请填写账号与至少 6 位密码'; return; }
     goEl.disabled = true;
-    api({ op: mode, account: ph, password: pw }).then(function (r) {
-      if (r.ok) { token = r.token; localStorage.setItem('yg_token', token); localStorage.setItem('yg_phone', r.phone || ph); refreshChip(); mask.classList.remove('show'); var sec = document.getElementById('myOrders'); if (sec) loadOrders(); }
-      else errEl.textContent = r.error || '操作失败';
+    api(body).then(function (r) {
+      if (r.ok) {
+        token = r.token; account = r.account || body.account; role = r.role || 'user';
+        localStorage.setItem('yg_token', token);
+        localStorage.setItem('yg_account', account);
+        localStorage.setItem('yg_role', role);
+        localStorage.setItem('yg_nick', r.nickname || '');
+        refreshChip(); mask.classList.remove('show');
+        var sec = document.getElementById('myOrders');
+        if (sec) loadOrders();
+      } else errEl.textContent = r.error || '操作失败';
     }).catch(function () { errEl.textContent = '网络错误，请重试'; }).then(function () { goEl.disabled = false; });
   }
   goEl.addEventListener('click', submit);
   pwdEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') submit(); });
   refreshChip();
+
+  // 供页面/表单读取当前登录账号
+  window.ygAccount = function () { return localStorage.getItem('yg_account') || ''; };
 })();
