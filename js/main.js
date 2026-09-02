@@ -496,3 +496,130 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     })
     .catch(function () {});
 })();
+
+/* ---------- 星图志：图鉴/百科/养石 ---------- */
+(function initAtlas() {
+  var east = document.getElementById('atlasEast');
+  var gua = document.getElementById('atlasGua');
+  var west = document.getElementById('atlasWest');
+  var cg = document.getElementById('atlasCrystal');
+  var care = document.getElementById('atlasCare');
+  var onAtlas = east || gua || west || cg || care;
+  if (!onAtlas) return;
+
+  if (east) {
+    east.innerHTML = Object.keys(ZODIAC).map(function (k) {
+      var z = ZODIAC[k], s = ELEMENT_STONES[z.el][0];
+      return '<div class="mini-card"><h4>' + k + '</h4><span class="sym">本命五行 · ' + z.el + '</span><p class="sub">主石建议 · ' + s[0] + '</p><p>' + z.quote + '</p></div>';
+    }).join('');
+  }
+  if (gua) {
+    gua.innerHTML = GUAS.map(function (g) {
+      return '<div class="mini-card"><h4>' + g[0] + '</h4><span class="sym">' + g[1] + '</span><p>' + g[2] + '</p></div>';
+    }).join('');
+  }
+  if (west) {
+    west.innerHTML = Object.keys(SUN).map(function (k) {
+      var s = SUN[k];
+      return '<div class="mini-card"><h4>' + k + ' ' + GLYPH[k] + '</h4><span class="sym">主石 · ' + s.stone[0] + '</span><p>' + s.quote + '</p></div>';
+    }).join('');
+  }
+  var CRYSTALS_STATIC = [
+    { name: '红纹石', kind: '本命火 · 巳蛇等', meaning: '温暖与深情，静焰的化身', color_hex: '#C9575B' },
+    { name: '月光石', kind: '月亮 · 情绪', meaning: '情绪的潮汐与柔软', color_hex: '#CFD4E0' },
+    { name: '海蓝宝', kind: '水 · 双鱼/水瓶', meaning: '深海般澄澈与理性', color_hex: '#7FB5C9' },
+    { name: '紫水晶', kind: '灵感 · 静心', meaning: '静心与灵感的光', color_hex: '#9B7BC9' },
+    { name: '虎眼石', kind: '土 · 坚定', meaning: '坚定与笃定', color_hex: '#B0804A' },
+    { name: '黑曜石', kind: '守护意象', meaning: '传统文化中的守护，愿平安', color_hex: '#1B1B22' },
+  ];
+  function drawCrystals(rows) {
+    if (!cg) return;
+    cg.innerHTML = rows.map(function (c) {
+      var col = c.color_hex || '#8FA3D9';
+      return '<div class="mini-card" style="border-left:3px solid ' + col + '">' +
+        '<h4>' + c.name + '</h4><span class="sym">' + (c.kind || c.element || '') + '</span>' +
+        '<p>' + (c.meaning || '') + '</p>' +
+        (c.care_tip ? '<p style="margin-top:6px;color:var(--moon);font-size:12px;">养护：' + c.care_tip + '</p>' : '') +
+        '</div>';
+    }).join('');
+  }
+  if (window.sb) {
+    window.sb('crystals?select=*&visible=eq.true&order=sort.asc')
+      .then(function (rows) { drawCrystals((rows && rows.length) ? rows : CRYSTALS_STATIC); })
+      .catch(function () { drawCrystals(CRYSTALS_STATIC); });
+  } else if (cg) drawCrystals(CRYSTALS_STATIC);
+
+  if (care) {
+    var CARE = [
+      ['水', '避免暴晒与高温；可用清水冲洗后软布擦干。', '海蓝宝 · 黑曜石'],
+      ['木', '忌干燥高温；软布轻拭；避免接触化妆品与香水。', '绿幽灵 · 孔雀石'],
+      ['火', '避免长时间暴晒以防褪色；单独收纳防磕碰。', '红纹石 · 石榴石'],
+      ['土', '远离酸碱与香水；不佩戴时放入礼盒阴凉处。', '黄水晶 · 蜜蜡'],
+      ['金', '轻柔清洁；不与硬物同放；洗澡运动前取下。', '白水晶 · 月光石'],
+      ['月亮 / 星盘', '睡前取下；不接触化学品；每月月圆夜静置片刻（文化习俗，量力而行）。', '定制款'],
+    ];
+    care.innerHTML = '<p style="margin-bottom:18px;color:var(--text-dim);">予光的养石不是「开光」，是日常三件事：清洁 · 收纳 · 佩戴习惯。水晶是矿物，养护是态度。</p>' +
+      CARE.map(function (c) {
+        return '<div class="mini-card"><h4>' + c[0] + '系</h4><p>' + c[1] + '</p><p class="sub" style="color:var(--star);font-size:12px;">' + c[2] + '</p></div>';
+      }).join('');
+  }
+})();
+
+/* ---------- 互动：拈一签 · 答案之书 · 微光转盘 ---------- */
+(function initPlay() {
+  var qianBtn = document.getElementById('qianBtn');
+  var qianRes = document.getElementById('qianRes');
+  var bookBtn = document.getElementById('bookBtn');
+  var bookRes = document.getElementById('bookRes');
+  var wheelBtn = document.getElementById('wheelBtn');
+  var wheel = document.getElementById('wheel');
+  var wheelRes = document.getElementById('wheelRes');
+  if (!qianBtn && !bookBtn && !wheel) return;
+
+  // 拈一签：池子 = 生肖光语 + 卦象 + 星座光语
+  var QIAN = [];
+  Object.keys(ZODIAC).forEach(function (k) { QIAN.push({ t: '生肖 · ' + k, q: ZODIAC[k].quote }); });
+  GUAS.forEach(function (g) { QIAN.push({ t: '卦象 · ' + g[0] + ' ' + g[1], q: g[2] }); });
+  Object.keys(SUN).forEach(function (k) { QIAN.push({ t: '星座 · ' + k + ' ' + GLYPH[k], q: SUN[k].quote }); });
+
+  if (qianBtn) {
+    qianBtn.addEventListener('click', function () {
+      var it = QIAN[Math.floor(Math.random() * QIAN.length)];
+      qianRes.innerHTML = '<b style="color:var(--gold);font-weight:500;">' + it.t + '</b><br>' + it.q;
+    });
+  }
+
+  var ANSWERS = [
+    '现在不是答案的时刻，是积蓄光的时刻。', '再等等——你等的不是别人，是自己的决定。', '把门留一条缝，光会自己进来。', '是的，但先照顾好今天。', '答案不在远处，在你第一直觉里。', '这一次，听自己的。', '慢一点，并不等于落后。', '去睡一觉，醒来再做决定。', '你担心的事，大概率不会发生。', '值得，但不必急。', '先照亮自己，再谈遇见。', '不是拒绝，只是时候未到。', '相信你已经准备好了。', '那扇窗没有关，是你还没看向它。', '温柔地拒绝，也是一种光。', '向前一步，光会跟上。', '把它当作练习，而不是考试。', '你若先亮，黑夜自会退半步。',
+  ];
+  if (bookBtn) {
+    bookBtn.addEventListener('click', function () {
+      bookRes.textContent = '……';
+      setTimeout(function () {
+        bookRes.textContent = ANSWERS[Math.floor(Math.random() * ANSWERS.length)];
+      }, 700);
+    });
+  }
+
+  var PRIZES = [
+    { t: '光语卡 ¥10', c: '#e3c47c' }, { t: '生肖石 9 折', c: '#8fa3d9' },
+    { t: '微光小礼', c: '#c33c2e' }, { t: '满赠礼盒', c: '#6fa87f' },
+    { t: '月光石试用', c: '#cfd4e0' }, { t: '再转一次', c: '#b0804a' },
+  ];
+  if (wheel) {
+    var pieces = PRIZES.map(function (p, i) { return p.c + ' ' + (i * 60) + 'deg ' + ((i + 1) * 60) + 'deg'; });
+    wheel.style.background = 'conic-gradient(' + pieces.join(',') + ')';
+    var rot = 0;
+    wheelBtn.addEventListener('click', function () {
+      var today = new Date().toDateString();
+      var last = localStorage.getItem('yg_wheel_day');
+      var idx = Math.floor(Math.random() * PRIZES.length);
+      if (last === today) { wheelRes.textContent = '今日已转 ✦ 光也需要休息，明日再来。'; return; }
+      localStorage.setItem('yg_wheel_day', today);
+      rot += 360 * (5 + Math.floor(Math.random() * 3)) + ((360 - (idx * 60 + 30) - (rot % 360)) % 360);
+      wheel.style.transform = 'rotate(' + rot + 'deg)';
+      wheelRes.textContent = '转动中……';
+      setTimeout(function () { wheelRes.innerHTML = '你抽到了：<b style="color:var(--gold);font-weight:500;">' + PRIZES[idx].t + '</b> ✦ 添加客服微信领取'; }, 4400);
+    });
+  }
+})();
