@@ -471,3 +471,28 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   });
   grid.innerHTML = cards.join('');
 })();
+
+/* ---------- 光集：数据库优先（表就绪后自动读取；失败/未配置则保留静态展示） ---------- */
+(function initLiveGallery() {
+  var grid = document.getElementById('galleryGrid');
+  if (!grid || !window.sb) return;
+  window.sb('gallery?select=*&visible=eq.true&approved=eq.true&order=sort.asc')
+    .then(function (rows) {
+      if (!rows || !rows.length) return;
+      grid.innerHTML = rows.map(function (it) {
+        var src = (window.sbImg && it.image_url) ? window.sbImg(it.image_url) : '';
+        return '<figure class="g-card reveal">' +
+          '<div class="g-img">' +
+          '<img src="' + src + '" alt="' + (it.name || '') + '" loading="lazy" onerror="this.style.display=\'none\';">' +
+          '<div class="ph">客户图片占位<br>' + (it.image_url || '') + '</div>' +
+          '</div>' +
+          '<figcaption class="g-cap">' +
+          '<div class="g-name">' + (it.name || '') + '</div>' +
+          (it.tag ? '<span class="g-tag">' + it.tag + '</span>' : '') +
+          (it.story ? '<p class="g-story">' + it.story + '</p>' : '') +
+          (it.quote ? '<div class="g-quote">' + it.quote + '</div>' : '') +
+          '</figcaption></figure>';
+      }).join('');
+    })
+    .catch(function () {});
+})();
