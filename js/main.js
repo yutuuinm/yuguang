@@ -623,3 +623,105 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     });
   }
 })();
+
+/* ---------- 通用提交表单（咨询/投稿 → messages 表；未连库时提示站外联系） ---------- */
+(function initForms() {
+  document.querySelectorAll('.sb-form').forEach(function (f) {
+    var status = f.querySelector('.form-status');
+    var btn = f.querySelector('button[type="submit"]');
+    f.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var body = { type: f.dataset.type || 'message' };
+      ['name', 'contact', 'content'].forEach(function (k) {
+        var el = f.querySelector('[name="' + k + '"]');
+        if (el && el.value) body[k] = el.value.trim();
+      });
+      if (!window.sb) {
+        if (status) status.textContent = '离线版无法在线提交，请通过下方微信或邮箱联系我们 ✦';
+        return;
+      }
+      if (btn) btn.disabled = true;
+      window.sb('messages', { method: 'POST', body: JSON.stringify(body) })
+        .then(function () {
+          if (status) status.textContent = '已收到你的留言 ✦ 我们会在 1 个工作日内回复（若加急请直接加客服微信）。';
+          f.reset();
+          if (btn) btn.disabled = false;
+        })
+        .catch(function () {
+          if (status) status.textContent = '提交失败，请稍后再试，或直接加客服微信。';
+          if (btn) btn.disabled = false;
+        });
+    });
+  });
+})();
+
+/* ---------- 商品橱窗（collections 页数据驱动，未连库保留静态系列卡） ---------- */
+(function initDbProducts() {
+  var grid = document.getElementById('dbProducts');
+  if (!grid) return;
+  var SERIES = { east: '东方线', west: '西方线', union: '合盘线', destiny: '本命' };
+  function draw(rows) {
+    if (!rows || !rows.length) {
+      grid.innerHTML = '<p class="section-sub" style="margin:10px auto 0;">（暂无可展示商品；接入商品数据后此处自动陈列）</p>';
+      return;
+    }
+    grid.innerHTML = rows.map(function (p) {
+      var src = window.sbImg ? window.sbImg(p.image_url) : (p.image_url || '');
+      return '<div class="g-card reveal">' +
+        '<div class="g-img">' +
+          '<img src="' + src + '" alt="' + p.name + '" loading="lazy" onerror="this.style.display=\'none\';">' +
+          '<div class="ph">商品图占位</div>' +
+        '</div>' +
+        '<div class="g-cap">' +
+          '<div class="g-name">' + p.name + '</div>' +
+          '<span class="g-tag">' + (SERIES[p.series] || p.series || '') + '</span>' +
+          '<p class="g-story">' + (p.main_stone ? '主石：' + p.main_stone : '') + (p.price_yuan ? ' · ¥' + p.price_yuan + ' 起' : '') + '</p>' +
+          (p.quote ? '<div class="g-quote">' + p.quote + '</div>' : '') +
+        '</div>' +
+        '<div style="padding:0 18px 18px;"><a class="btn-ghost" style="width:100%;text-align:center;font-size:13px;padding:8px 0;" href="studio.html">去定制同款</a></div>' +
+      '</div>';
+    }).join('');
+  }
+  if (!window.sb) { draw(null); return; }
+  window.sb('products?select=*&visible=eq.true&order=sort.asc')
+    .then(draw).catch(function () { draw(null); });
+})();
+
+/* ---------- 作品验真（防伪）：records 表按码查询 ---------- */
+(function initVerify() {
+  var inp = document.getElementById('verifyCode');
+  var btn = document.getElementById('verifyBtn');
+  var res = document.getElementById('verifyRes');
+  if (!inp || !btn || !res) return;
+  btn.addEventListener('click', function () {
+    var code = (inp.value || '').trim();
+    if (!code) { res.innerHTML = '请输入作品背面/证书上的验证码。'; return; }
+    res.innerHTML = '查询中……';
+    if (!window.sb) {
+      res.innerHTML = '当前为离线版，验真需联网数据库。请上线版或联系客服人工核验。';
+      return;
+    }
+    window.sb('records?select=*&code=eq.' + encodeURIComponent(code))
+      .then(function (rows) {
+        var r = rows && rows[0];
+        if (!r) {
+          res.innerHTML = '<div class="doc-block" style="margin:0;"><h3 style="text-align:center;">未查询到该验证码</h3><p style="text-align:center;">请核对后重试；若仍有疑问，请联系客服人工核验（谨防仿冒渠道）。</p></div>';
+          return;
+        }
+        var info = (r.info && typeof r.info === 'object') ? r.info : {};
+        var img = (window.sbImg && r.image_urls) ? window.sbImg(String(r.image_urls).split(',')[0]) : '';
+        res.innerHTML = '<div class="doc-block" style="margin:0;">' +
+          '<h3 style="text-align:center;">✓ 验真通过 · 予光正品</h3>' +
+          (img ? '<img src="' + img + '" alt="作品图" style="width:100%;max-height:300px;object-fit:cover;border-radius:10px;margin-bottom:14px;" loading="lazy" onerror="this.style.display=\'none\';">' : '') +
+          '<p><b style="color:var(--moon);">验证码：</b><span style="color:var(--gold);letter-spacing:.1em;">' + code + '</span></p>' +
+          (r.product_ref ? '<p><b style="color:var(--moon);">作品：</b>' + r.product_ref + '</p>' : '') +
+          (info.text ? '<p>' + info.text + '</p>' : '') +
+          '<p style="color:var(--text-dim);font-size:12px;">建档时间：' + (r.created_at || '').replace('T', ' ').slice(0, 16) + '</p>' +
+          '</div>';
+      })
+      .catch(function () {
+        res.innerHTML = '<p style="text-align:center;">查询服务暂不可用，请稍后再试或联系客服。</p>';
+      });
+  });
+  inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') btn.click(); });
+})();
