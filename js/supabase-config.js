@@ -3,10 +3,17 @@
    Project URL / anon key 来自 supabase.com → Settings → API
    使用约定：window.sb('表?查询') 读，sb('表',{method:'POST',body}) 写
    注意：anon 仅能按 RLS 策略访问；请勿在公开代码中放入 service_role。
+   Edge Functions（可选，默认关闭，不影响纯静态运行）：
+     emailUrl  = 部署 email-send 后的函数地址（提交成功后自动发邮件通知）
+     emailToken= 与函数 FUNC_TOKEN 一致（防滥用，可留空）
+     aiUrl     = 部署 ai-assistant 后的函数地址（AI 光语助手入口用）
 */
 window.SUPABASE = {
   url: 'https://iswxrfxugxvqcjuqzhst.supabase.co',
-  anon: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlzd3hyZnh1Z3h2cWNqdXF6aHN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNDQ1MTMsImV4cCI6MjEwMzkyMDUxM30.t9VW2vBoG1upxGwKa-J8nheU9E3BDMxvYkEfZbAdQyU'
+  anon: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlzd3hyZnh1Z3h2cWNqdXF6aHN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNDQ1MTMsImV4cCI6MjEwMzkyMDUxM30.t9VW2vBoG1upxGwKa-J8nheU9E3BDMxvYkEfZbAdQyU',
+  emailUrl: '',
+  emailToken: '',
+  aiUrl: ''
 };
 
 /* 轻量 REST 接口：sb('products?select=*') 或 sb('messages',{method:'POST',body}) */
@@ -35,4 +42,20 @@ window.sbImg = function (v) {
   if (!v) return '';
   if (v.indexOf('http') === 0 || v.indexOf('img/') === 0) return v;
   return window.SUPABASE.url + '/storage/v1/object/public/' + v;
+};
+
+/* 提交成功后触发邮件通知（需已部署 email-send 且配置 emailUrl；失败静默） */
+window.notifyEmail = function (table, body) {
+  var cfg = window.SUPABASE;
+  if (!cfg.emailUrl) return;
+  var kind = table === 'orders' ? 'order' : (body && body.type) || 'message';
+  var headers = { 'Content-Type': 'application/json' };
+  if (cfg.emailToken) headers['x-func-token'] = cfg.emailToken;
+  try {
+    fetch(cfg.emailUrl, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({ kind: kind, fields: body })
+    }).catch(function () {});
+  } catch (e) { /* 忽略 */ }
 };
