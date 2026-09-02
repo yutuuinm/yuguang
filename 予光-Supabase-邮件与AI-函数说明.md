@@ -1,58 +1,52 @@
-# 予光 · Supabase 邮件发送 & AI 助手（Edge Functions）
+# 予光 · Supabase 邮件发送 & AI 助手（Edge Functions · v2）
 
-与白桦同架构，但做了两点优化：密钥只存 **Secrets/app_data**（service role 读取，不进前端）；AI 提示词内置**予光合规红线**。
+与白桦同架构，优化点：**邮件收件人与 AI 配置入库**（`settings` 表，仅 service role 可读，
+管理员在 Table Editor 直接改，无需改代码），密钥**不进网页、不进公开仓库**。
 
-## 目录（已放入仓库 `supabase/functions/`）
-| 函数 | 作用 |
-|---|---|
-| `email-send` | 客户提交定制意向/留言/投稿后，SMTP 发通知邮件到商家邮箱 |
-| `ai-assistant` | DeepSeek AI 光语助手：`chat`（全站助手）/ `stones`（AI 荐石，读 crystals 库） |
+## 代码位置（已随仓库部署到 GitHub，公开可见的是无密钥的源码）
+- `supabase/functions/email-send/index.ts` —— SMTP 邮件通知（发件/收件均读 settings.mail）
+- `supabase/functions/ai-assistant/index.ts` —— DeepSeek AI 助手（chat / stones，读 settings.ai）
 
-## 部署（本机执行，一次性）
+## 第一步：配置入库（本机执行，含密钥）
+在 Supabase → SQL Editor 执行本地文件 **`予光-Supabase-配置.sql`**（整段）：
+- 建 `settings` 表（匿名不可见）并写入
+  - `mail`：发件 2132389280@qq.com + 授权码 + 收件 `["21040690227@163.com"]`（支持多个）
+  - `ai`：DeepSeek key + model
+- 同时收紧 `app_data` 公开读策略（防密钥暴露）
 
-需要本机安装 Node 并登录 Supabase：
+**管理员以后改配置**：Supabase → Table Editor → `settings` 表 →
+- 改收件邮箱/加邮箱：编辑 `mail` 行的 `value.to` 数组（示例见 SQL 注释）
+- 换模型/换 AI key：编辑 `ai` 行
+- 也可以加环境变量覆盖（Secrets 优先级更高）：`SMTP_USER/SMTP_PASS/MAIL_TO/AI_API_KEY/AI_MODEL`
 
+## 第二步：部署函数（二选一）
+方式 A（推荐，自动）：Supabase Dashboard → **Integrations → GitHub** 接入 `yutuuinm/yuguang`
+→ 启用 Edge Functions（分支 main）。之后仓库 push 即自动部署，改函数我推上去即可。
+方式 B（本机一次）：
 ```bash
-# 1) 安装并登录（浏览器授权）
-npm i -g supabase
-supabase login
-
-# 2) 在本项目目录关联项目
+npm i -g supabase && supabase login
 supabase link --project-ref iswxrfxugxvqcjuqzhst
-
-# 3) 部署两个函数
 supabase functions deploy email-send
 supabase functions deploy ai-assistant
-
-# 4) 配置 Secrets（值换成你自己的）
-# 邮件：使用你的发件邮箱（QQ/163 均可，需开启 SMTP 并取得授权码）
-supabase secrets set SMTP_USER=你的发件邮箱 SMTP_PASS=邮箱授权码 MAIL_TO=收件邮箱
-# AI：DeepSeek 平台申请 key（platform.deepseek.com）
-supabase secrets set AI_API_KEY=sk-你的key AI_MODEL=deepseek-chat
 ```
 
-> 也可不用环境变量：在 SQL Editor 执行
-> `insert into app_data(key,value) values ('yuguang_ai','{"key":"sk-...","model":"deepseek-chat"}') on conflict (key) do update set value=excluded.value;`
-> AI 函数会优先读 `AI_API_KEY`，读不到再查 `app_data.yuguang_ai`。
-
-## 前端接线（已完成）
-- `site/js/supabase-config.js` 已预留 `emailUrl / aiUrl / emailToken`（默认空 = 关闭，不影响页面）。
-- 表单提交成功后若配置了 `emailUrl`，自动发一封通知邮件（kind=order/gallery_submit/message）。
-- AI 助手入口可在任意页面打开浏览器控制台验证：
-  ```js
-  // 设好 emailUrl/aiUrl 后（或临时手填）：
-  fetch('https://iswxrfxugxvqcjuqzhst.supabase.co/functions/v1/ai-assistant', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ mode:'chat', question:'帮我看看定制流程？' })
-  }).then(r=>r.json()).then(console.log)
-  ```
+## 第三步：验证
+- 浏览器 GET 函数地址（如 `https://iswxrfxugxvqcjuqzhst.supabase.co/functions/v1/email-send`）应返回健康 JSON；
+- 网站任一表单（首页留言/定制意向/光集投稿）提交后，收件邮箱应收到【予光】通知；
+- AI 前端入口：在浏览器控制台执行下方命令验证 chat 与 stones：
+```js
+fetch('https://iswxrfxugxvqcjuqzhst.supabase.co/functions/v1/ai-assistant', {
+  method:'POST', headers:{'Content-Type':'application/json'},
+  body: JSON.stringify({ mode:'stones', need:'想给自己一份分手后的陪伴' })
+}).then(r=>r.json()).then(console.log)
+```
 
 ## 防滥用与合规
-- `email-send` 支持 `FUNC_TOKEN` 校验（`supabase secrets set FUNC_TOKEN=xxx` 后前端同样配置），防止被刷邮件；
-- AI 提示词内置红线：不算命、不承诺效果、不宣传开光法力、文化意象仅供参考、医疗问题引导就医；
-- anon key 依旧只用于站内读写公开表/提交表单，两个函数均不依赖前端密钥。
+- `email-send` 支持 `FUNC_TOKEN`（`supabase secrets set FUNC_TOKEN=xxx`，前端同步配置后防刷邮件）；
+- AI 提示词内置红线：不算命、不承诺效果、不宣传开光法力、文化意象仅供参考、医疗引导就医；
+- 含密钥的 `予光-Supabase-配置.sql` 与邮件授权码**绝不推送到 GitHub 公开仓库**（源码里无任何密钥）。
 
 ## 常见问题
-- 函数地址 404：确认已 link 到本项目 ref 并部署成功；浏览器直接 GET 函数地址应返回健康 JSON。
-- 邮件发不出去：检查 SMTP 授权码是否正确、QQ 邮箱需在设置里开启 SMTP 服务。
-- AI 返回"未配置"：检查 `AI_API_KEY` 或 `app_data.yuguang_ai` 是否写入。
+- 函数 404：确认已 link 正确项目并成功 deploy；GET 健康检查应返回 JSON。
+- 邮件收不到：SQL 是否执行（settings.mail 已写入）；SMTP 授权码是否正确；QQ 邮箱需在设置开启 SMTP。
+- AI 返回"未配置"：settings.ai 是否已写入（或设置 AI_API_KEY）。
