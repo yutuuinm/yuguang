@@ -3,17 +3,16 @@
    Project URL / anon key 来自 supabase.com → Settings → API
    使用约定：window.sb('表?查询') 读，sb('表',{method:'POST',body}) 写
    注意：anon 仅能按 RLS 策略访问；请勿在公开代码中放入 service_role。
-   Edge Functions（可选，默认关闭，不影响纯静态运行）：
-     emailUrl  = 部署 email-send 后的函数地址（提交成功后自动发邮件通知）
-     emailToken= 与函数 FUNC_TOKEN 一致（防滥用，可留空）
-     aiUrl     = 部署 ai-assistant 后的函数地址（AI 光语助手入口用）
+   Edge Functions（已部署）：
+     emailUrl = email-send 函数地址（表单提交成功后自动发邮件通知，FUNC_TOKEN 未设则无需 token）
+     aiUrl    = ai-assistant 函数地址（AI 光语助手 / 荐石）
 */
 window.SUPABASE = {
   url: 'https://iswxrfxugxvqcjuqzhst.supabase.co',
   anon: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlzd3hyZnh1Z3h2cWNqdXF6aHN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNDQ1MTMsImV4cCI6MjEwMzkyMDUxM30.t9VW2vBoG1upxGwKa-J8nheU9E3BDMxvYkEfZbAdQyU',
-  emailUrl: '',
+  emailUrl: 'https://iswxrfxugxvqcjuqzhst.supabase.co/functions/v1/email-send',
   emailToken: '',
-  aiUrl: ''
+  aiUrl: 'https://iswxrfxugxvqcjuqzhst.supabase.co/functions/v1/ai-assistant'
 };
 
 /* 轻量 REST 接口：sb('products?select=*') 或 sb('messages',{method:'POST',body}) */
@@ -44,7 +43,7 @@ window.sbImg = function (v) {
   return window.SUPABASE.url + '/storage/v1/object/public/' + v;
 };
 
-/* 提交成功后触发邮件通知（需已部署 email-send 且配置 emailUrl；失败静默） */
+/* 提交成功后触发邮件通知（需已部署 email-send；失败静默） */
 window.notifyEmail = function (table, body) {
   var cfg = window.SUPABASE;
   if (!cfg.emailUrl) return;
@@ -58,4 +57,15 @@ window.notifyEmail = function (table, body) {
       body: JSON.stringify({ kind: kind, fields: body })
     }).catch(function () {});
   } catch (e) { /* 忽略 */ }
+};
+
+/* AI 助手统一调用：sbAI({mode:'chat'|'stones', question/need, history}) → Promise<{ok,answer|error}> */
+window.sbAI = function (payload) {
+  var cfg = window.SUPABASE;
+  if (!cfg.aiUrl) return Promise.resolve({ ok: false, error: 'AI 未配置' });
+  return fetch(cfg.aiUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).then(function (r) { return r.json(); });
 };
