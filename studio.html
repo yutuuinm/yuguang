@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>定制工坊 · 予光</title>
+<meta name="description" content="予光定制工坊——东方生肖五行、西方星座星盘、双人合盘，三分钟生成一枚属于你的光。我们不算命，只把古老的星空语言做成你愿意戴在身上的光。">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <img class="nav-logo" src="予光.jpg" alt="予光 logo">
+    <a class="nav-brand" href="index.html">予光</a>
+    <button class="menu-btn" id="menuBtn" aria-label="菜单">☰</button>
+    <nav class="nav-links" id="navLinks">
+      <a href="index.html">首页</a>
+      <a href="collections.html">系列</a>
+      <a href="studio.html">定制工坊</a>
+      <a href="story.html">品牌故事</a>
+      <a href="intro.html">认识予光</a>
+      <a href="promise.html">承诺</a>
+      <a class="btn-gold" href="studio.html">开始定制</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="page-hero">
+    <h1 class="reveal visible">定制工坊</h1>
+    <p class="reveal visible">选一套星空语言，生成一枚只属于你的光</p>
+  </section>
+
+  <section class="studio-wrap" id="studio">
+
+    <!-- Step 1 选谱系 -->
+    <div class="tabs" id="tabs">
+      <button class="tab-btn active" data-panel="east" id="east">予光 · 东方（生肖五行）</button>
+      <button class="tab-btn" data-panel="west" id="west">予光 · 西方（星座星盘）</button>
+      <button class="tab-btn" data-panel="union" id="union">予光 · 合盘（双生）</button>
+    </div>
+
+    <div class="studio-grid">
+
+      <!-- 左侧：输入 -->
+      <div>
+
+        <!-- 东方 -->
+        <div class="panel active" id="panel-east">
+          <div class="field">
+            <label>你的生肖（本命五行将自动推演）</label>
+            <select id="eastZodiac"></select>
+            <div class="hint" id="eastElement"></div>
+          </div>
+          <div class="field">
+            <label>你想守护的方位（八卦 · 可选）</label>
+            <select id="eastGua"></select>
+            <div class="hint">正式版将按你的处境推荐卦象；这里由你选择此刻最想听的那句话。</div>
+          </div>
+          <div class="field">
+            <label>金属</label>
+            <select id="metalEast">
+              <option value="18K 哑光金">18K 哑光金</option>
+              <option value="925 做旧银">925 做旧银</option>
+              <option value="玫瑰金">玫瑰金</option>
+              <option value="白金">白金</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 西方 -->
+        <div class="panel" id="panel-west">
+          <div class="field">
+            <label>你的太阳星座（本我 · 主石）</label>
+            <select id="westSun"></select>
+          </div>
+          <div class="field">
+            <label>你的情绪质地（月亮 · 辅石）</label>
+            <select id="westMoon"></select>
+            <div class="hint">正式版将由出生日期与时段自动推演月亮星座；此步用于示意「月亮＝情绪与亲密需要」。</div>
+          </div>
+          <div class="field">
+            <label>你给人的第一印象（上升 · 链型）</label>
+            <select id="westRising">
+              <option value="轻盈细链">轻盈细链 · 风一样地来</option>
+              <option value="精致锁骨链">精致锁骨链 · 得体而坚定</option>
+              <option value="粗犷麻绳链">粗犷麻绳链 · 不问也知有力量</option>
+              <option value="波浪蛇骨链">波浪蛇骨链 · 温柔藏有暗涌</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>金属</label>
+            <select id="metalWest">
+              <option value="18K 哑光金">18K 哑光金</option>
+              <option value="925 做旧银">925 做旧银</option>
+              <option value="玫瑰金">玫瑰金</option>
+              <option value="白金">白金</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 合盘 -->
+        <div class="panel" id="panel-union">
+          <div class="field">
+            <label>你的星座</label>
+            <select id="unionA"></select>
+          </div>
+          <div class="field">
+            <label>对方 / 你在意的人的星座</label>
+            <select id="unionB"></select>
+          </div>
+          <div class="field">
+            <label>合扣样式</label>
+            <select id="unionClasp">
+              <option value="日月扣">日月扣 · 你是我白天里的月亮</option>
+              <option value="太极扣">太极扣 · 两半合一，阴阳互生</option>
+              <option value="双环扣">双环扣 · 各自成环，彼此相套</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>金属</label>
+            <select id="metalUnion">
+              <option value="18K 哑光金">18K 哑光金</option>
+              <option value="925 做旧银">925 做旧银</option>
+              <option value="玫瑰金">玫瑰金</option>
+              <option value="白金">白金</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="preview-actions" style="justify-content:flex-start;">
+          <button class="btn-gold" id="saveBtn" type="button">加入礼盒（原型示意）</button>
+        </div>
+
+        <p class="studio-note">＊ 我们不算命。生肖、八卦、星座、星盘在此均为文化符号与自我表达；正式版月亮与上升星座由出生日期、时段自动推演（天文计算），解读仍为文化寓意，不承诺任何效果。</p>
+      </div>
+
+      <!-- 右侧：设计卡 -->
+      <div class="preview-card" id="preview">
+        <div class="preview-stone" id="stone"></div>
+        <div class="preview-name" id="pName">巳蛇 · 天蝎</div>
+        <div class="preview-sub" id="pSub">EAST × WEST · 示例</div>
+        <div class="preview-rows" id="pRows">
+          <div class="row"><span>主石</span><span id="rMain">红纹石（巳火）</span></div>
+          <div class="row"><span>辅石</span><span id="rAux">月光石</span></div>
+          <div class="row"><span>金属</span><span id="rMetal">18K 哑光金</span></div>
+          <div class="row"><span>链型 / 扣饰</span><span id="rChain">波浪蛇骨链</span></div>
+          <div class="row"><span>刻印</span><span id="rGlyph">☲ 离卦</span></div>
+        </div>
+        <div class="preview-light" id="pLight">「安静炽烈，你的光不喧哗，但没人能忽略。」</div>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="brand-line">予光</div>
+        <p style="color:var(--text-dim);font-size:14px;">黑暗中总有光伴你前行，虽微弱，但足够照亮。<br>予光——把光给你；我，就是光。</p>
+      </div>
+      <div>
+        <h5>探索</h5>
+        <a href="story.html">品牌故事</a>
+        <a href="collections.html">系列总览</a>
+        <a href="index.html#lights">微光时刻</a>
+        <a href="promise.html">我们的承诺</a>
+      </div>
+      <div>
+        <h5>服务</h5>
+        <a href="studio.html">定制工坊</a>
+        <a href="promise.html">承诺与隐私</a>
+        <a href="faq.html">常见问题</a>
+        <a href="mailto:hello@yuguang.example">hello@yuguang.example</a>
+      </div>
+    </div>
+    <div class="disclaimer">
+      免责声明：予光所有产品均为饰品。其中涉及的生肖、八卦、星座、星盘等符号及其解读，源自中国传统文化与流行文化中的象征寓意，属装饰与自我表达范畴，不构成任何医疗、心理或行为建议，也不对任何效果作出承诺。© 予光 YUGUANG · 网站为初步设计原型
+    </div>
+  </div>
+</footer>
+
+<script src="js/supabase-config.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
