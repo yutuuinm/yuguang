@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>作品验真 · 予光</title>
+<meta name="description" content="予光作品验真——输入作品随附验证码，核验正品信息。愿每一份托付都清楚可查。">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <img class="nav-logo" src="予光.jpg" alt="予光 logo">
+    <a class="nav-brand" href="index.html">予光</a>
+    <button class="menu-btn" id="menuBtn" aria-label="菜单">☰</button>
+    <nav class="nav-links" id="navLinks">
+      <a href="index.html">首页</a>
+      <a href="collections.html">系列</a>
+      <a href="studio.html">定制工坊</a>
+      <a href="gallery.html">光集</a>
+      <a href="atlas.html">星图志</a>
+      <a href="play.html">互动</a>
+      <a href="promise.html">承诺</a>
+      <a class="btn-gold" href="studio.html">开始定制</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="page-hero">
+    <h1 class="reveal visible">作品验真</h1>
+    <p class="reveal visible">每件予光作品，都有一枚自己的验证码</p>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="doc-block reveal" style="text-align:center;">
+        <p>验证码位于礼盒内「正品卡」背面（形如 YG-XXXX-XXXX）。<br>输入后即可核验作品的建档信息。</p>
+        <div class="verify-input">
+          <input id="verifyCode" type="text" placeholder="输入验证码，如 YG-2409-0001" autocomplete="off">
+          <button class="btn-gold" id="verifyBtn" type="button">验 真</button>
+        </div>
+        <div class="verify-result" id="verifyRes"></div>
+        <p class="studio-note" style="margin-top:24px;">＊ 验真仅核验予光官方建档信息；无法通过官方渠道核验的渠道请谨慎，谨防仿冒。</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="brand-line">予光</div>
+        <p style="color:var(--text-dim);font-size:14px;">黑暗中总有光伴你前行，虽微弱，但足够照亮。<br>予光——把光给你；我，就是光。</p>
+      </div>
+      <div>
+        <h5>探索</h5>
+        <a href="story.html">品牌故事</a>
+        <a href="intro.html">认识予光</a>
+        <a href="collections.html">系列总览</a>
+        <a href="gallery.html">光集</a>
+        <a href="promise.html">我们的承诺</a>
+      </div>
+      <div>
+        <h5>服务</h5>
+        <a href="studio.html">定制工坊</a>
+        <a href="promise.html">承诺与隐私</a>
+        <a href="faq.html">常见问题</a>
+        <a href="verify.html">作品验真</a>
+        <a href="mailto:hello@yuguang.example">hello@yuguang.example</a>
+      </div>
+    </div>
+    <div class="disclaimer">
+      免责声明：予光所有产品均为饰品。其中涉及的生肖、八卦、星座、星盘等符号及其解读，源自中国传统文化与流行文化中的象征寓意，属装饰与自我表达范畴，不构成任何医疗、心理或行为建议，也不对任何效果作出承诺。愿你戴着它，把自己的日子过成想要的样子。© 予光 YUGUANG · 网站为初步设计原型
+    </div>
+  </div>
+</footer>
+
+<script src="js/supabase-config.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
