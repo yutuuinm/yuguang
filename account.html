@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>个人中心 · 予光</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09032119"?>
+<link rel="stylesheet" href="css/style.css?v=09032123"?>
 <style>
   .acc{max-width:620px;margin:0 auto;padding:110px 18px 80px;}
   .back{color:var(--gold);font-size:13px;text-decoration:none;}
@@ -53,7 +53,7 @@
     <div><b id="meName"></b><small id="meInfo"></small></div>
   </div>
 
-  <div style="margin-top:14px;">
+  <div id="menuList" style="margin-top:14px;">
     <button class="menu-card" data-p="edit" type="button">✏️ 编辑资料<span>账号 / 昵称 / 手机号</span></button>
     <button class="menu-card" data-p="email" type="button">📮 更换邮箱<span>需原邮箱验证码</span></button>
     <button class="menu-card" data-p="pw" type="button">🔒 修改密码</button>
@@ -62,6 +62,7 @@
   </div>
 
   <div class="panel" id="p-edit">
+    <div class="vback"><a href="javascript:void(0)" data-back>← 返回</a></div>
     <h4>编辑资料</h4>
     <input id="acAccount" placeholder="账号">
     <input id="acNick" placeholder="昵称（头像=首字）">
@@ -71,6 +72,7 @@
   </div>
 
   <div class="panel" id="p-email">
+    <div class="vback"><a href="javascript:void(0)" data-back>← 返回</a></div>
     <h4>更换邮箱</h4>
     <div class="row">
       <input id="acEmail" type="email" placeholder="新邮箱">
@@ -82,6 +84,7 @@
   </div>
 
   <div class="panel" id="p-pw">
+    <div class="vback"><a href="javascript:void(0)" data-back>← 返回</a></div>
     <h4>修改密码</h4>
     <input id="acOld" type="password" placeholder="原密码">
     <input id="acNew" type="password" placeholder="新密码（至少 6 位）">
@@ -89,8 +92,10 @@
     <button class="btn-gold" id="acPw" type="button" style="width:100%;">修改</button>
   </div>
 
-  <div class="panel" id="p-orders"><div id="ordersBox"><p style="color:var(--text-dim);font-size:13px;">加载中…</p></div></div>
-  <div class="panel" id="p-inbox"><div id="inboxBox"><p style="color:var(--text-dim);font-size:13px;">加载中…</p></div></div>
+  <div class="panel" id="p-orders"><div class="vback"><a href="javascript:void(0)" data-back>← 返回</a></div>
+    <h4>我的订单</h4><div id="ordersBox"><p style="color:var(--text-dim);font-size:13px;">加载中…</p></div></div>
+  <div class="panel" id="p-inbox"><div class="vback"><a href="javascript:void(0)" data-back>← 返回</a></div>
+    <h4>信箱</h4><div id="inboxBox"><p style="color:var(--text-dim);font-size:13px;">加载中…</p></div></div>
 
   <div style="display:flex;gap:12px;justify-content:center;margin-top:18px;">
     <button class="btn-ghost" id="acOut" type="button">退出登录</button>
@@ -111,16 +116,26 @@
   function api(body) { return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-sess': token }, body: JSON.stringify(body) }).then(function (r) { return r.json(); }); }
   function msg(id, t) { var el = document.getElementById(id); if (el) el.textContent = t; }
 
+  var menuList = document.getElementById('menuList');
+  function goBack() {
+    document.querySelectorAll('.panel').forEach(function (x) { x.classList.remove('open'); });
+    menuList.classList.remove('hide');
+    menuList.classList.remove('anim-in'); void menuList.offsetWidth; menuList.classList.add('anim-in');
+  }
   document.querySelectorAll('.menu-card').forEach(function (b) {
     b.addEventListener('click', function () {
       var p = 'p-' + b.getAttribute('data-p');
       var panel = document.getElementById(p);
-      var open = panel.classList.contains('open');
+      if (!panel) return;
+      menuList.classList.add('hide');
       document.querySelectorAll('.panel').forEach(function (x) { x.classList.remove('open'); });
-      if (!open) panel.classList.add('open');
+      panel.classList.remove('open'); void panel.offsetWidth; panel.classList.add('open');
       if (p === 'p-orders') loadOrders();
       if (p === 'p-inbox') loadInbox();
     });
+  });
+  document.querySelectorAll('[data-back]').forEach(function (a) {
+    a.addEventListener('click', goBack);
   });
 
   function load() {
@@ -208,7 +223,7 @@
   // hash 直达板块
   var map={edit:"p-edit",email:"p-email",pw:"p-pw",orders:"p-orders",inbox:"p-inbox"};
   var target=map[(location.hash||"").replace("#","")];
-  if(target){var p=document.getElementById(target);if(p)p.classList.add("open");}
+  if(target){var p=document.getElementById(target);if(p){menuList.classList.add('hide');p.classList.remove('open');void p.offsetWidth;p.classList.add('open');}}
 })();
 </script>
 </body>
