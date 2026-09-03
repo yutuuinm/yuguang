@@ -1422,3 +1422,16 @@ main { animation: fadeIn .32s ease; }
 .lm-item small { color: var(--text-dim); font-size: 11.5px; }
 .lm-item:hover { transform: translateY(-2px); border-color: var(--line); background: rgba(227,196,124,.08); }
 .lm-close { display: block; margin: 16px auto 0; }
+
+/* 视图滑动过渡（鸿蒙式） */
+.acc .panel { display:none; }
+.acc .panel.open { display:block; animation: slideR .34s cubic-bezier(.22,.7,.3,1); }
+@keyframes slideR { from { opacity:0; transform: translateX(34px); } to { opacity:1; transform:none; } }
+#menuList.hide { display:none; }
+#menuList.anim-in { animation: slideL .3s cubic-bezier(.22,.7,.3,1); }
+@keyframes slideL { from { opacity:0; transform: translateX(-26px); } to { opacity:1; transform:none; } }
+.vback { margin-bottom: 4px; }
+.vback a { color: var(--gold); font-size: 13px; text-decoration: none; opacity:.9; }
+.vback a:hover { opacity:1; }
+/* 通用：跨板块/面板打开过渡 */
+.panel.open, .doc-block.reveal.visible { will-change: transform, opacity; }
