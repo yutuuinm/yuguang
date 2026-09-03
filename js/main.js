@@ -752,16 +752,17 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
 })();
 
 /* ---------- AI 光语助手（悬浮对话 + 星图志选石；未加载配置时自动降级） ---------- */
+/* 机器人形象「小光」：名字统一为 小光，圆形微光金渐变 + 星光点缀（样式见 style.css 末尾） */
 (function initAi() {
   // 右下角悬浮助手
   if (window.sbAI && !document.getElementById('aiFab')) {
     var root = document.createElement('div');
     root.className = 'ai-widget';
     root.innerHTML =
-      '<button type="button" class="ai-fab" id="aiFab">✨ 光语助手</button>' +
+      '<button type="button" class="ai-fab" id="aiFab" aria-label="小光 · 予光助手">小光</button>' +
       '<div class="ai-panel" id="aiPanel">' +
-        '<div class="ai-head">予光 · 光语助手<span class="ai-close" id="aiClose">✕</span></div>' +
-        '<div class="ai-body" id="aiBody"><p class="ai-tip">问我定制流程、功能用法、晶石意象，或只是想聊聊。文化意象仅供参考，不构成任何承诺。</p></div>' +
+        '<div class="ai-head">予光 · 小光<span class="ai-close" id="aiClose">✕</span></div>' +
+        '<div class="ai-body" id="aiBody"><p class="ai-tip">我是小光，予光的小向导 ✦ 问我定制流程、光集故事或作品验真，也可以只是想聊聊。文化意象仅供参考，不构成任何承诺。</p></div>' +
         '<div class="ai-foot"><input id="aiInput" placeholder="输入你的问题…" autocomplete="off"><button type="button" id="aiSend">发送</button></div>' +
       '</div>';
     document.body.appendChild(root);
@@ -773,6 +774,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     var sendBtn = root.querySelector('#aiSend');
     var history = [];
     var open = false;
+    var greeted = false;
     function addMsg(text, who) {
       var d = document.createElement('div');
       d.className = 'ai-msg ' + who;
@@ -792,14 +794,25 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
         .then(function (r) {
           if (bodyEl.contains(wait)) bodyEl.removeChild(wait);
           if (r && r.ok) { history.push({ role: 'assistant', content: r.answer }); addMsg(r.answer, 'ai'); }
-          else addMsg('（AI 暂时走神了，稍后再试；急事可加客服微信）', 'ai');
+          else addMsg('（小光暂时走神了，稍后再试；急事可加客服微信）', 'ai');
         })
         .catch(function () {
           if (bodyEl.contains(wait)) bodyEl.removeChild(wait);
           addMsg('（网络开了个小差，稍后再试）', 'ai');
         });
     }
-    fab.addEventListener('click', function () { open = !open; root.classList.toggle('open', open); if (open) inp.focus(); });
+    fab.addEventListener('click', function () {
+      open = !open;
+      root.classList.toggle('open', open);
+      if (open) {
+        if (!greeted) {
+          greeted = true;
+          var g = addMsg('你好，我是小光 ✦ 黑暗中总有光伴你前行，虽微弱，但足够照亮。', 'ai');
+          g.className = 'ai-msg ai greet';
+        }
+        inp.focus();
+      }
+    });
     closeBtn.addEventListener('click', function () { open = false; root.classList.remove('open'); });
     sendBtn.addEventListener('click', ask);
     inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') ask(); });
@@ -1288,4 +1301,215 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     if (document.querySelector('.user-menu')) { sync(); clearInterval(iv); }
     else if (++tries > 20) clearInterval(iv);
   }, 400);
+})();
+
+/* ============================================================
+   B 组改造（前端侧）：微光时刻 DB / 微信设置 / 实时 ygLive / 小光名字统一
+   ============================================================ */
+
+/* ---------- 1. 微光时刻：gallery 数据库优先，无数据/失败保留静态兜底 ---------- */
+(function initHomeLights() {
+  var sec = document.getElementById('lights');
+  if (!sec || !window.sb) return;
+  var grid = sec.querySelector('.lights-grid');
+  if (!grid) return;
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  window.sb('gallery?select=name,image_url,story,quote&visible=eq.true&approved=eq.true&order=id.desc&limit=3')
+    .then(function (rows) {
+      if (!rows || !rows.length) return; // 空 → 静态卡片保留
+      var cards = [];
+      rows.forEach(function (it) {
+        var src = (window.sbImg && it.image_url) ? window.sbImg(it.image_url) : '';
+        var text = String(it.story || '').trim() || String(it.quote || '').trim();
+        var imgBox = src
+          ? '<div class="light-img"><img src="' + esc(src) + '" alt="' + esc(it.name || '予光 · 光集作品') + '" loading="lazy" onerror="this.style.display=\'none\';"></div>'
+          : '';
+        var body = text ? '<p>' + esc(text) + '</p>' : '';
+        if (!imgBox && !body) return;
+        cards.push(
+          '<div class="light-card reveal">' + imgBox +
+          '<span class="quote-mark">“</span>' + body +
+          '<div class="who"><b>予光 · 光集</b></div></div>'
+        );
+      });
+      if (!cards.length) return;
+      // 静态兜底卡保留在 DOM，成功后仅隐藏
+      var statics = grid.querySelectorAll('.light-card');
+      Array.prototype.forEach.call(statics, function (c) { c.classList.add('light-hide'); });
+      grid.insertAdjacentHTML('beforeend', cards.join(''));
+      // 逐张错落渐显
+      var dyn = grid.querySelectorAll('.light-card.reveal:not(.light-hide)');
+      Array.prototype.forEach.call(dyn, function (c, i) { c.style.transitionDelay = (i * 90) + 'ms'; });
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          Array.prototype.forEach.call(dyn, function (c) { c.classList.add('visible'); });
+        });
+      });
+    })
+    .catch(function () { /* 失败 → 静态卡片保留 */ });
+})();
+
+/* ---------- 2. 微信设置前台生效（app_data key='contact'；仅当存在时） ---------- */
+(function initContactCfg() {
+  var wxEl = document.getElementById('wxIdTxt');
+  var mpImg = document.getElementById('qrMpImg');
+  var svcImg = document.getElementById('qrSvcImg');
+  if ((!wxEl && !mpImg && !svcImg) || !window.sb) return; // 仅联系方式区所在页面
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function applyQr(img, fileName) {
+    if (!img || !fileName || typeof fileName !== 'string') return;
+    var name = fileName.trim();
+    if (!name || !/\.\w{2,5}$/.test(name)) return; // 空 / 无扩展名 → 跳过
+    var box = img.parentNode;
+    var ph = box ? box.querySelector('.qr-ph') : null;
+    function showImg() { if (ph) ph.style.display = 'none'; }
+    function restorePh() { if (ph) ph.style.display = ''; }
+    img.style.display = '';
+    if (img.complete && img.naturalWidth) showImg();
+    img.addEventListener('load', showImg, { once: true });
+    img.addEventListener('error', restorePh, { once: true });
+    img.src = (/^(https?:)?\/\//.test(name) || name.indexOf('img/') === 0) ? name : ('img/' + name);
+  }
+  window.sb('app_data?select=key,value')
+    .then(function (rows) {
+      if (!rows || !rows.length) return;
+      var cfg = null;
+      for (var i = 0; i < rows.length; i++) {
+        if (rows[i] && rows[i].key === 'contact') {
+          var v = rows[i].value;
+          if (typeof v === 'string') { try { v = JSON.parse(v); } catch (e) { v = null; } }
+          if (v && typeof v === 'object') { cfg = v; break; }
+        }
+      }
+      if (!cfg) return; // 未配置 contact → 不生效
+      // 微信号文本：把含 yuguang-service 的文本替换为新微信号
+      var w = String(cfg.wechat || cfg.wechat2 || '').trim();
+      if (wxEl && w && wxEl.innerHTML.indexOf('yuguang-service') !== -1) {
+        wxEl.innerHTML = wxEl.innerHTML.split('yuguang-service').join(esc(w));
+      }
+      // 二维码：src = img/ + 文件名
+      applyQr(mpImg, cfg.qr_mp);
+      applyQr(svcImg, cfg.qr_service);
+    })
+    .catch(function () { /* 失败静默，保持默认 */ });
+})();
+
+/* ---------- 3. 实时微光（ygLive）：顶部轻提示 / 角标 / 20s 轮询基座（供各页复用） ---------- */
+(function initYgLive() {
+  var cfg = window.SUPABASE || {};
+  function token() { return localStorage.getItem('yg_token') || ''; }
+  function api(body) {
+    if (!cfg.url) return Promise.resolve({ ok: false, error: '离线模式' });
+    return fetch(cfg.url + '/functions/v1/account-api', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-sess': token() },
+      body: JSON.stringify(body || {})
+    }).then(function (r) { return r.json(); })
+      .catch(function () { return { ok: false, error: '网络错误' }; });
+  }
+  var seq = 0;
+  function escTip(s) {
+    return String(s == null ? '' : s).replace(/[&<>]/g, function (c) {
+      return c === '&' ? '&amp;' : (c === '<' ? '&lt;' : '&gt;');
+    });
+  }
+  // 顶部轻提示：dark-gold 小条，6s 自动淡出；同键替换，避免堆叠
+  function tip(opts) {
+    opts = opts || {};
+    var key = opts.key || ('tip' + (++seq));
+    document.querySelectorAll('.yg-tip').forEach(function (t) { if (t.parentNode) t.parentNode.removeChild(t); });
+    var bar = document.createElement('div');
+    bar.className = 'yg-tip';
+    bar.id = 'ygTip-' + key;
+    bar.setAttribute('role', 'status');
+    bar.innerHTML = escTip(opts.text || '');
+    var dead = false;
+    function dismiss() {
+      if (dead) return;
+      dead = true;
+      if (bar.parentNode) {
+        bar.classList.add('yg-out');
+        setTimeout(function () { if (bar.parentNode) bar.parentNode.removeChild(bar); }, 520);
+      }
+    }
+    bar.addEventListener('click', function () {
+      dismiss();
+      if (opts.onClick) { try { opts.onClick(); } catch (e) {} }
+    });
+    document.body.appendChild(bar);
+    setTimeout(dismiss, opts.dur || 6000);
+    return { close: dismiss };
+  }
+  // 角标：菜单按钮右上小红点 / 数字
+  function badgeEl(el) {
+    if (!el) return null;
+    if (!el._ygBadge) {
+      var b = document.createElement('span');
+      b.className = 'yg-badge';
+      b.style.display = 'none';
+      el.appendChild(b);
+      el._ygBadge = b;
+    }
+    return el._ygBadge;
+  }
+  function badgeSet(el, num) {
+    var b = badgeEl(el);
+    if (!b) return;
+    if (num == null || num <= 0) { badgeClear(el); return; }
+    b.className = 'yg-badge';
+    b.textContent = num > 9 ? '9+' : String(num);
+    b.style.display = 'inline-block';
+  }
+  function badgeClear(el) {
+    var b = el && el._ygBadge;
+    if (b) { b.style.display = 'none'; b.textContent = ''; }
+  }
+  var polls = {};
+  // 轮询：仅在页面可见且 when() 通过时触发 tick；立即首轮执行
+  function poll(opts) {
+    opts = opts || {};
+    var key = opts.key || ('poll' + (++seq));
+    if (polls[key]) clearInterval(polls[key]);
+    function tick() {
+      if (document.hidden) return;
+      if (opts.when && !opts.when()) return;
+      try { opts.tick(); } catch (e) {}
+    }
+    polls[key] = setInterval(tick, opts.every || 20000);
+    setTimeout(tick, opts.immediate === false ? opts.every : 60);
+    return { stop: function () { if (polls[key]) { clearInterval(polls[key]); delete polls[key]; } } };
+  }
+  window.ygLive = {
+    api: api,
+    logged: function () { return !!token(); },
+    tip: tip,
+    badgeSet: badgeSet,
+    badgeClear: badgeClear,
+    poll: poll
+  };
+})();
+
+/* ---------- 4. 机器人形象名字统一：页面既有「光语助手」文案运行时替换为「小光」 ---------- */
+(function unifyBotName() {
+  function walk(n) {
+    if (!n || n.nodeType !== 1) return;
+    var tag = n.tagName || '';
+    if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'INPUT') return;
+    Array.prototype.forEach.call(n.childNodes, function (c) {
+      if (c.nodeType === 3) {
+        if (c.nodeValue && c.nodeValue.indexOf('光语助手') !== -1) {
+          c.nodeValue = c.nodeValue.split('光语助手').join('小光');
+        }
+      } else if (c.nodeType === 1) walk(c);
+    });
+  }
+  walk(document.body);
 })();
