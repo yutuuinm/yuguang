@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
     }
     const ru = await fetch(SB_URL + "/rest/v1/users?select=role&id=eq." + sess[0].account_id, { headers: auth });
     const user = ((await ru.json()) || [])[0];
-    if (!user || user.role !== "admin") {
+    if (!user || (user.role !== "admin" && user.role !== "root")) {
       return Response.json({ ok: false, error: "无管理员权限" }, { status: 403, headers: corsHeaders });
     }
 
