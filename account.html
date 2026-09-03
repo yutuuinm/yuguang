@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>个人中心 · 予光</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09032138"?>
+<link rel="stylesheet" href="css/style.css?v=09032140"?>
 <style>
   .acc{max-width:620px;margin:0 auto;padding:110px 18px 80px;}
   .back{color:var(--gold);font-size:13px;text-decoration:none;}
@@ -47,11 +47,6 @@
 
 <main><div class="acc">
   <a class="back" href="javascript:history.back()">← 返回</a>
-
-  <div class="me-top">
-    <div class="me-av" id="meAv">光</div>
-    <div><b id="meName"></b><small id="meInfo"></small></div>
-  </div>
 
   <div id="menuList" style="margin-top:14px;">
     <button class="menu-card" data-p="edit" type="button">✏️ 编辑资料<span>账号 / 昵称 / 手机号</span></button>
@@ -99,7 +94,6 @@
 
   <div style="display:flex;gap:12px;justify-content:center;margin-top:18px;">
     <button class="btn-ghost" id="acOut" type="button">退出登录</button>
-    <a class="btn-ghost" href="index.html">返回首页</a>
   </div>
 </div></main>
 
@@ -115,14 +109,10 @@
   var account = localStorage.getItem('yg_account') || '';
   function api(body) { return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-sess': token }, body: JSON.stringify(body) }).then(function (r) { return r.json(); }); }
   function msg(id, t) { var el = document.getElementById(id); if (el) el.textContent = t; }
-
   var menuList = document.getElementById('menuList');
-  var meTop = document.getElementById('meTop');
-
   function closeAll() { document.querySelectorAll('.panel').forEach(function (x) { x.classList.remove('open'); }); }
   function goBack() {
     closeAll();
-    if (meTop) meTop.classList.remove('hide');
     if (menuList) { menuList.classList.remove('hide'); menuList.classList.remove('anim-in'); void menuList.offsetWidth; menuList.classList.add('anim-in'); }
   }
   document.querySelectorAll('.menu-card').forEach(function (b) {
@@ -131,7 +121,6 @@
       var panel = document.getElementById(p);
       if (!panel) return;
       if (menuList) menuList.classList.add('hide');
-      if (meTop) meTop.classList.add('hide');
       closeAll();
       panel.classList.remove('open'); void panel.offsetWidth; panel.classList.add('open');
       if (p === 'p-orders') loadOrders();
@@ -140,48 +129,23 @@
     });
   });
   document.querySelectorAll('[data-back]').forEach(function (a) { a.addEventListener('click', goBack); });
-
   function fill(r) {
     account = r.account;
     localStorage.setItem('yg_account', r.account);
-    var s = ((r.nickname || '') || r.account || '光').trim();
-    document.getElementById('meAv').textContent = s.charAt(0);
-    document.getElementById('meName').textContent = r.nickname || r.account;
-    document.getElementById('meInfo').textContent = '账号：' + r.account + ' · ' + r.role;
-    document.getElementById('acAccount').value = r.account;
-    document.getElementById('acNick').value = r.nickname || '';
-    document.getElementById('acPhone').value = r.phone || '';
-    document.getElementById('acEmail').value = r.email || r.account;
+    localStorage.setItem('yg_nick', r.nickname || '');
+    var ac = document.getElementById('acAccount'); if (ac) ac.value = r.account;
+    var nk = document.getElementById('acNick'); if (nk) nk.value = r.nickname || '';
+    var ph = document.getElementById('acPhone'); if (ph) ph.value = r.phone || '';
+    var em = document.getElementById('acEmail'); if (em) em.value = r.email || r.account;
     var ce = document.getElementById('curEmail'); if (ce) ce.textContent = r.email || r.account;
   }
-  function fallbackLocal() {
-    var acc = localStorage.getItem('yg_account') || '';
-    var nick = localStorage.getItem('yg_nick') || '';
-    if (acc) {
-      var s = (nick || acc).trim();
-      var avEl = document.getElementById('meAv');
-      if (avEl) avEl.textContent = s.charAt(0);
-      var n = document.getElementById('meName');
-      if (n) n.textContent = nick || acc;
-      var ac = document.getElementById('acAccount');
-      if (ac) ac.value = acc;
-    }
-  }
   function doMe(times) {
-    if (!token) { msg('meInfo', '请先登录'); return; }
+    if (!token) return;
     api({ op: 'me' }).then(function (r) {
-      if (!r.ok) {
-        if ((times || 0) < 1) { setTimeout(function () { doMe((times || 0) + 1); }, 900); return; }
-        // 静默降级：用本地信息展示，不再提示“失效”
-        fallbackLocal();
-        return;
-      }
+      if (!r.ok) { if ((times || 0) < 1) { setTimeout(function () { doMe((times || 0) + 1); }, 900); } return; }
       fill(r);
-    }).catch(function () {
-      if ((times || 0) < 1) { setTimeout(function () { doMe((times || 0) + 1); }, 1200); }
-    });
+    }).catch(function () { if ((times || 0) < 1) { setTimeout(function () { doMe((times || 0) + 1); }, 1200); } });
   }
-
   function loadOrders() {
     var box = document.getElementById('ordersBox');
     api({ op: 'orders' }).then(function (r) {
@@ -206,19 +170,11 @@
       if (ids.length) api({ op: 'inbox_read', ids: ids }).catch(function () {});
     }).catch(function () { box.innerHTML = '<p style="color:var(--text-dim);font-size:13px;">信箱加载失败</p>'; });
   }
-
   document.getElementById('acSave').addEventListener('click', function () {
     api({ op: 'update_profile', account: document.getElementById('acAccount').value.trim(), nickname: document.getElementById('acNick').value.trim(), phone: document.getElementById('acPhone').value.trim() })
-      .then(function (r) {
-        if (r.ok) {
-          localStorage.setItem('yg_account', document.getElementById('acAccount').value.trim());
-          localStorage.setItem('yg_nick', document.getElementById('acNick').value.trim());
-          msg('editMsg', '已保存');
-          location.reload();
-        } else msg('editMsg', r.error || '保存失败');
-      }).catch(function () { msg('editMsg', '网络错误'); });
+      .then(function (r) { if (r.ok) { localStorage.setItem('yg_account', document.getElementById('acAccount').value.trim()); localStorage.setItem('yg_nick', document.getElementById('acNick').value.trim()); msg('editMsg', '已保存'); } else msg('editMsg', r.error || '保存失败'); })
+      .catch(function () { msg('editMsg', '网络错误'); });
   });
-
   var cd = 0;
   document.getElementById('acSend').addEventListener('click', function () {
     if (cd > 0) return;
@@ -237,9 +193,7 @@
     var newEmail = document.getElementById('acEmail').value.trim();
     var code = document.getElementById('acCode').value.trim();
     if (!newEmail || !code) { msg('mailMsg', '请先获取验证码并填写新邮箱'); return; }
-    api({ op: 'update_profile', email: newEmail, code: code })
-      .then(function (r) { if (r.ok) { msg('mailMsg', '邮箱已更换'); } else msg('mailMsg', r.error || '更换失败'); })
-      .catch(function () { msg('mailMsg', '网络错误'); });
+    api({ op: 'update_profile', email: newEmail, code: code }).then(function (r) { msg('mailMsg', r.ok ? '邮箱已更换' : (r.error || '更换失败')); }).catch(function () { msg('mailMsg', '网络错误'); });
   });
   document.getElementById('acPw').addEventListener('click', function () {
     api({ op: 'change_pw', old_password: document.getElementById('acOld').value, new_password: document.getElementById('acNew').value })
@@ -251,11 +205,10 @@
     ['yg_token', 'yg_account', 'yg_role', 'yg_nick'].forEach(function (k) { localStorage.removeItem(k); });
     location.href = 'index.html';
   });
-
   doMe(0);
   var map = { edit: 'p-edit', email: 'p-email', pw: 'p-pw', orders: 'p-orders', inbox: 'p-inbox' };
   var target = map[(location.hash || '').replace('#', '')];
-  if (target) { var p = document.getElementById(target); if (p) { if (menuList) menuList.classList.add('hide'); if (meTop) meTop.classList.add('hide'); p.classList.add('open'); if (target === 'p-orders') loadOrders(); if (target === 'p-inbox') loadInbox(); } }
+  if (target) { var p = document.getElementById(target); if (p) { if (menuList) menuList.classList.add('hide'); p.classList.add('open'); if (target === 'p-orders') loadOrders(); if (target === 'p-inbox') loadInbox(); } }
 })();
 </script>
 </body>
