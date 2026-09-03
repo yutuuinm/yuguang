@@ -1282,3 +1282,15 @@ main, header, footer { position: relative; z-index: 3; }
 .hb-card .hb-txt { padding: 14px 18px 18px; }
 .hb-card h4 { font-family: var(--serif); letter-spacing: .1em; color: var(--gold); margin-bottom: 6px; font-size: 17px; }
 .hb-card p { color: var(--text-dim); font-size: 13px; line-height: 1.8; }
+
+/* 登录/注册：右上角金色主按钮 */
+.nav-user.cta {
+  background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+  color: #14121a !important;
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-weight: 600;
+  box-shadow: 0 0 16px rgba(227,196,124,.35);
+}
+.nav-user.cta:hover { color:#14121a; }
+@media (max-width: 640px){ .nav-user.cta{ padding:6px 12px; font-size:12px; } }
