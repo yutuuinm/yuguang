@@ -114,6 +114,7 @@
     mainEl.style.display = 'block';
     document.getElementById('admWho').innerHTML = '👤 <b>' + account + '</b>（' + role + '）· 会话已保存';
     load();
+    window.dispatchEvent(new Event('yg:login'));
   }
   function tryEnter() {
     if (!token) return;
