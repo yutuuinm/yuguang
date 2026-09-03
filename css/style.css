@@ -1435,3 +1435,5 @@ main { animation: fadeIn .32s ease; }
 .vback a:hover { opacity:1; }
 /* 通用：跨板块/面板打开过渡 */
 .panel.open, .doc-block.reveal.visible { will-change: transform, opacity; }
+/* 会员中心顶部横条随子界面隐藏 */
+.me-top.hide { display: none; }
