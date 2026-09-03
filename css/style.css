@@ -1294,3 +1294,13 @@ main, header, footer { position: relative; z-index: 3; }
 }
 .nav-user.cta:hover { color:#14121a; }
 @media (max-width: 640px){ .nav-user.cta{ padding:6px 12px; font-size:12px; } }
+
+/* 移动端细节 */
+@media (max-width: 640px) {
+  .login-modal { max-height: 88vh; overflow-y: auto; }
+  .login-modal input { padding: 13px 12px; font-size: 15px; }
+  .login-modal .btn-gold { padding: 13px 0; }
+  .homeband { padding-top: 18px; }
+  .hero-inner { padding-top: 110px; }
+}
+html { -webkit-tap-highlight-color: transparent; }
