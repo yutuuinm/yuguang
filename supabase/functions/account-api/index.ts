@@ -81,7 +81,10 @@ Deno.serve(async (req) => {
       const rs = await fetch(SB_URL + "/rest/v1/sessions?select=account_id,expires_at&token_hash=eq." + encodeURIComponent(tokenHash) + "&expires_at=gt." + encodeURIComponent(new Date().toISOString()), { headers: auth });
       const sess = (await rs.json()) || [];
       if (!sess.length) throw new Error("未登录或已过期");
-      const u = await findUser(String(sess[0].account_id));
+      // 会话挂 users.id，按 id 直查（不能用账号名查询）
+      const uid = String(sess[0].account_id);
+      const ru = await fetch(SB_URL + "/rest/v1/users?select=id,account,email,pass_hash,salt,phone,nickname,role&id=eq." + encodeURIComponent(uid) + "&limit=1", { headers: auth });
+      const u = ((await ru.json()) || [])[0];
       if (!u) throw new Error("用户不存在");
       return { u, tokenHash };
     }
