@@ -961,6 +961,7 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
     localStorage.setItem('yg_role', role);
     localStorage.setItem('yg_nick', r.nickname || '');
     refreshChip(); mask.classList.remove('show');
+    window.dispatchEvent(new Event('yg:login'));
   }
 
   /* ---- 个人中心弹窗 ---- */
@@ -1064,6 +1065,8 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
     account = ''; token = ''; role = 'user';
     refreshChip();
     menu.style.display = 'none';
+    window.dispatchEvent(new Event('yg:login'));
+    if (location.pathname.indexOf('admin.html') !== -1) { location.href = 'index.html'; return; }
     var maskEl = document.querySelector('.login-modal-mask');
     if (maskEl) maskEl.classList.remove('show');
   }
@@ -1165,6 +1168,11 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
   mask.querySelector('.close-x').addEventListener('click', function () { mask.classList.remove('show'); });
   mask.addEventListener('click', function (e) { if (e.target === mask) mask.classList.remove('show'); });
 
+  window.addEventListener('yg:login', function () {
+    account = localStorage.getItem('yg_account') || '';
+    role = localStorage.getItem('yg_role') || 'user';
+    refreshChip();
+  });
   refreshChip();
   window.ygAccount = function () { return localStorage.getItem('yg_account') || ''; };
 })();
