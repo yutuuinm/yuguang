@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>予光 · 黑暗中总有光伴你前行</title>
 <meta name="description" content="予光——东西方双轨定制的水晶饰品品牌。生肖八卦与星座星盘，炼成一枚托在你掌心、微弱但足够照亮的光。我们不改命，只陪你点亮自己。">
-<link rel="stylesheet" href="css/style.css?v=09032233"?>
+<link rel="stylesheet" href="css/style.css?v=09032301"?>
 </head>
 <body>
 
@@ -22,7 +22,7 @@
       <a href="studio.html">定制工坊</a>
       <a href="gallery.html">光集</a>
       <a href="atlas.html">星图志</a>
-      <a href="play.html">互动</a>
+      <a href="#playSec">互动</a>
       <a href="studio.html" style="color:var(--text-dim);font-size:13px;">开始定制</a>
     </nav>
   </div>
@@ -58,7 +58,7 @@
       <a class="feat-card reveal" href="studio.html"><span class="g">✦</span><h4>定制工坊</h4><p>生肖/星座/双人，三分钟生成你的设计卡</p></a>
       <a class="feat-card reveal" href="atlas.html"><span class="g">☯</span><h4>星图志</h4><p>生肖·八卦·星座·晶石·养石百科</p></a>
       <a class="feat-card reveal" href="gallery.html"><span class="g">☾</span><h4>光集</h4><p>客户作品与光的时刻</p></a>
-      <a class="feat-card reveal" href="play.html"><span class="g">🎋</span><h4>互动</h4><p>拈签 · 答案之书 · 微光转盘</p></a>
+      <a class="feat-card reveal" href="#playSec"><span class="g">🎋</span><h4>互动</h4><p>拈签 · 答案之书 · 微光转盘 · 就在本页</p></a>
       <a class="feat-card reveal" href="verify.html"><span class="g">✓</span><h4>作品验真</h4><p>输入验证码核验正品</p></a>
       <a class="feat-card reveal" href="#myOrders"><span class="g">📦</span><h4>我的订单</h4><p>登录后可随时查看定制进度</p></a>
     </div>
@@ -148,6 +148,46 @@
     </div>
   </section>
 
+
+  <!-- 互动（并入首页：原独立互动页已取消） -->
+  <section class="section" id="playSec">
+    <h2 class="section-title reveal">互动 · 陪你一会儿</h2>
+    <div class="gold-line"></div>
+    <p class="section-sub reveal">拈一签 · 答案之书 · 微光转盘——愿每一次翻开与旋转，都提醒你：你还在，你还有光。</p>
+    <div class="wrap play-grid">
+
+      <div class="play-box reveal">
+        <span class="glyph">🎋</span>
+        <h3>拈一签 · 光语</h3>
+        <p class="desc">从生肖、八卦与星座的光语里，拈一支此刻想听的签。</p>
+        <button class="btn-gold" id="qianBtn" type="button">拈 一 签</button>
+        <div class="play-result" id="qianRes">签筒已备好，等你的手。</div>
+      </div>
+
+      <div class="play-box reveal">
+        <span class="glyph">📖</span>
+        <h3>答案之书</h3>
+        <p class="desc">心里默念一个问题，翻开一页——答案温柔，但不替你决定。</p>
+        <button class="btn-gold" id="bookBtn" type="button">翻 开 一 页</button>
+        <div class="play-result" id="bookRes">在心里默念你的问题。</div>
+      </div>
+
+      <div class="play-box reveal">
+        <span class="glyph">🎡</span>
+        <h3>微光转盘</h3>
+        <p class="desc">每日一次，转一轮微光小礼。</p>
+        <div class="wheel-wrap">
+          <div class="wheel-pointer">▼</div>
+          <div class="wheel" id="wheel"></div>
+        </div>
+        <button class="btn-gold" id="wheelBtn" type="button">转 一 转</button>
+        <div class="play-result" id="wheelRes">奖品以客服核销为准。</div>
+      </div>
+
+    </div>
+    <p class="play-note" style="text-align:center;margin-top:14px;">＊ 互动仅供娱乐与陪伴，不预测结果、不承诺效果。</p>
+  </section>
+
   <!-- ⑦ 我的订单（登录后显示） -->
   <section class="section" id="myOrders" style="display:none;">
     <h2 class="section-title reveal">我的订单</h2>
@@ -235,7 +275,7 @@
   </div>
 </footer>
 
-<script src="js/supabase-config.js?v=09032233"></script>
-<script src="js/main.js?v=09032233"></script>
+<script src="js/supabase-config.js?v=09032301"></script>
+<script src="js/main.js?v=09032301"></script>
 </body>
 </html>
