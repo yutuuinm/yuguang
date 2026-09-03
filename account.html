@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>个人中心 · 予光</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09032145"?>
+<link rel="stylesheet" href="css/style.css?v=09032147"?>
 <style>
   .acc{max-width:620px;margin:0 auto;padding:110px 18px 80px;}
   .back{color:var(--gold);font-size:13px;text-decoration:none;}
@@ -46,7 +46,8 @@
 </div></header>
 
 <main><div class="acc">
-  <a class="back" href="javascript:history.back()">← 返回</a>
+  <a class="back" href="javascript:void(0)" id="backTop">← 返回</a>
+  <div class="me-line" id="meLine" style="display:none;align-items:center;gap:10px;margin:10px 0 4px;padding:10px 4px;"><span class="me-dot" id="meDot" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-deep));color:#14121a;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-size:17px;">光</span><b style="color:var(--moon);font-size:16px;" id="meLineName"></b></div>
 
   <div id="menuList" style="margin-top:14px;">
     <button class="menu-card" data-p="edit" type="button">✏️ 编辑资料<span>账号 / 昵称 / 手机号</span></button>
@@ -57,7 +58,6 @@
   </div>
 
   <div class="panel" id="p-edit">
-    <div class="vback"><a href="javascript:void(0)" data-back>← 返回</a></div>
     <h4>编辑资料</h4>
     <input id="acAccount" placeholder="账号">
     <input id="acNick" placeholder="昵称（头像=首字）">
@@ -67,7 +67,6 @@
   </div>
 
   <div class="panel" id="p-email">
-    <div class="vback"><a href="javascript:void(0)" data-back>← 返回</a></div>
     <h4>更换邮箱</h4>
     <div class="row">
       <input id="acEmail" type="email" placeholder="新邮箱">
@@ -79,7 +78,6 @@
   </div>
 
   <div class="panel" id="p-pw">
-    <div class="vback"><a href="javascript:void(0)" data-back>← 返回</a></div>
     <h4>修改密码</h4>
     <input id="acOld" type="password" placeholder="原密码">
     <input id="acNew" type="password" placeholder="新密码（至少 6 位）">
@@ -87,9 +85,9 @@
     <button class="btn-gold" id="acPw" type="button" style="width:100%;">修改</button>
   </div>
 
-  <div class="panel" id="p-orders"><div class="vback"><a href="javascript:void(0)" data-back>← 返回</a></div>
+  <div class="panel" id="p-orders">
     <h4>我的订单</h4><div id="ordersBox"><p style="color:var(--text-dim);font-size:13px;">加载中…</p></div></div>
-  <div class="panel" id="p-inbox"><div class="vback"><a href="javascript:void(0)" data-back>← 返回</a></div>
+  <div class="panel" id="p-inbox">
     <h4>信箱</h4><div id="inboxBox"><p style="color:var(--text-dim);font-size:13px;">加载中…</p></div></div>
 
   <div style="display:flex;gap:12px;justify-content:center;margin-top:18px;">
@@ -110,6 +108,9 @@
   function api(body) { return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-sess': token }, body: JSON.stringify(body) }).then(function (r) { return r.json(); }); }
   function msg(id, t) { var el = document.getElementById(id); if (el) el.textContent = t; }
   var menuList = document.getElementById('menuList');
+  var backTop = document.getElementById('backTop');
+  function anyOpen(){ return !!document.querySelector('.panel.open'); }
+  if (backTop) backTop.addEventListener('click', function(){ if (anyOpen()) goBack(); else history.back(); });
   function closeAll() { document.querySelectorAll('.panel').forEach(function (x) { x.classList.remove('open'); }); }
   function goBack() {
     closeAll();
@@ -128,8 +129,10 @@
       if (p === 'p-email') { var ce = document.getElementById('curEmail'); if (ce) ce.textContent = account; }
     });
   });
-  document.querySelectorAll('[data-back]').forEach(function (a) { a.addEventListener('click', goBack); });
+
+  function setLine(n,a){ var dot=document.getElementById('meDot'); if(dot) dot.textContent=((n||a||'光').trim().charAt(0)); var nm=document.getElementById('meLineName'); if(nm) nm.textContent=(n||a||''); var ln=document.getElementById('meLine'); if(ln) ln.style.display='flex'; }
   function fill(r) {
+    setLine(r.nickname, r.account);
     account = r.account;
     localStorage.setItem('yg_account', r.account);
     localStorage.setItem('yg_nick', r.nickname || '');
@@ -141,6 +144,8 @@
   }
   function doMe(times) {
     if (!token) return;
+    var la=localStorage.getItem('yg_account')||'', ln2=localStorage.getItem('yg_nick')||'';
+    if (la) setLine(ln2, la);
     api({ op: 'me' }).then(function (r) {
       if (!r.ok) { if ((times || 0) < 1) { setTimeout(function () { doMe((times || 0) + 1); }, 900); } return; }
       fill(r);
