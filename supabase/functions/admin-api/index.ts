@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const op = body.op || "list";
     const table = String(body.table || "");
-    if (TABLES.indexOf(table) === -1) throw new Error("不允许的表：" + table);
+    if (op !== "broadcast" && TABLES.indexOf(table) === -1) throw new Error("不允许的表：" + table);
 
     const SB_URL = Deno.env.get("SUPABASE_URL") || "";
     const SK = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
