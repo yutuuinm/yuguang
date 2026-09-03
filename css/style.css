@@ -1330,7 +1330,7 @@ html { -webkit-tap-highlight-color: transparent; }
 .nav-inner, .nav-links, header.nav { position: relative; }
 
 
-/* 登录后右上角：头像圆 + 向下展开板块（白桦/华为风格） */
+/* 登录后右上角：头像圆 + 向下展开板块（予光夜蓝暗金风格） */
 .nav-user-wrap { position: relative; display: inline-flex; }
 .chip-av {
   display: inline-flex; align-items: center; justify-content: center;
@@ -1468,3 +1468,153 @@ body.yg-exit main { animation: ygMainOut .2s ease-in both; }
 
 /* 单文件视图切换（鸿蒙式滑入） */
 .view.active { animation: slideR .36s cubic-bezier(.22,.7,.3,1); }
+
+/* ============================================================
+   B 组改造追加样式（微光时刻 DB 兜底 / 实时轻提示 / 角标 / 小光）
+   ============================================================ */
+
+/* ---------- 微光时刻：DB 动态渲染成功后隐藏静态兜底卡 ---------- */
+.light-card.light-hide { display: none; }
+
+/* ---------- 顶部轻提示（dark-gold：夜底金字，自动淡出） ---------- */
+.yg-tip {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6000;
+  max-width: min(560px, 92vw);
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(227, 196, 124, 0.55);
+  background: linear-gradient(135deg, rgba(13, 17, 27, 0.97), rgba(20, 27, 46, 0.97));
+  color: var(--gold);
+  font-size: 13.5px;
+  letter-spacing: 0.05em;
+  line-height: 1.6;
+  text-align: center;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 26px rgba(227, 196, 124, 0.28), 0 10px 34px rgba(0, 0, 0, 0.55);
+  animation: ygTipIn 0.45s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+  user-select: none;
+}
+.yg-tip:hover { box-shadow: 0 0 34px rgba(227, 196, 124, 0.45), 0 10px 34px rgba(0, 0, 0, 0.6); }
+.yg-tip.yg-out { animation: ygTipOut 0.5s ease-in both; }
+@keyframes ygTipIn {
+  from { opacity: 0; transform: translate(-50%, -14px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+@keyframes ygTipOut {
+  from { opacity: 1; transform: translate(-50%, 0); }
+  to { opacity: 0; transform: translate(-50%, -14px); }
+}
+@media (max-width: 640px) { .yg-tip { top: 10px; font-size: 12.5px; padding: 8px 14px; } }
+
+/* ---------- 会员中心：菜单项内容角标（红点 / 数字） ---------- */
+#menuList .menu-card { position: relative; }
+.menu-card .yg-badge {
+  position: absolute;
+  top: -5px;
+  right: -4px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 32% 28%, #ff9d8f, #c33c2e 72%);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 17px;
+  text-align: center;
+  letter-spacing: 0;
+  box-shadow: 0 0 0 2px rgba(11, 14, 23, 0.9), 0 2px 8px rgba(195, 60, 46, 0.55);
+  animation: ygBadgePop 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.3) both;
+  pointer-events: none;
+}
+.menu-card .yg-badge.dot-only { min-width: 9px; width: 9px; height: 9px; padding: 0; top: 6px; right: 14px; }
+@keyframes ygBadgePop {
+  from { opacity: 0; transform: scale(0.4); }
+  to { opacity: 1; transform: scale(1); }
+}
+/* 顶部用户下拉菜单内「我的订单」条目的角标 */
+.user-menu.up-panel a { position: relative; }
+.user-menu a .yg-badge {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 32% 28%, #ff9d8f, #c33c2e 72%);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  letter-spacing: 0;
+  box-shadow: 0 0 0 2px rgba(11, 14, 23, 0.9), 0 2px 8px rgba(195, 60, 46, 0.55);
+  animation: ygBadgePop 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.3) both;
+  pointer-events: none;
+}
+
+/* ---------- 小光 · 悬浮助手形象（覆盖既有 .ai-* 到末尾） ---------- */
+.ai-fab {
+  width: 58px;
+  height: 58px;
+  padding: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #14121a;
+  cursor: pointer;
+  background:
+    radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.55), transparent 42%),
+    linear-gradient(135deg, #f2dcae, var(--gold) 46%, var(--gold-deep));
+  border: 1px solid rgba(244, 239, 230, 0.5);
+  box-shadow:
+    0 0 0 4px rgba(227, 196, 124, 0.16),
+    0 6px 22px rgba(227, 196, 124, 0.5),
+    inset 0 -3px 6px rgba(122, 82, 22, 0.35);
+  position: relative;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+.ai-fab:hover { transform: scale(1.07); box-shadow: 0 0 0 6px rgba(227, 196, 124, 0.22), 0 8px 28px rgba(227, 196, 124, 0.65), inset 0 -3px 6px rgba(122, 82, 22, 0.35); }
+.ai-fab:active { transform: scale(0.95); }
+/* 星光点缀 */
+.ai-fab::before,
+.ai-fab::after {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 6px 1px rgba(255, 255, 255, 0.8);
+  pointer-events: none;
+}
+.ai-fab::before { top: 8px; right: 11px; }
+.ai-fab::after { bottom: 10px; left: 13px; width: 3px; height: 3px; background: #ffe9b8; box-shadow: 0 0 5px 1px rgba(255, 233, 184, 0.9); }
+/* 面板头部为小光专属标题（予光 · 小光） */
+.ai-head {
+  font-size: 14px;
+  background: linear-gradient(90deg, rgba(227, 196, 124, 0.12), rgba(227, 196, 124, 0.03));
+}
+/* 小光引入动画：首次打开浮现问候气泡 */
+.ai-msg.ai.greet { border-color: rgba(227, 196, 124, 0.5); background: rgba(227, 196, 124, 0.1); animation: ygGreetIn 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) both; }
+@keyframes ygGreetIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+@media (max-width: 480px) {
+  .ai-fab { width: 52px; height: 52px; font-size: 15px; }
+  .ai-widget { right: 14px; bottom: 14px; }
+  .ai-panel { bottom: 68px; }
+}
