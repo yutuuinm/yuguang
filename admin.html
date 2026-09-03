@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>予光 · 管理后台</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09032218">
+<link rel="stylesheet" href="css/style.css?v=09032226">
 <style>
   .adm{max-width:1000px;margin:0 auto;padding:120px 20px 80px;}
   .adm h2{font-family:var(--serif);letter-spacing:.2em;color:var(--gold);margin-bottom:6px;}
@@ -63,6 +63,11 @@
         <option value="subscribers">订阅 subscribers</option>
         <option value="users">用户 users</option>
         <option value="settings">配置 settings</option>
+        <option value="app_data">配置项 app_data</option>
+        <option value="wheel_spins">转盘 wheel_spins</option>
+        <option value="ai_usage">AI用量 ai_usage</option>
+        <option value="recycle_bin">回收站 recycle_bin</option>
+        <option value="mailboxes">站内信 mailboxes</option>
       </select>
       <button class="btn-gold" id="admRefresh" type="button">刷新</button>
       <input id="admSearch" placeholder="搜索本表…" style="width:auto;min-width:170px;margin:0;padding:8px 10px;">
@@ -85,6 +90,7 @@
   <div style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
     <button class="btn-ghost adm-tool-btn" data-t="crystal" type="button" style="font-size:13px;padding:8px 16px;">💎 新增晶石</button>
     <button class="btn-ghost adm-tool-btn" data-t="record" type="button" style="font-size:13px;padding:8px 16px;">🔑 生成验真码</button>
+    <button class="btn-ghost adm-tool-btn" data-t="broadcast" type="button" style="font-size:13px;padding:8px 16px;">📨 群发站内信</button>
     <button class="btn-ghost adm-tool-btn" data-t="notice" type="button" style="font-size:13px;padding:8px 16px;">📢 活动通知</button>
   </div>
   <div class="adm-tool adm-tool-crystal doc-block" style="display:none;margin-top:12px;">
@@ -105,6 +111,13 @@
     <button class="btn-gold" id="recGen" type="button">生成验真码</button>
     <div id="recOut" style="font-family:monospace;font-size:12px;color:var(--gold);white-space:pre-wrap;margin-top:8px;"></div>
   </div>
+
+  <div class="adm-tool adm-tool-broadcast doc-block" style="display:none;margin-top:12px;">
+    <input id="bcTitle" placeholder="标题（如：新品上架 / 活动公告）">
+    <textarea id="bcBody" style="min-height:70px;" placeholder="内容（发给全部注册用户的站内信）"></textarea>
+    <div class="msg" id="bcMsg"></div>
+    <button class="btn-gold" id="bcSend" type="button">群发站内信</button>
+  </div>
   <div class="adm-tool adm-tool-notice doc-block" style="display:none;margin-top:12px;">
     <textarea id="noticeTxt" style="min-height:70px;" placeholder="通知内容，留空则关闭"></textarea>
     <div class="msg" id="noticeMsg"></div>
@@ -116,8 +129,8 @@
 
 <footer class="footer"><div class="wrap"><div class="disclaimer">© 予光 YUGUANG · 管理后台 · 仅供内部使用</div></div></footer>
 
-<script src="js/supabase-config.js?v=09032218"></script>
-<script src="js/main.js?v=09032218"></script>
+<script src="js/supabase-config.js?v=09032226"></script>
+<script src="js/main.js?v=09032226"></script>
 <script>
 (function () {
   var cfg = window.SUPABASE || {};
@@ -307,6 +320,17 @@
     });
   }
 
+
+
+  document.getElementById('bcSend').addEventListener('click', function () {
+    var title = (document.getElementById('bcTitle').value || '').trim();
+    var body = document.getElementById('bcBody').value;
+    if (!title && !body) { document.getElementById('bcMsg').textContent = '标题或内容至少填一项'; return; }
+    if (!confirm('确认群发站内信给全部注册用户？')) return;
+    api(DAPI, { op: 'broadcast', title: title, body: body }).then(function (r) {
+      document.getElementById('bcMsg').textContent = r.ok ? ('已发送 ' + (r.sent || 0) + ' / ' + (r.users || 0) + ' 个用户信箱') : ('失败：' + (r.error || ''));
+    }).catch(function () { document.getElementById('bcMsg').textContent = '网络错误'; });
+  });
 
   // ===== 搜索与行编辑 =====
   var allRows = [];
