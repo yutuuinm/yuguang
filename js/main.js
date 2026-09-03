@@ -980,10 +980,10 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
     if (cd > 0) return;
     var em = (emailEl.value || '').trim();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { errEl.textContent = '请输入正确的邮箱'; emailEl.focus(); return; }
-    errEl.textContent = '发送中…';
+    errEl.textContent = '正在发送…';
     api({ op: 'send_code', email: em }).then(function (r) {
       if (r.ok) {
-        errEl.textContent = '验证码已发送（10 分钟内有效）'; cd = 60; sendEl.textContent = '已发送(' + cd + ')';
+        errEl.textContent = '发送成功，请前往邮箱查看（10 分钟内有效）'; cd = 60; sendEl.textContent = '已发送(' + cd + ')';
         var t = setInterval(function () { cd--; if (cd <= 0) { clearInterval(t); sendEl.textContent = '获取验证码'; } else sendEl.textContent = '已发送(' + cd + ')'; }, 1000);
       } else errEl.textContent = r.error || '发送失败';
     }).catch(function () { errEl.textContent = '网络错误'; });
