@@ -111,7 +111,7 @@ function fillSelect(sel, options) {
 }
 
 /* ---------- 全站星夜底图（自动注入，换图只需改这里） ---------- */
-const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件名即可全站生效
+const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文件名即可全站生效
 
 (function initBackdrop() {
   const canvas = $('stars');
