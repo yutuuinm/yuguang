@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>予光 · 管理后台</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09032233">
+<link rel="stylesheet" href="css/style.css?v=09032301">
 <style>
   .adm{max-width:1000px;margin:0 auto;padding:120px 20px 80px;}
   .adm h2{font-family:var(--serif);letter-spacing:.2em;color:var(--gold);margin-bottom:6px;}
@@ -43,11 +43,7 @@
   <h2 style="text-align:center;">予光 · 管理后台</h2>
 
   <div class="adm-card doc-block" id="admGate">
-    <p style="text-align:center;color:var(--text-dim);font-size:13px;">仅管理员可进入</p>
-    <input id="admAccount" placeholder="账号">
-    <input id="admPwd" type="password" placeholder="密码">
-    <div class="err" id="admErr"></div>
-    <button class="btn-gold" style="width:100%;" id="admLogin" type="button">登 录</button>
+    <p style="text-align:center;color:var(--text-dim);font-size:13px;" id="admTip">正在校验登录状态…</p>
   </div>
 
   <div id="admMain" style="display:none;">
@@ -71,7 +67,6 @@
       <button class="btn-gold" id="admRefresh" type="button">刷新</button>
       <input id="admSearch" placeholder="搜索本表…" style="width:auto;min-width:170px;margin:0;padding:8px 10px;">
       <button class="btn-ghost" id="admExport" type="button" style="font-size:13px;padding:8px 18px;">导出 CSV</button>
-      <a class="btn-ghost" style="font-size:13px;padding:8px 18px;" href="index.html">返回主页</a>
       <button class="btn-ghost" style="font-size:13px;padding:8px 18px;" id="admLogout" type="button">退出</button>
       <input id="admResetAcc" placeholder="用户邮箱(重置密码)" style="width:auto;min-width:200px;margin:0;padding:8px 10px;">
       <button class="btn-ghost" style="font-size:13px;padding:8px 14px;" id="admResetBtn" type="button">重置该用户密码</button>
@@ -147,8 +142,8 @@
 
 <footer class="footer"><div class="wrap"><div class="disclaimer">© 予光 YUGUANG · 管理后台 · 仅供内部使用</div></div></footer>
 
-<script src="js/supabase-config.js?v=09032233"></script>
-<script src="js/main.js?v=09032233"></script>
+<script src="js/supabase-config.js?v=09032301"></script>
+<script src="js/main.js?v=09032301"></script>
 <script>
 (function () {
   var cfg = window.SUPABASE || {};
@@ -157,7 +152,6 @@
   var token = localStorage.getItem('yg_token') || '';
   var gate = document.getElementById('admGate');
   var mainEl = document.getElementById('admMain');
-  var errEl = document.getElementById('admErr');
   var msg = document.getElementById('admMsg');
   var rowsEl = document.getElementById('admRows');
   var sel = document.getElementById('admTable');
@@ -177,26 +171,23 @@
     load();
     window.dispatchEvent(new Event('yg:login'));
   }
+  var admTries = 0;
+  function denyEnter() {
+    var tip = document.getElementById('admTip');
+    if (tip) tip.textContent = '当前账号无管理权限，即将返回…';
+    setTimeout(function () { location.href = 'index.html'; }, 1200);
+  }
   function tryEnter() {
-    if (!token) return;
+    if (!token) { denyEnter(); return; }
     api(AAPI, { op: 'me' }).then(function (r) {
       if (r.ok && (r.role === 'admin' || r.role === 'root')) enter(r.account, r.role, r.nickname);
-      else if (!r.ok) { document.getElementById('admErr').textContent = '正在验证登录状态…'; }
-    }).catch(function () {});
+      else denyEnter();
+    }).catch(function () {
+      admTries++;
+      if (admTries < 4) setTimeout(tryEnter, 1000); else denyEnter();
+    });
   }
 
-  document.getElementById('admLogin').addEventListener('click', function () {
-    var ac = (document.getElementById('admAccount').value || '').trim();
-    var pw = document.getElementById('admPwd').value;
-    if (!ac || !pw) { errEl.textContent = '请输入账号与密码'; return; }
-    api(AAPI, { op: 'login', account: ac, password: pw }).then(function (r) {
-      if (!r.ok) { errEl.textContent = r.error || '登录失败'; return; }
-      if (r.role !== 'admin' && r.role !== 'root') { errEl.textContent = '该账号无管理员权限'; return; }
-      token = r.token;
-      localStorage.setItem('yg_token', token);
-      enter(r.account, r.role, r.nickname);
-    }).catch(function () { errEl.textContent = '网络错误'; });
-  });
   document.getElementById('admResetBtn').addEventListener('click', function () {
     var ac = (document.getElementById('admResetAcc').value || '').trim();
     if (!ac) { msg.textContent = '请输入用户邮箱'; return; }
@@ -491,12 +482,7 @@
     }).catch(function () { document.getElementById('noticeMsg').textContent = '网络错误'; });
   });
 
-  (function () {
-    var n = 0;
-    function loop() { tryEnter(); n++; if (n > 14) clearInterval(iv); }
-    loop();
-    var iv = setInterval(loop, 1500);
-  })();
+  tryEnter();
 })();
 
 </script>
