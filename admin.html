@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>予光 · 管理后台</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09032301">
+<link rel="stylesheet" href="css/style.css?v=09040011">
 <style>
   /* ============ 予光 · 管理后台（白桦规格 · 分区式） ============ */
   .adm{max-width:1180px;margin:0 auto;padding:132px 20px 90px;position:relative;z-index:5;}
@@ -108,6 +108,12 @@
   .ygCard h3{font-family:var(--serif);font-size:17px;letter-spacing:.18em;color:var(--gold);font-weight:400;margin-bottom:12px;}
   .ygCard .btn-row{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:14px;}
   .hint{color:var(--text-dim);font-size:12px;line-height:1.9;}
+  /* —— 新增分区补充 —— */
+  .swatch{display:inline-block;width:14px;height:14px;border-radius:4px;border:1px solid rgba(244,239,230,.3);vertical-align:-2px;margin-right:6px;}
+  .sec-note{color:var(--text-dim);font-size:12px;line-height:1.9;border:1px dashed var(--line-soft);border-radius:10px;padding:8px 12px;margin:10px 0;}
+  .rad{display:inline-flex;gap:6px;align-items:center;margin:2px 14px 10px 0;color:var(--moon);font-size:13px;cursor:pointer;}
+  .rad input{accent-color:var(--gold);margin:0 2px 0 0;}
+  .chk{accent-color:var(--gold);}
 </style>
 </head>
 <body>
@@ -144,36 +150,60 @@
         <span class="small-note" style="text-align:center;">登录账号即后台身份 · 退出请到前台账号页</span>
       </div>
       <div class="card-grid" id="homeGrid">
-        <button class="card" type="button" data-sec="secOrders">
+        <button class="card" type="button" data-sec="secOrders" title="新单处理：行内补码/改单 · 完成发货 · 导出验证卡 · 合并/拆分 · 物流单号">
           <span class="g">📋</span><h3><em>待处理订单</em></h3>
-          <p>新单处理 · 生成防伪码 · 完成发货<br>合并/拆分 · 批量操作 · 物流单号</p>
+          <p>新单处理 · 生成防伪码 · 完成发货<br>导出防伪码图片 · 合并/拆分 · 物流单号</p>
         </button>
-        <button class="card" type="button" data-sec="secSingle">
-          <span class="g">🧾</span><h3><em>单个官方码</em></h3>
-          <p>手工建档一枚防伪码<br>生成官方验证卡并导出图片</p>
+        <button class="card" type="button" data-sec="secSingle" title="手工录入产品名/批次/光语/图片，入库一枚官方码并渲染验证卡">
+          <span class="g">🧾</span><h3><em>单个官方码生成</em></h3>
+          <p>手工建档一枚防伪码（含批次/光语）<br>生成官方验证卡并导出图片</p>
         </button>
-        <button class="card" type="button" data-sec="secBatch">
+        <button class="card" type="button" data-sec="secBatch" title="按数量 1–50 批量生成防伪码，唯一码自动入库，一次可复制全部">
           <span class="g">📦</span><h3><em>批量生成</em></h3>
-          <p>按数量 1–50 批量生成防伪码<br>唯一码自动入库，一次可复制全部</p>
+          <p>按数量 1–50 批量生成防伪码（同批次）<br>唯一码自动入库，一次可复制全部</p>
         </button>
-        <button class="card" type="button" data-sec="secUsers">
+        <button class="card" type="button" data-sec="secDb" title="records 专属：复制/预览卡片/详情编辑/导出 JPG/批量删；其余表通用浏览">
+          <span class="g">🗂️</span><h3><em>数据库记录管理</em></h3>
+          <p>防伪码 records 专属操作 + 预览/编辑<br>13 张表通用浏览 · 搜索 · JSON 行编辑</p>
+        </button>
+        <button class="card" type="button" data-sec="secUsers" title="账号列表：查看订单/代录加单/重置密码/站内信/角色/群发消息">
           <span class="g">👥</span><h3><em>用户管理</em></h3>
-          <p>账号列表 · 查看订单 / 代录加单<br>重置密码 · 站内信 · 角色 / 群发</p>
+          <p>账号列表 · 查看订单 / 代录加单<br>重置密码 · 站内信 · 角色 / 群发消息</p>
         </button>
-        <button class="card" type="button" data-sec="secMail">
+        <button class="card" type="button" data-sec="secCrystal" title="水晶知识库 CRUD：新增/编辑/删除/复制，生辰测石与星图志的数据源">
+          <span class="g">💎</span><h3><em>水晶知识库</em></h3>
+          <p>五行水晶库 · 新增 / 编辑 / 删除 / 复制<br>生辰测石与星图志选材依据</p>
+        </button>
+        <button class="card" type="button" data-sec="secWheel" title="转盘立减金额与四档概率（合计 100%）→ app_data.wheel">
+          <span class="g">🎁</span><h3><em>转盘优惠</em></h3>
+          <p>转盘立减档位与概率配置<br>保存到 app_data（前台接入后生效）</p>
+        </button>
+        <button class="card" type="button" data-sec="secCms" title="站点文案：brand/notice/join/quotes/home_banners 等 app_data 键的 JSON 编辑">
+          <span class="g">⚙️</span><h3><em>站点文案</em></h3>
+          <p>品牌 / 活动通知 / 语录等文案键<br>app_data JSON 读取与保存</p>
+        </button>
+        <button class="card" type="button" data-sec="secAi" title="AI 光语助手配置：model/funcUrl/prompt/enabled 等 settings.ai 键">
+          <span class="g">🤖</span><h3><em>AI 设计</em></h3>
+          <p>AI 光语助手设置（settings.ai）<br>模型 / 函数地址 / 提示词 / 开关</p>
+        </button>
+        <button class="card" type="button" data-sec="secSubMail" title="把订阅登记（subscribers.contact）中的邮箱逐个群发邮件">
+          <span class="g">📮</span><h3><em>发订阅邮件</em></h3>
+          <p>订阅列表加载 · 标题正文<br>对全部订阅邮箱逐封群发</p>
+        </button>
+        <button class="card" type="button" data-sec="secMail" title="下单/发货/重置密码等通知的收件邮箱（settings.mail）">
           <span class="g">📧</span><h3><em>邮件设置</em></h3>
-          <p>下单/发货/重置密码等通知的<br>收件邮箱与 SMTP 发信配置</p>
+          <p>通知收件邮箱与 SMTP 发信配置<br>下单 / 发货 / 重置密码通知均发往这些邮箱</p>
         </button>
-        <button class="card" type="button" data-sec="secDb">
-          <span class="g">🗂️</span><h3><em>数据浏览</em></h3>
-          <p>13 张表通用浏览 · 搜索<br>行查看 · JSON 行编辑 · 删除</p>
+        <button class="card" type="button" data-sec="secPwd" title="修改当前管理员登录账号的密码（账号密码体系 = 操作密码）">
+          <span class="g">🔑</span><h3><em>修改操作密码</em></h3>
+          <p>修改当前管理员账号密码<br>旧密码校验 · 立即生效</p>
         </button>
-        <button class="card" type="button" data-sec="secTools">
+        <button class="card" type="button" data-sec="secTools" title="快捷录入：新增商品 · 上架光集 · 活动通知">
           <span class="g">⚡</span><h3><em>快捷工具</em></h3>
-          <p>新增晶石 · 新增商品<br>上架光集 · 活动通知</p>
+          <p>新增商品 · 上架光集 · 活动通知<br>（水晶库请在 💎 水晶知识库维护）</p>
         </button>
       </div>
-      <div class="home-foot">白桦规格 · 分区式管理后台 · 予光暗金视觉 v2</div>
+      <div class="home-foot">白桦规格 · 分区式管理后台 · 予光暗金视觉 v3</div>
     </section>
 
     <!-- ========== A. 待处理订单 ========== -->
@@ -211,18 +241,21 @@
           <div>
             <label class="f-label">产品名称 *</label>
             <input id="sName" placeholder="如：巳蛇 · 离光（本命火 · 离卦）" style="width:100%;">
-            <label class="f-label">专属编号（验证码，可改；留空自动生成唯一码）</label>
+            <label class="f-label">专属编号（验证码，可改；留空自动生成 YG-YYMMDD-XXXXXX 唯一码）</label>
             <input id="sCode" placeholder="YG-YYMMDD-XXXXXX" style="width:100%;">
+            <label class="f-label">批次号（选填，随码入库 info.batch）</label>
+            <input id="sBatch" placeholder="如：2025-巳蛇-01" style="width:100%;">
           </div>
           <div>
-            <label class="f-label">寄语（选填）</label>
-            <textarea id="sMsg" style="min-height:74px;" placeholder="印在验证卡上的光语…"></textarea>
+            <label class="f-label">光语（选填，随码入库 info.text，印在验证卡上）</label>
+            <textarea id="sMsg" style="min-height:110px;" placeholder="印在验证卡上的光语…"></textarea>
           </div>
         </div>
         <label class="f-label">图片文件名（选填，多个逗号分隔）</label>
         <input id="sImgs" placeholder="如：img/customers/xx.jpg, img/customers/yy.jpg" style="width:100%;">
+        <div class="sec-note">入库字段：records.info = {text: 光语, batch: 批次号} · image_urls = 图片文件名（逗号分隔）。生成后下方渲染验证卡，可复制码 / 导出 JPG / 直达记录管理。</div>
         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:8px;">
-          <button class="btn-gold" id="sGen" type="button">✨ 生成官方码</button>
+          <button class="btn-gold" id="sGen" type="button" title="校验必填后入库 records 并渲染官方验证卡">✨ 生成官方码</button>
           <span class="msg" id="sGenMsg"></span>
         </div>
       </div>
@@ -238,20 +271,23 @@
       <div class="doc-pad">
         <div class="grid-2">
           <div>
-            <label class="f-label">产品名称 *</label>
+            <label class="f-label">产品名称 *（同批同一产品）</label>
             <input id="bName" placeholder="同一批作品的产品名" style="width:100%;">
             <label class="f-label">数量（1–50）</label>
             <input id="bQty" type="number" min="1" max="50" value="5" style="width:130px;">
+            <label class="f-label">批次号（选填，随码入库 info.batch）</label>
+            <input id="bBatch" placeholder="如：2025-巳蛇-01" style="width:100%;">
           </div>
           <div>
-            <label class="f-label">寄语（选填，随码入库）</label>
-            <textarea id="bMsg" style="min-height:74px;" placeholder="光语 / 批次备注…"></textarea>
+            <label class="f-label">光语（选填，随码入库 info.text）</label>
+            <textarea id="bMsg" style="min-height:110px;" placeholder="光语 / 批次备注…"></textarea>
           </div>
         </div>
-        <label class="f-label">图片文件名（选填，多个逗号分隔）</label>
+        <label class="f-label">图片文件名（选填，多个逗号分隔；同批共用同一组图片）</label>
         <input id="bImgs" placeholder="如：img/customers/xx.jpg" style="width:100%;">
+        <div class="sec-note">逐枚生成 YG-YYMMDD-XXXXXX 唯一码 → records.info = {text: 光语, batch: 批次号} · image_urls = 图片。全部入库后列出全部码并可一键复制。</div>
         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:8px;">
-          <button class="btn-gold" id="bGo" type="button">📦 批量生成（自动入库）</button>
+          <button class="btn-gold" id="bGo" type="button" title="校验后并发入库（每批 5 枚）">📦 批量生成（自动入库）</button>
           <span class="msg" id="bGenMsg"></span>
         </div>
         <div id="bOutArea"></div>
@@ -264,7 +300,7 @@
         <button class="back-btn" type="button" data-act="back">← 返回</button>
         <h2><span>👥</span> 用户管理</h2>
         <span class="sp"></span>
-        <button class="btn-line" id="uBroadcast" type="button">📢 群发站内信</button>
+        <button class="btn-line" id="uBroadcast" type="button" title="站内信群发（全部用户 / 仅订阅者），可勾选同时发邮件">📢 群发消息</button>
         <button class="btn-sm" id="uRefresh" type="button">🔄 刷新</button>
       </div>
       <div class="doc-pad">
@@ -289,34 +325,34 @@
       <div class="doc-pad">
         <label class="f-label">📮 通知收件邮箱（每行一个，或逗号分隔）→ 存为 settings.mail.to</label>
         <textarea id="mTo" style="min-height:96px;" placeholder="admin@example.com&#10;boss@example.com"></textarea>
-        <div class="small-note">下单 / 发货 / 重置密码 / 密码申请等通知都会发往这些收件邮箱（email-send / account-api 从 settings 表 key=mail 读取）。</div>
+        <div class="small-note" style="color:var(--gold);margin-bottom:8px;">下单 / 发货 / 重置密码 等通知均发往这些邮箱（email-send / account-api 从 settings 表 key=mail 读取收件人）。</div>
         <label class="f-label">🧩 其余邮件配置（JSON，键名：smtp_user / smtp_pass / smtp_host / smtp_port）</label>
         <textarea id="mJson" style="min-height:130px;font-family:monospace;" placeholder='{"smtp_user":"you@qq.com","smtp_pass":"授权码","smtp_host":"smtp.qq.com","smtp_port":465}'></textarea>
-        <div class="hint">提示：保存时仅「收件邮箱」会按行拆分写入 <b style="color:var(--gold);">to</b>，JSON 框中的其余键原样保留合并。若 settings 尚无 mail 键将自动新建。</div>
+        <div class="hint">提示：保存时仅「收件邮箱」会按行拆分写入 <b style="color:var(--gold);">to</b>，JSON 框中的其余键原样保留合并。保存前会先查询 settings 是否已有 mail 键：已存在 → 更新，不存在 → 新建，不会丢配置。</div>
         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:6px;">
-          <button class="btn-gold" id="mSave" type="button">💾 保存邮件配置</button>
+          <button class="btn-gold" id="mSave" type="button" title="先查 settings.mail 是否存在，再选择 insert/update">💾 保存邮件配置</button>
           <span class="msg" id="mMsg"></span>
         </div>
       </div>
     </section>
 
-    <!-- ========== F. 数据浏览（通用表工具） ========== -->
+    <!-- ========== F. 数据库记录管理（通用表 + records 专属操作） ========== -->
     <section class="admSec" id="secDb">
       <div class="sec-top">
         <button class="back-btn" type="button" data-act="back">← 返回</button>
-        <h2><span>🗂️</span> 数据浏览</h2>
+        <h2><span>🗂️</span> 数据库记录管理</h2>
         <span class="sp"></span>
-        <button class="btn-sm" id="dRefresh" type="button">🔄 刷新</button>
+        <button class="btn-sm" id="dRefresh" type="button" title="重新读取当前表">🔄 刷新</button>
       </div>
       <div class="doc-pad">
         <div class="bar">
           <select id="dTable" style="width:auto;">
+            <option value="records">防伪码记录 records ★</option>
             <option value="orders">订单 orders</option>
             <option value="messages">留言 messages</option>
             <option value="gallery">光集 gallery</option>
             <option value="products">商品 products</option>
             <option value="crystals">晶石 crystals</option>
-            <option value="records">验真 records</option>
             <option value="subscribers">订阅 subscribers</option>
             <option value="settings">配置 settings</option>
             <option value="app_data">配置项 app_data</option>
@@ -328,15 +364,20 @@
           <input id="dSearch" placeholder="🔍 搜索本表…" style="min-width:170px;margin:0;">
           <span class="msg" id="dMsg"></span>
         </div>
+        <div id="dRecTool" style="display:none;" class="bar">
+          <button class="btn-line" id="dRecSelAll" type="button" title="勾选/取消当前列表全部记录">☑️ 全选</button>
+          <button class="btn-line" id="dRecCopySel" type="button" title="把勾选记录的防伪码以换行文本复制">📋 复制选中码</button>
+          <button class="btn-line danger" id="dRecDelSel" type="button" title="硬删除勾选记录（无回收站，二次确认）">🗑️ 批量删除选中</button>
+          <span class="small-note" id="dRecSelN"></span>
+          <span class="small-note">★ records 专属：行内 复制/预览验证卡/详情编辑(产品·批次·光语·图片)/删除；records 无回收站，删除为硬删除。</span>
+        </div>
         <div id="dSettings" style="display:none;margin:8px 0 14px;" class="doc-pad">
           <div style="font-size:13px;color:var(--gold);letter-spacing:.1em;margin-bottom:6px;">⚙️ settings 常用键（JSON，保存后立即生效）</div>
-          <label class="f-label">mail（发信 SMTP + 收件邮箱，供 email-send/account-api 读取）</label>
+          <label class="f-label">mail（发信 SMTP + 收件邮箱，供 email-send/account-api 读取；AI 配置请到 🤖 AI 设计分区维护）</label>
           <textarea id="dMailCfg" style="min-height:90px;font-family:monospace;"></textarea>
-          <label class="f-label">ai（AI 光语助手配置）</label>
-          <textarea id="dAiCfg" style="min-height:80px;font-family:monospace;"></textarea>
           <label class="f-label">home_banners（主页展示条数组：title/text/image/link）</label>
           <textarea id="dHomeCfg" style="min-height:100px;font-family:monospace;"></textarea>
-          <button class="btn-gold" id="dCfgSave" type="button">保存配置</button>
+          <button class="btn-gold" id="dCfgSave" type="button" title="先查存在再 insert/update，不丢键">保存配置</button>
         </div>
         <div class="wrap-scroll"><table class="tbl" id="dRows"></table></div>
       </div>
@@ -350,31 +391,11 @@
       </div>
       <div class="doc-pad">
         <div class="tool-head">
-          <button class="btn-line" type="button" data-tool="toolCrystal">💎 新增晶石</button>
           <button class="btn-line" type="button" data-tool="toolProduct">🛍️ 新增商品</button>
           <button class="btn-line" type="button" data-tool="toolGallery">🖼️ 上架光集</button>
           <button class="btn-line" type="button" data-tool="toolNotice">📢 活动通知</button>
         </div>
-
-        <div class="adm-tool doc-pad" id="toolCrystal">
-          <div style="font-size:13px;color:var(--gold);letter-spacing:.1em;margin-bottom:8px;">💎 新增晶石（名称必填）</div>
-          <div class="grid-2">
-            <div>
-              <label class="f-label">名称 *</label><input id="tCrName" placeholder="如：红纹石">
-              <label class="f-label">归属（五行/星体/星座，如：火 · 巳蛇）</label><input id="tCrKind" placeholder="归属">
-              <label class="f-label">五行/元素（水木火土金 / sun / moon…）</label><input id="tCrElement" placeholder="如：火">
-              <label class="f-label">含义 / 意象</label><input id="tCrMeaning" placeholder="传统意象…">
-            </div>
-            <div>
-              <label class="f-label">养护提示</label><input id="tCrCare" placeholder="养护提示">
-              <label class="f-label">色值</label><input id="tCrColor" placeholder="#C9575B">
-              <label class="f-label">图片路径</label><input id="tCrImg" placeholder="img/… 或 客户图片/…">
-              <label class="f-label">排序（数字）</label><input id="tCrSort" placeholder="如：9" type="number">
-            </div>
-          </div>
-          <div class="msg" id="tCrMsg"></div>
-          <button class="btn-gold" id="tCrSave" type="button">保存晶石</button>
-        </div>
+        <div class="sec-note" style="margin:12px 0 4px;">💎 水晶知识库（新增/编辑/删除/复制）请到首页「💎 水晶知识库」分区维护；其余快捷录入面板如下（点按钮展开）。</div>
 
         <div class="adm-tool doc-pad" id="toolProduct">
           <div style="font-size:13px;color:var(--gold);letter-spacing:.1em;margin-bottom:8px;">🛍️ 新增商品（slug 与名称必填）</div>
@@ -425,13 +446,181 @@
         </div>
       </div>
     </section>
+
+    <!-- ========== H. 水晶知识库（独立分区 · 白桦规格 11） ========== -->
+    <section class="admSec" id="secCrystal">
+      <div class="sec-top">
+        <button class="back-btn" type="button" data-act="back">← 返回</button>
+        <h2><span>💎</span> 水晶知识库</h2><span class="sp"></span>
+        <button class="btn-sm" id="crRefresh" type="button" title="重新读取 crystals 表">🔄 刷新</button>
+      </div>
+      <div class="doc-pad">
+        <div class="bar">
+          <input id="crSearch" placeholder="🔍 搜索名称 / 归属 / 五行 / 寓意" style="min-width:230px;margin:0;">
+          <span class="small-note" id="crCount"></span>
+          <button class="btn-line" id="crReset" type="button" title="清空表单，回到「新增」状态">↩️ 清空表单</button>
+        </div>
+        <div class="sec-note">五行口径：木=绿系 / 火=红紫系 / 土=黄棕系 / 金=白金系 / 水=黑蓝系。本分区是晶石维护的唯一入口（表单新增 / 行内编辑 / 删除 / 复制），供生辰测石与星图志读取。</div>
+        <div class="doc-pad" id="crForm" style="margin-top:2px;">
+          <div style="font-size:13px;color:var(--gold);letter-spacing:.1em;margin-bottom:8px;"><span id="crFormTitle">💎 新增晶石</span>（名称必填）</div>
+          <div class="grid-2">
+            <div>
+              <label class="f-label">名称 *</label><input id="crName" placeholder="如：红纹石">
+              <label class="f-label">归属 kind（五行/星体/星座，如：火 · 巳蛇）</label><input id="crKind" placeholder="归属">
+              <label class="f-label">五行/元素 element（水木火土金 / sun / moon / rising）</label><input id="crElement" placeholder="如：火">
+              <label class="f-label">含义 / 意象 meaning</label><input id="crMeaning" placeholder="传统意象…">
+            </div>
+            <div>
+              <label class="f-label">养护提示 care_tip</label><input id="crCare" placeholder="养护提示">
+              <label class="f-label">色值 color_hex</label><input id="crColor" placeholder="#C9575B">
+              <label class="f-label">图片路径 image_url</label><input id="crImg" placeholder="img/… 或 客户图片/…">
+              <label class="f-label">排序 sort（数字）</label><input id="crSort" placeholder="如：9" type="number">
+              <label class="f-label" style="display:inline-flex;gap:6px;align-items:center;"><input type="checkbox" id="crVisible" class="chk" checked> 对外可见 visible</label>
+            </div>
+          </div>
+          <div class="msg" id="crMsg"></div>
+          <button class="btn-gold" id="crSave" type="button" title="名称必填；编辑态为更新该行">💾 保存晶石</button>
+        </div>
+        <div class="wrap-scroll"><div id="crBody"></div></div>
+      </div>
+    </section>
+
+    <!-- ========== I. 转盘优惠（白桦规格 10） ========== -->
+    <section class="admSec" id="secWheel">
+      <div class="sec-top">
+        <button class="back-btn" type="button" data-act="back">← 返回</button>
+        <h2><span>🎁</span> 转盘优惠</h2><span class="sp"></span>
+        <button class="btn-sm" id="wdRefresh" type="button" title="重新读取 app_data.wheel">🔄 重新读取</button>
+      </div>
+      <div class="doc-pad">
+        <div style="font-size:13px;color:var(--gold);letter-spacing:.1em;margin-bottom:8px;">🎁 转盘立减档位与概率（保存到 app_data key=wheel）</div>
+        <div class="grid-2">
+          <div>
+            <label class="f-label">最小立减（元）</label>
+            <input id="wdMin" type="number" min="0" placeholder="如 5" style="width:100%;">
+            <label class="f-label">最大立减（元，须 ≥ 最小）</label>
+            <input id="wdMax" type="number" min="0" placeholder="如 20" style="width:100%;">
+          </div>
+          <div>
+            <label class="f-label">四档概率（合计须 100%）— 四档金额由最小~最大自动均分</label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <input id="wdP1" type="number" min="0" max="100" placeholder="档1 %" style="width:72px;">
+              <input id="wdP2" type="number" min="0" max="100" placeholder="档2 %" style="width:72px;">
+              <input id="wdP3" type="number" min="0" max="100" placeholder="档3 %" style="width:72px;">
+              <input id="wdP4" type="number" min="0" max="100" placeholder="档4 %" style="width:72px;">
+            </div>
+            <div class="small-note" id="wdSumTxt"></div>
+          </div>
+        </div>
+        <div class="sec-note">保存后写入 app_data key=<b style="color:var(--gold);">wheel</b> 的 value：{min, max, probs:[档1,档2,档3,档4]}。供前端转盘读取（当前转盘为内置档位，接入后生效）。</div>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          <button class="btn-gold" id="wdSave" type="button" title="校验合计=100% 与 max≥min 后 upsert app_data.wheel">💾 保存优惠配置</button>
+          <span class="msg" id="wdMsg"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== J. 站点文案（app_data 各文案键 · 白桦规格 9） ========== -->
+    <section class="admSec" id="secCms">
+      <div class="sec-top">
+        <button class="back-btn" type="button" data-act="back">← 返回</button>
+        <h2><span>⚙️</span> 站点文案</h2><span class="sp"></span>
+        <button class="btn-sm" id="cmsRefresh" type="button" title="重新读取 app_data 全部键">🔄 重新读取</button>
+      </div>
+      <div class="doc-pad">
+        <label class="f-label">配置键 key（app_data）</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input id="cmsKey" list="cmsKeyList" value="brand" placeholder="brand / notice / quotes / …" style="flex:1;min-width:220px;margin:0;">
+          <datalist id="cmsKeyList">
+            <option value="brand"></option><option value="notice"></option><option value="join"></option>
+            <option value="quotes"></option><option value="home_banners"></option>
+          </datalist>
+          <button class="btn-line" id="cmsReload" type="button" title="从库中读取该键当前值填入下方">🔄 读取该键</button>
+        </div>
+        <div class="small-note" id="cmsDesc"></div>
+        <label class="f-label">内容（JSON 对象，或纯文本；随 app_data.value 存储）</label>
+        <textarea id="cmsVal" style="min-height:220px;font-family:monospace;" placeholder='{&#10;  "name": "予光",&#10;  "slogan": "…"&#10;}'></textarea>
+        <div class="sec-note">
+          常用键：<b style="color:var(--gold);">brand</b>（品牌理念 JSON：name / slogan / disclaimer）· <b style="color:var(--gold);">notice</b>（活动通知文本）·
+          <b style="color:var(--gold);">join</b>（加入我们 · 分成政策）· <b style="color:var(--gold);">quotes</b>（加载语录，每行一条）·
+          <b style="color:var(--gold);">home_banners</b>（主页展示条数组）。提示：前台对应读取处接入后生效。
+        </div>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          <button class="btn-gold" id="cmsSave" type="button" title="先查 app_data 是否已有该 key，再 insert/update">💾 保存该键</button>
+          <span class="msg" id="cmsMsg"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== K. 发订阅邮件（白桦规格 14 · secSubMail） ========== -->
+    <section class="admSec" id="secSubMail">
+      <div class="sec-top">
+        <button class="back-btn" type="button" data-act="back">← 返回</button>
+        <h2><span>📮</span> 发订阅邮件</h2><span class="sp"></span>
+        <button class="btn-sm" id="smRefresh" type="button" title="重新读取 subscribers">🔄 刷新订阅列表</button>
+      </div>
+      <div class="doc-pad">
+        <label class="f-label">邮件标题（留空默认「予光来信」）</label>
+        <input id="smTitle" placeholder="如：予光新品上架" style="width:100%;">
+        <label class="f-label">正文 *</label>
+        <textarea id="smBody" style="min-height:140px;" placeholder="要发给订阅者的内容…"></textarea>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          <button class="btn-gold" id="smSend" type="button" title="仅对形如邮箱的 contact 逐封发送（间隔 200ms），非邮箱跳过并统计">📮 发送给全部订阅邮箱</button>
+          <span class="msg" id="smMsg"></span>
+        </div>
+        <div class="sec-note">subscribers.contact 中形如邮箱（xx@yy.zz）的条目才会发邮件；微信号等非邮箱条目会跳过并计入统计。发信走 emailUrl（email-send 函数，收件人以参数 to 覆盖），每次间隔 200ms。</div>
+        <div class="small-note" id="smCount" style="margin:8px 0;"></div>
+        <div class="wrap-scroll"><div id="smList"></div></div>
+      </div>
+    </section>
+
+    <!-- ========== L. 修改操作密码（白桦规格 13） ========== -->
+    <section class="admSec" id="secPwd">
+      <div class="sec-top">
+        <button class="back-btn" type="button" data-act="back">← 返回</button>
+        <h2><span>🔑</span> 修改操作密码</h2><span class="sp"></span>
+      </div>
+      <div class="doc-pad" style="max-width:480px;">
+        <label class="f-label">旧密码（当前登录密码）*</label>
+        <input id="pwOld" type="password" autocomplete="current-password" placeholder="旧密码" style="width:100%;">
+        <label class="f-label">新密码（至少 6 位）*</label>
+        <input id="pwNew" type="password" autocomplete="new-password" placeholder="新密码" style="width:100%;">
+        <label class="f-label">重复新密码 *</label>
+        <input id="pwNew2" type="password" autocomplete="new-password" placeholder="再次输入新密码" style="width:100%;">
+        <div class="sec-note">与白桦「操作密码 = 账号密码体系」一致：此处修改的是当前登录管理员账号（<b style="color:var(--gold);" id="pwWho">—</b>）的登录密码，校验通过后立即生效，无需重启后台。</div>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          <button class="btn-gold" id="pwSave" type="button" title="account-api change_pw：旧密码校验 + 新密码两次一致">🔑 修改密码</button>
+          <span class="msg" id="pwMsg"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== M. AI 设计（白桦规格 12） ========== -->
+    <section class="admSec" id="secAi">
+      <div class="sec-top">
+        <button class="back-btn" type="button" data-act="back">← 返回</button>
+        <h2><span>🤖</span> AI 设计</h2><span class="sp"></span>
+        <button class="btn-sm" id="aiRefresh" type="button" title="重新读取 settings.ai">🔄 重新读取</button>
+      </div>
+      <div class="doc-pad">
+        <div style="font-size:13px;color:var(--gold);letter-spacing:.1em;margin-bottom:6px;">🤖 AI 光语助手 / 荐石配置（settings 表 key=ai）</div>
+        <div class="small-note" style="margin-bottom:8px;">函数地址（只读，取自 supabase-config.js）：<b style="color:var(--gold);" id="aiUrlShown">…</b>。建议键：model（如 deepseek-v4-flash / pro）、funcUrl（Edge Function 地址，留空则使用默认 aiUrl）、prompt（提示词模板，可含可用水晶清单占位）、enabled（true/false）。</div>
+        <label class="f-label">配置 JSON</label>
+        <textarea id="aiJson" style="min-height:260px;font-family:monospace;" placeholder='{&#10;  "enabled": true,&#10;  "funcUrl": "",&#10;  "model": "deepseek-v4-flash",&#10;  "prompt": "…"&#10;}'></textarea>
+        <div class="sec-note">含密钥类键（key / api_key / token / secret）时不会明文回显：加载时以 <b style="color:var(--gold);">•••••（已配置，留空保持不变）</b> 占位，保存时若该键仍为占位则沿用库中原值，避免把密钥读回前台。</div>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          <button class="btn-gold" id="aiSave" type="button" title="先查 settings 是否存在 ai 键再 insert/update">💾 保存 AI 设置</button>
+          <span class="msg" id="aiMsg"></span>
+        </div>
+      </div>
+    </section>
   </div>
 </div></main>
 
 <footer class="footer"><div class="wrap"><div class="disclaimer">© 予光 YUGUANG · 管理后台 · 仅供内部使用</div></div></footer>
 
-<script src="js/supabase-config.js?v=09032301"></script>
-<script src="js/main.js?v=09032301"></script>
+<script src="js/supabase-config.js?v=09040011"></script>
+<script src="js/main.js?v=09040011"></script>
 <script>
 (function () {
   'use strict';
@@ -485,15 +674,25 @@
     if (name === 'secUsers') loadUsers(true);
     if (name === 'secMail') loadMailCfg(true);
     if (name === 'secDb') loadDb(true);
+    if (name === 'secCrystal') loadCrystals(true);
+    if (name === 'secWheel') wdLoad();
+    if (name === 'secCms') cmsLoadAll();
+    if (name === 'secSubMail') loadSubscribers(true);
+    if (name === 'secAi') aiLoad();
+    if (name === 'secPwd') {
+      var pwEl = $('pwWho');
+      if (pwEl) pwEl.textContent = ME.account || '—';
+      var pm = $('pwMsg'); if (pm) { pm.textContent = ''; pm.className = 'msg'; }
+    }
   }
   function goBackAdmin() { showHome(); }
 
   /* ================= 鉴权 ================= */
   var admTries = 0;
-  function denyEnter() {
+  function denyEnter(reason) {
     var tip = $('admTip');
-    if (tip) tip.textContent = '当前账号无管理权限，即将返回首页…';
-    setTimeout(function () { location.href = 'index.html'; }, 1300);
+    if (tip) tip.textContent = (reason === 'auth') ? '登录已过期或未登录，请先登录后再进入…' : '当前账号无管理权限，即将返回首页…';
+    setTimeout(function () { location.href = (reason === 'auth') ? 'account.html' : 'index.html'; }, 1300);
   }
   function enter(account, role, nick) {
     localStorage.setItem('yg_account', account);
@@ -509,13 +708,13 @@
     startPoller();
   }
   function tryEnter() {
-    if (!token) { denyEnter(); return; }
+    if (!token) { denyEnter('auth'); return; }
     acc({ op: 'me' }).then(function (r) {
       if (r && r.ok && (r.role === 'admin' || r.role === 'root')) enter(r.account, r.role, r.nickname);
-      else denyEnter();
+      else denyEnter(/未登录|过期/.test(String(r.error || '')) ? 'auth' : undefined);
     }).catch(function () {
       admTries++;
-      if (admTries < 4) setTimeout(tryEnter, 1000); else denyEnter();
+      if (admTries < 4) setTimeout(tryEnter, 1000); else denyEnter('auth');
     });
   }
 
@@ -539,7 +738,7 @@
   var O = { all: [], showAll: false, q: '', sel: {}, editId: null, busy: false };
   var PENDING = ['new', 'paid', 'making'];
   var OSTAT = {
-    new: ['待确认', '#e3c47c'], paid: ['已确认', '#e3c47c'], making: ['制作中', '#e3c47c'],
+    new: ['待处理', '#e3c47c'], paid: ['待处理', '#e3c47c'], making: ['待处理', '#e3c47c'],
     shipped: ['已发货', '#8fb6e8'], done: ['已完成', '#93a0b5'], refund: ['退款/售后', '#ff8d7d']
   };
   function isPending(st) { return PENDING.indexOf(st) > -1; }
@@ -562,6 +761,14 @@
       names.push(nm);
     });
     return names.length ? names.join('、') : '—';
+  }
+  function itemQuote(it) { return ((it && (it.quote || it.msg)) || '').trim(); }
+  function itemImgs(it) { return ((it && it.image_urls) || '').trim(); }
+  function itemRec(o, it) {
+    var info = {};
+    var q = itemQuote(it) || String(o.note || '').trim();
+    if (q) info.text = String(q).slice(0, 200);
+    return { code: it.code, product_ref: String(it.name || '定制作品').slice(0, 60), info: info, image_urls: itemImgs(it), created_at: o.created_at };
   }
   function copyText(txt) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -608,11 +815,13 @@
       go();
     });
   }
-  /* 为订单补齐防伪码：每项无 code 的作品各入一枚 records，随后写回订单 items */
+  /* 为订单补齐防伪码：每项无 code 的作品各入一枚 records（info.text=光语、image_urls=该件图片），随后写回订单 items */
   function genCodesForOrder(o) {
     var items = orderItems(o);
     var jobs = [];
-    items.forEach(function (it, i) { if (!it.code) jobs.push({ i: i, name: (it.name || '定制作品').slice(0, 60) }); });
+    items.forEach(function (it, i) {
+      if (!it.code) jobs.push({ i: i, name: String(it.name || '定制作品').slice(0, 60), quote: itemQuote(it), imgs: itemImgs(it) });
+    });
     if (!jobs.length) return Promise.resolve(0);
     var used = {};
     jobs.forEach(function (j) { j.code = uniqueCode(used); used[j.code] = 1; });
@@ -621,8 +830,11 @@
       if (!q.length) return Promise.resolve(0);
       var batch = q.splice(0, 3);
       var ps = batch.map(function (j) {
-        var info = {}; if (o.note) info.text = String(o.note).slice(0, 200);
-        return insertRecordGuarded({ code: j.code, product_ref: j.name, info: info, image_urls: '' }).then(function () { return j; });
+        var info = {};
+        // 光语优先取该件 quote；旧数据未逐件存光语时回退订单备注 note
+        var t = j.quote || String(o.note || '').trim();
+        if (t) info.text = String(t).slice(0, 200);
+        return insertRecordGuarded({ code: j.code, product_ref: j.name, info: info, image_urls: j.imgs }).then(function () { return j; });
       });
       return Promise.all(ps).then(function () { return next(); });
     }
@@ -706,11 +918,15 @@
   function oEditRow(o) {
     var items = orderItems(o);
     var h = '<tr class="row-edit"><td colspan="8">';
-    h += '<div style="font-size:12px;color:var(--gold);letter-spacing:.1em;margin-bottom:6px;">💾 保存修改（编辑产品名与备注，code/价格等自动保留）</div>';
+    h += '<div style="font-size:12px;color:var(--gold);letter-spacing:.1em;margin-bottom:6px;">💾 保存修改 —— 每件作品可填：产品名 / 光语 / 图片文件名（逗号分隔）。缺码项标「待生成」，保存后可点 🧾 生成防伪码 或直接 ✅ 完成订单（自动补码）。</div>';
     items.forEach(function (it, i) {
-      h += '<div class="oitem"><label>产品 ' + (i + 1) + '</label><input data-ename="' + i + '" value="' + esc(it.name || '') + '" placeholder="产品名"></div>';
+      var code = (it && it.code) || '';
+      h += '<div class="oitem"><label>产品 ' + (i + 1) + '</label><input data-ename="' + i + '" value="' + esc((it && it.name) || '') + '" placeholder="产品名"></div>';
+      h += '<div class="oitem"><label>光语</label><textarea data-equote="' + i + '" style="flex:1;min-width:200px;margin:0;" placeholder="印在验证卡上的光语…">' + esc(itemQuote(it)) + '</textarea>' +
+        (code ? '<span class="badge" style="color:#8fb6e8;border-color:#8fb6e855;">码 ' + esc(code) + '</span>' : '<span class="badge" style="color:var(--gold);border-color:var(--gold)66;">待生成</span>') + '</div>';
+      h += '<div class="oitem"><label>图片</label><input data-eimg="' + i + '" value="' + esc(itemImgs(it)) + '" placeholder="图片文件名，逗号分隔"></div>';
     });
-    h += '<label class="f-label">备注 note</label><textarea data-enote style="min-height:52px;">' + esc(o.note || '') + '</textarea>';
+    h += '<label class="f-label">备注 note（合并信息 / 物流行会自动保留）</label><textarea data-enote style="min-height:52px;">' + esc(o.note || '') + '</textarea>';
     h += '<div style="margin-top:8px;"><button class="btn-sm" data-act="oEditSave">💾 保存</button><button class="btn-sm" data-act="oEditCancel">取消</button></div>';
     h += '</td></tr>';
     return h;
@@ -719,14 +935,15 @@
     var st = o.status;
     var b = '';
     if (isPending(st)) {
-      b += '<button class="btn-sm" data-act="oEdit" data-id="' + o.id + '">💾 保存修改</button>';
-      b += '<button class="btn-sm" data-act="oCode" data-id="' + o.id + '">🧾 生成防伪码</button>';
-      b += '<button class="btn-sm" data-act="oFinish" data-id="' + o.id + '">✅ 完成订单</button>';
-      b += '<button class="btn-sm" data-act="oTrack" data-id="' + o.id + '">📦 运单号</button>';
+      b += '<button class="btn-sm" data-act="oEdit" data-id="' + o.id + '" title="展开行内编辑：每件作品的产品名/光语/图片（缺码项待生成）">💾 保存修改</button>';
+      b += '<button class="btn-sm" data-act="oCode" data-id="' + o.id + '" title="给无码项逐件入库 records 并写回订单">🧾 生成防伪码</button>';
+      b += '<button class="btn-sm" data-act="oFinish" data-id="' + o.id + '" title="先补齐防伪码，再置为 已发货(shipped)">✅ 完成订单</button>';
+      b += '<button class="btn-sm" data-act="oTrack" data-id="' + o.id + '" title="填写/修改快递单号（写入备注 物流：…）">📦 运单号</button>';
     }
-    if (st === 'shipped') b += '<button class="btn-sm" data-act="oRecall" data-id="' + o.id + '">↩️ 撤回</button><button class="btn-sm" data-act="oTrack" data-id="' + o.id + '">📦 运单号</button>';
+    if (st === 'shipped') b += '<button class="btn-sm" data-act="oRecall" data-id="' + o.id + '" title="shipped → 待处理(making)，需重新完成发货">↩️ 撤回待处理</button><button class="btn-sm" data-act="oTrack" data-id="' + o.id + '">📦 运单号</button>';
     if (isMergedRow(o)) b += '<button class="btn-sm" data-act="oSplit" data-id="' + o.id + '" title="拆回原被合并单并删除本合并单">🧩 拆分此单</button>';
-    b += '<button class="btn-sm danger" data-act="oDel" data-id="' + o.id + '">🗑️ 删除</button>';
+    b += '<button class="btn-sm" data-act="oExp" data-id="' + o.id + '" title="该单有码则弹验证卡预览并可逐卡导出 JPG；无码则提示先生成">🖼️ 导出防伪码图片</button>';
+    b += '<button class="btn-sm danger" data-act="oDel" data-id="' + o.id + '" title="硬删除订单（无回收站，确认后不可恢复）">🗑️ 删除</button>';
     return b;
   }
   function findOrder(id) {
@@ -765,7 +982,18 @@
         var items = orderItems(o);
         tr.querySelectorAll('input[data-ename]').forEach(function (inp) {
           var i = Number(inp.getAttribute('data-ename'));
-          if (items[i]) items[i].name = inp.value.trim();
+          if (!items[i]) items[i] = {};
+          items[i].name = inp.value.trim();
+        });
+        tr.querySelectorAll('textarea[data-equote]').forEach(function (tx) {
+          var i = Number(tx.getAttribute('data-equote'));
+          if (!items[i]) items[i] = {};
+          items[i].quote = tx.value.trim(); // 光语写入 items.quote（读取兼容 msg）
+        });
+        tr.querySelectorAll('input[data-eimg]').forEach(function (inp) {
+          var i = Number(inp.getAttribute('data-eimg'));
+          if (!items[i]) items[i] = {};
+          items[i].image_urls = inp.value.trim();
         });
         var noteEl = tr.querySelector('[data-enote]');
         var note = noteEl ? noteEl.value : (o.note || '');
@@ -781,13 +1009,16 @@
       b.addEventListener('click', function () {
         var o = findOrder(b.getAttribute('data-id'));
         if (!o) return;
-        setMsg('oMsg', '正在生成防伪码…');
+        setMsg('oMsg', '正在生成防伪码（光语/图片随码入库）…');
         genCodesForOrder(o).then(function (n) {
-          O.lastMsg = '已生成 ' + n + ' 枚官方码并写入订单（再次点击可为缺码项补码）；确认无误后可 ✅ 完成订单';
+          O.lastMsg = '已生成 ' + n + ' 枚官方码并写入订单（再次点击可为缺码项补码）；确认无误后可 ✅ 完成订单，或 🖼️ 导出防伪码图片';
           O.lastBad = '';
           loadOrders();
         }).catch(function (e) { setMsg('oMsg', '生成失败：' + (e.message || e), 'bad'); });
       });
+    });
+    box.querySelectorAll('[data-act="oExp"]').forEach(function (b) {
+      b.addEventListener('click', function () { oExportImg(b.getAttribute('data-id')); });
     });
     box.querySelectorAll('[data-act="oFinish"]').forEach(function (b) {
       b.addEventListener('click', function () {
@@ -816,9 +1047,9 @@
       b.addEventListener('click', function () {
         var o = findOrder(b.getAttribute('data-id'));
         if (!o) return;
-        if (!confirm('撤回订单「' + (o.order_no || o.id) + '」为 制作中(making)？')) return;
+        if (!confirm('撤回订单「' + (o.order_no || o.id) + '」为 待处理(making)？撤回后需重新完成发货。')) return;
         adm({ op: 'update', table: 'orders', id: o.id, set: { status: 'making' } }).then(function (r) {
-          if (r.ok) { O.lastMsg = '已撤回为待处理'; O.lastBad = ''; loadOrders(); }
+          if (r.ok) { O.lastMsg = '✅ 已撤回为待处理（将在列表重新出现）'; O.lastBad = ''; loadOrders(); }
           else setMsg('oMsg', '失败：' + (r.error || ''), 'bad');
         }).catch(function () { setMsg('oMsg', '网络错误', 'bad'); });
       });
@@ -970,33 +1201,74 @@
      ② 单个官方码
      ============================================================ */
   var lastCard = null;
+  function recInfo(rec) {
+    var info = rec.info || {};
+    if (typeof info === 'string') { try { info = JSON.parse(info); } catch (e) { info = {}; } }
+    return info || {};
+  }
+  function vCardHtml(rec) {
+    var info = recInfo(rec);
+    var h = '<div class="v-card">';
+    h += '<div class="v-brand">予 光 Y U G U A N G</div>';
+    h += '<div class="v-code">' + esc(rec.code || '') + '</div>';
+    h += '<div class="v-name">' + esc(rec.product_ref || '予光定制作品') + '</div>';
+    if (info.text) h += '<div class="v-line">' + esc(info.text) + '</div>';
+    if (info.batch) h += '<div class="v-line">批次：' + esc(info.batch) + '</div>';
+    h += '<div class="v-line">建档时间：' + esc(fmtTime(rec.created_at)) + '</div>';
+    h += '<div class="v-tip">予光作品验真页：' + esc(location.protocol + '//' + location.host + '/verify.html') + '<br>输入该验证码即可查询建档信息</div>';
+    h += '</div>';
+    return h;
+  }
   function renderCard(rec) {
     lastCard = rec;
-    var h = '<div class="doc-pad"><div style="font-size:13px;color:var(--gold);letter-spacing:.12em;margin-bottom:10px;">✅ 已入库 · 官方验证卡</div>';
-    h += '<div class="v-card">';
-    h += '<div class="v-brand">予 光 Y U G U A N G</div>';
-    h += '<div class="v-code">' + esc(rec.code) + '</div>';
-    h += '<div class="v-name">' + esc(rec.product_ref || '定制作品') + '</div>';
-    var info = rec.info || {};
-    if (typeof info === 'string') { try { info = JSON.parse(info); } catch (e) {} }
-    h += '<div class="v-line">' + esc(info.text || '') + '</div>';
-    h += '<div class="v-line">建档时间：' + esc(fmtTime(rec.created_at)) + '</div>';
-    h += '<div class="v-tip">验证页：输入该验证码即可查询建档信息（' + esc(location.protocol + '//' + location.host + '/verify.html') + '）</div>';
-    h += '</div>';
+    var info = recInfo(rec);
+    var h = '<div class="doc-pad"><div style="font-size:13px;color:var(--gold);letter-spacing:.12em;margin-bottom:10px;">✅ 已入库 · 官方验证卡' + (info.batch ? '（批次：' + esc(info.batch) + '）' : '') + '</div>';
+    h += vCardHtml(rec);
     h += '<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">';
-    h += '<button class="btn-line" id="copyCardBtn" type="button">📋 复制码</button>';
-    h += '<button class="btn-line" id="exportCardBtn" type="button">🖼️ 导出为图片(JPG)</button>';
-    h += '<button class="btn-line" id="toDbBtn" type="button">🗄️ 去记录管理查看</button>';
+    h += '<button class="btn-line" id="copyCardBtn" type="button" title="复制验证码到剪贴板">📋 复制码</button>';
+    h += '<button class="btn-line" id="exportCardBtn" type="button" title="用 canvas 绘制该卡并下载 JPG">🖼️ 导出为图片(JPG)</button>';
+    h += '<button class="btn-line" id="toDbBtn" type="button" title="跳转到 数据库记录管理（records）查看刚生成的记录">🗄️ 去记录管理查看</button>';
     h += '</div></div>';
     $('sCardArea').innerHTML = h;
     $('copyCardBtn').addEventListener('click', function () { copyText(rec.code); setMsg('sGenMsg', '已复制 ' + rec.code, 'ok'); });
-    $('exportCardBtn').addEventListener('click', exportCardJpg);
+    $('exportCardBtn').addEventListener('click', function () { exportCardJpg(rec); });
     $('toDbBtn').addEventListener('click', function () { $('dTable').value = 'records'; goToDb(); });
   }
   function goToDb() { openAdminSection('secDb'); }
-  function exportCardJpg() {
-    if (!lastCard) return;
-    var rec = lastCard;
+  /* 🖼️ 订单导出防伪码图片：该单有码 → 弹验证卡预览 modal（逐卡下载 JPG）；无码 → 提示先生成 */
+  function oExportImg(id) {
+    var o = findOrder(id);
+    if (!o) { setMsg('oMsg', '未找到该订单', 'bad'); return; }
+    var coded = orderItems(o).filter(function (it) { return it && it.code; });
+    var missing = orderItems(o).filter(function (it) { return !(it && it.code); }).length;
+    if (!coded.length) { setMsg('oMsg', '订单 ' + esc(o.order_no || o.id) + ' 尚无防伪码，请先点「🧾 生成防伪码」或直接「✅ 完成订单」（自动补码）。', 'bad'); return; }
+    var h = '<h3>🖼️ 导出防伪码图片 · ' + esc(o.order_no || o.id) + '</h3>';
+    h += '<div class="small-note" style="margin-bottom:6px;">共 ' + coded.length + ' 枚码' + (missing ? '（另有 ' + missing + ' 件缺码，请先生成）' : '') + ' · 预览为验证卡样式，逐卡可下载 JPG。</div>';
+    coded.forEach(function (it, idx) {
+      h += '<div style="margin:12px 0;">' + vCardHtml(itemRec(o, it)) + '</div>';
+      h += '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:6px;">' +
+        '<button class="btn-line" data-exp="' + idx + '" type="button" title="canvas 绘制该验证卡并下载 JPG">📷 下载此卡 JPG</button>' +
+        '<button class="btn-line" data-expcopy="' + idx + '" type="button" title="复制该防伪码">📋 复制码 ' + esc(it.code) + '</button></div>';
+    });
+    h += '<div class="btn-row"><button class="btn-ghost" data-x type="button">关闭</button></div>';
+    var m = openModal(h);
+    bindModalClose(m);
+    m.querySelectorAll('[data-exp]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var it = coded[Number(b.getAttribute('data-exp'))];
+        if (it) downloadVCard(itemRec(o, it));
+      });
+    });
+    m.querySelectorAll('[data-expcopy]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var it = coded[Number(b.getAttribute('data-expcopy'))];
+        if (it && it.code) { copyText(it.code); setMsg('oMsg', '已复制 ' + it.code, 'ok'); }
+      });
+    });
+  }
+  /* canvas 手绘验证卡并下载 JPG（予光暗金） */
+  function downloadVCard(rec) {
+    if (!rec || !rec.code) return;
     var W = 1080, H = 720;
     var c = document.createElement('canvas');
     c.width = W; c.height = H;
@@ -1026,15 +1298,16 @@
     ctx.fillText(String(rec.product_ref || '予光定制作品').slice(0, 24), W / 2, 410);
     ctx.fillStyle = 'rgba(244,239,230,.85)';
     ctx.font = '400 30px sans-serif';
-    var info = rec.info || {}; if (typeof info === 'string') { try { info = JSON.parse(info); } catch (e) { info = {}; } }
+    var info = recInfo(rec);
     var text = String(info.text || '');
+    var ty = 465;
     if (text) {
       var words = text.slice(0, 60);
       var lines = [];
       while (words.length > 0) { lines.push(words.slice(0, 20)); words = words.slice(20); }
-      var ty = 470;
       lines.slice(0, 3).forEach(function (ln) { ctx.fillText(ln, W / 2, ty); ty += 40; });
     }
+    if (info.batch) { ctx.fillText('批次：' + String(info.batch).slice(0, 26), W / 2, ty + 30); }
     ctx.fillStyle = 'rgba(244,239,230,.55)';
     ctx.font = '400 24px sans-serif';
     var url = location.protocol + '//' + location.host + '/verify.html';
@@ -1044,7 +1317,12 @@
     a.download = '予光-验证卡-' + code + '.jpg';
     a.href = c.toDataURL('image/jpeg', 0.92);
     a.click();
-    setMsg('sGenMsg', '已导出 JPG（可长按/保存）', 'ok');
+  }
+  function exportCardJpg(rec) {
+    var r = (rec && rec.code) ? rec : lastCard;
+    if (!r) return;
+    downloadVCard(r);
+    setMsg('sGenMsg', '已导出 JPG（可长按/保存）：' + r.code, 'ok');
   }
   function sGenSubmit() {
     var name = ($('sName').value || '').trim();
@@ -1056,8 +1334,11 @@
       $('sCode').value = uniqueCode(used); return;
     }
     var note = ($('sMsg').value || '').trim();
+    var batch = ($('sBatch').value || '').trim();
     var imgs = ($('sImgs').value || '').trim();
-    var info = {}; if (note) info.text = note;
+    var info = {};
+    if (note) info.text = note;
+    if (batch) info.batch = batch;
     setMsg('sGenMsg', '正在生成…');
     insertRecordGuarded({ code: code, product_ref: name, info: info, image_urls: imgs }).then(function () {
       $('sCode').value = '';
@@ -1077,8 +1358,11 @@
     if (!name) { setMsg('bGenMsg', '请填写产品名称', 'bad'); return; }
     var qty = Math.min(50, Math.max(1, num($('bQty').value) || 1));
     var note = ($('bMsg').value || '').trim();
+    var batch = ($('bBatch').value || '').trim();
     var imgs = ($('bImgs').value || '').trim();
-    var info = {}; if (note) info.text = note;
+    var info = {};
+    if (note) info.text = note;
+    if (batch) info.batch = batch;
     var codes = [];
     var used = {};
     for (var i = 0; i < qty; i++) { codes.push(uniqueCode(used)); used[codes[i]] = 1; }
@@ -1186,29 +1470,29 @@
     h += '<span class="sp" style="flex:1;"></span>';
     h += '<button class="btn-sm" data-uclose type="button">✕ 收起</button></div>';
     if (isRoot) {
-      h += '<div class="small-note" style="color:var(--gold);">🔐 终端(root)账号由服务端保护，不可修改角色、删除或重置，仅作后台入口保留。</div>';
+      h += '<div class="small-note" style="color:var(--gold);">🔐 终端(root)账号由服务端保护，不可查看订单外的一切修改（不改角色 / 不删除 / 不重置），仅作后台入口保留。</div>';
+      h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;"><button class="btn-line" data-uact="orders">📋 查看订单</button></div>';
     } else {
       h += '<div style="display:flex;gap:8px;flex-wrap:wrap;">';
-      h += '<button class="btn-line" data-uact="orders">📋 查看订单</button>';
-      h += '<button class="btn-line" data-uact="addorder">➕ 增加订单</button>';
-      h += '<button class="btn-line" data-uact="resetpw">🔑 重置密码</button>';
-      h += '<button class="btn-line" data-uact="mail">💬 发消息</button>';
+      h += '<button class="btn-line" data-uact="orders" title="弹窗列出该账号订单，行内可 查看详情 / 复制单号 / 删除">📋 查看订单</button>';
+      h += '<button class="btn-line" data-uact="addorder" title="先生成官方码入库 → 建已发货订单（账号预填），成功弹窗展示订单号+码">➕ 增加订单</button>';
+      h += '<button class="btn-line" data-uact="resetpw" title="account-api admin_reset：随机临时密码发往邮箱+站内信">🔑 重置密码</button>';
+      h += '<button class="btn-line" data-uact="mail" title="insert mailboxes（kind=important）发站内信给该账号">💬 发消息</button>';
       if (canManage) {
-        h += '<button class="btn-line" data-uact="role">' + (isAdmin ? '👑 取消管理员' : '👑 设为管理员') + '</button>';
-        h += '<button class="btn-line danger" data-uact="del" style="color:#ff8d7d;border-color:#ff8d7d55;">🗑️ 删除账号</button>';
+        h += '<button class="btn-line" data-uact="role" title="切换 user ⇄ admin 角色（root/管理员账号受服务端守卫）">' + (isAdmin ? '👑 取消管理员' : '👑 设为管理员') + '</button>';
+        h += '<button class="btn-line danger" data-uact="del" style="color:#ff8d7d;border-color:#ff8d7d55;" title="硬删除账号（关联订单保留）">🗑️ 删除账号</button>';
       } else {
         h += '<span class="small-note" style="align-self:center;">（管理员账号仅 root 终端可操作）</span>';
       }
       h += '</div>';
     }
-    h += '<div id="uUserOrders" style="margin-top:12px;display:none;"></div>';
     h += '</div>';
     box.innerHTML = h;
     box.querySelector('[data-uclose]').addEventListener('click', function () { U.active = null; box.style.display = 'none'; renderUsers(); });
     box.querySelectorAll('[data-uact]').forEach(function (b) {
       b.addEventListener('click', function () {
         var act = b.getAttribute('data-uact');
-        if (act === 'orders') loadUserOrders(u);
+        if (act === 'orders') openUserOrdersModal(u);
         if (act === 'addorder') openUserOrderModal(u);
         if (act === 'resetpw') resetUserPwd(u);
         if (act === 'mail') openUserMailModal(u);
@@ -1217,67 +1501,143 @@
       });
     });
   }
-  function loadUserOrders(u) {
-    var area = $('uUserOrders');
-    area.style.display = 'block';
-    area.innerHTML = '<div style="color:var(--text-dim);font-size:13px;">订单加载中…</div>';
+  /* 📋 该账号订单 · 弹窗（每 15s 自动刷新） */
+  function openUserOrdersModal(u) {
+    var m = openModal(
+      '<h3>📋 ' + esc(u.account || '') + ' 的订单</h3>' +
+      '<div class="small-note" style="margin-bottom:8px;">共 <span id="uoCnt">…</span> 单 · 弹窗打开期间每 15s 自动刷新；行内可 查看 / 复制单号 / 删除。</div>' +
+      '<div id="uoList">加载中…</div>' +
+      '<div class="btn-row"><button class="btn-ghost" data-x type="button">关闭</button></div>');
+    bindModalClose(m);
+    renderUOList(m, u);
+    var timer = setInterval(function () {
+      if (!document.body.contains(m)) { clearInterval(timer); return; }
+      renderUOList(m, u);
+    }, 15000);
+  }
+  function renderUOList(m, u) {
     adm({ op: 'list', table: 'orders', limit: 200 }).then(function (r) {
-      if (!r.ok) { area.innerHTML = '<div class="small-note">加载失败：' + esc(r.error || '') + '</div>'; return; }
+      if (!document.body.contains(m)) return;
+      var list = $('uoList'); if (!list) return;
+      if (!r.ok) { list.innerHTML = '<div class="small-note">加载失败：' + esc(r.error || '') + '</div>'; return; }
       var mine = (r.rows || []).filter(function (o) { return o.account === u.account; });
-      if (!mine.length) { area.innerHTML = '<div class="small-note">该账号暂无订单（可 ➕ 增加订单）。</div>'; return; }
-      var h = '<div style="border-top:1px dashed var(--line-soft);padding-top:10px;"><div style="font-size:12px;color:var(--gold);letter-spacing:.1em;margin-bottom:6px;">📋 该账号订单 ' + mine.length + ' 单</div>';
+      var cnt = $('uoCnt'); if (cnt) cnt.textContent = mine.length;
+      if (!mine.length) { list.innerHTML = '<div class="small-note">该账号暂无订单（可在详情里 ➕ 增加订单）。</div>'; return; }
+      var h = '';
       mine.forEach(function (o) {
         h += '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;border:1px solid var(--line-soft);border-radius:10px;padding:8px 10px;margin-bottom:6px;font-size:12px;">' +
-          '<div style="color:var(--gold);">' + esc(o.order_no || o.id) + '</div>' + stBadge(o.status) +
+          '<div style="color:var(--gold);font-size:12px;">' + esc(o.order_no || o.id) + '</div>' + stBadge(o.status) +
           '<span class="dim">¥' + esc(o.amount === null || o.amount === undefined ? '—' : o.amount) + '</span>' +
-          '<span class="dim" style="flex:1;min-width:140px;">' + esc(itemsSummary(o)) + '</span>' +
-          '<button class="btn-sm" data-uodel="' + o.id + '">🗑️ 删除该单</button></div>';
+          '<span class="dim" style="flex:1;min-width:120px;">' + esc(itemsSummary(o)) + '</span>' +
+          '<button class="btn-sm" data-uov="' + o.id + '" title="查看订单详情（每件码/光语/图片/备注）">查看</button>' +
+          '<button class="btn-sm" data-uocp="' + o.id + '" title="复制订单号">📋 复制单号</button>' +
+          '<button class="btn-sm danger" data-uodel="' + o.id + '" title="硬删除该订单（确认后不可恢复）">🗑️ 删除</button></div>';
       });
-      h += '</div>';
-      area.innerHTML = h;
-      area.querySelectorAll('[data-uodel]').forEach(function (b) {
+      list.innerHTML = h;
+      list.querySelectorAll('[data-uov]').forEach(function (b) {
         b.addEventListener('click', function () {
-          if (!confirm('确认删除该订单？')) return;
-          adm({ op: 'delete', table: 'orders', id: Number(b.getAttribute('data-uodel')) }).then(function (r) {
-            if (r.ok) loadUserOrders(u); else setMsg('uMsg', '删除失败：' + (r.error || ''), 'bad');
+          var o = null;
+          for (var i = 0; i < mine.length; i++) if (String(mine[i].id) === String(b.getAttribute('data-uov'))) o = mine[i];
+          if (o) uoOrderDetailModal(o, function () { renderUOList(m, u); });
+        });
+      });
+      list.querySelectorAll('[data-uocp]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var o = null;
+          for (var i = 0; i < mine.length; i++) if (String(mine[i].id) === String(b.getAttribute('data-uocp'))) o = mine[i];
+          if (o) copyText(o.order_no || String(o.id));
+        });
+      });
+      list.querySelectorAll('[data-uodel]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var o = null;
+          for (var i = 0; i < mine.length; i++) if (String(mine[i].id) === String(b.getAttribute('data-uodel'))) o = mine[i];
+          if (!o) return;
+          if (!confirm('确认删除订单「' + (o.order_no || o.id) + '」？硬删除不可恢复。')) return;
+          adm({ op: 'delete', table: 'orders', id: o.id }).then(function (r) {
+            if (r.ok) renderUOList(m, u); else setMsg('uMsg', '删除失败：' + (r.error || ''), 'bad');
           }).catch(function () { setMsg('uMsg', '网络错误', 'bad'); });
         });
       });
-    }).catch(function () { area.innerHTML = '<div class="small-note">网络错误</div>'; });
+    }).catch(function () {
+      if (document.body.contains(m)) { var l = $('uoList'); if (l) l.innerHTML = '<div class="small-note">网络错误</div>'; }
+    });
+  }
+  function uoOrderDetailModal(o, afterReload) {
+    var h = '<h3>查看订单 · ' + esc(o.order_no || o.id) + '</h3>';
+    h += '<div class="small-note" style="margin-bottom:8px;">' + stBadge(o.status) + ' ¥' + esc(o.amount === null || o.amount === undefined ? '—' : o.amount) + ' · 手机：' + esc(o.phone || '—') + ' · 账号：' + esc(o.account || '—') + ' · 建档：' + esc(fmtTime(o.created_at)) + '</div>';
+    orderItems(o).forEach(function (it, i) {
+      var code = (it && it.code) || '';
+      h += '<div style="border:1px solid var(--line-soft);border-radius:10px;padding:8px 10px;margin:6px 0;font-size:12px;">' +
+        '<div>产品 ' + (i + 1) + '：' + esc((it && it.name) || '—') + (code ? ' <span class="badge" style="color:#8fb6e8;border-color:#8fb6e855;">' + esc(code) + '</span>' : ' <span class="badge" style="color:var(--gold);border-color:var(--gold)55;">待生成</span>') + '</div>' +
+        ((it && it.price !== undefined) ? '<div class="dim">价格：¥' + esc(it.price) + '</div>' : '') +
+        '<div class="dim">光语：' + esc(itemQuote(it) || '—') + '</div>' +
+        '<div class="dim">图片：' + esc(itemImgs(it) || '—') + '</div></div>';
+    });
+    h += '<div class="small-note" style="margin-top:4px;">备注：' + esc(o.note || '—') + '</div>';
+    h += '<div class="btn-row">' +
+      '<button class="btn-line" data-cpno type="button" title="复制订单号">📋 复制订单号</button>' +
+      '<button class="btn-line" data-cpcode type="button" title="复制本单全部防伪码（每行一个）">📋 复制全部码</button>' +
+      (afterReload ? '<button class="btn-line danger" data-del type="button">🗑️ 删除此单</button>' : '') +
+      '<button class="btn-ghost" data-x type="button">关闭</button></div>';
+    var m2 = openModal(h);
+    bindModalClose(m2);
+    m2.querySelector('[data-cpno]').addEventListener('click', function () { copyText(o.order_no || String(o.id)); });
+    m2.querySelector('[data-cpcode]').addEventListener('click', function () {
+      var codes = orderItems(o).map(function (it) { return it && it.code; }).filter(Boolean);
+      if (codes.length) copyText(codes.join('\n')); else setMsg('uMsg', '该单尚无防伪码', 'bad');
+    });
+    if (afterReload) m2.querySelector('[data-del]').addEventListener('click', function () {
+      if (!confirm('确认删除订单「' + (o.order_no || o.id) + '」？')) return;
+      adm({ op: 'delete', table: 'orders', id: o.id }).then(function (r) {
+        closeModal(m2);
+        if (r.ok && afterReload) afterReload(); else setMsg('uMsg', '删除失败：' + (r.error || ''), 'bad');
+      }).catch(function () { setMsg('uMsg', '网络错误', 'bad'); });
+    });
   }
   function openUserOrderModal(u) {
     var m = openModal(
       '<h3>➕ 为 ' + esc(u.account) + ' 增加订单（管理员代录）</h3>' +
-      '<div class="small-note" style="margin-bottom:8px;">流程：先生成官方码入库 → 建一条已发货订单并写入该码。</div>' +
+      '<div class="small-note" style="margin-bottom:8px;">流程：先生成官方码入库（records）→ 建一条 已发货(shipped) 订单写入该码 → 弹窗展示订单号+防伪码供复制。</div>' +
       '<label class="f-label">产品名 *</label><input id="uoName" placeholder="如：巳蛇 · 离光（红纹石）" style="width:100%;">' +
       '<label class="f-label">金额（元，选填）</label><input id="uoAmount" type="number" placeholder="如 699" style="width:100%;">' +
-      '<label class="f-label">图片文件名（选填，逗号分隔）</label><input id="uoImg" placeholder="img/customers/xx.jpg" style="width:100%;">' +
-      '<label class="f-label">寄语 / 备注（选填，随码入库）</label><textarea id="uoMsg" style="min-height:56px;"></textarea>' +
-      '<div class="btn-row"><button class="btn-ghost" data-x type="button">取消</button><button class="btn-gold" data-ok type="button">✨ 生成码并加单</button></div>');
+      '<label class="f-label">图片文件名（选填，逗号分隔，随码入库 image_urls）</label><input id="uoImg" placeholder="img/customers/xx.jpg" style="width:100%;">' +
+      '<label class="f-label">光语（选填，随码入库 info.text，并写入订单备注）</label><textarea id="uoMsg" style="min-height:56px;"></textarea>' +
+      '<div class="btn-row"><button class="btn-ghost" data-x type="button">取消</button><button class="btn-gold" data-ok type="button" title="生成码+建单，完成后弹窗展示订单号与码">✨ 生成码并加单</button></div>');
     bindModalClose(m);
     m.querySelector('[data-ok]').addEventListener('click', function () {
       var name = (m.querySelector('#uoName').value || '').trim();
       if (!name) { setMsg('uMsg', '请填写产品名', 'bad'); return; }
       var amount = num(m.querySelector('#uoAmount').value);
       var img = (m.querySelector('#uoImg').value || '').trim();
-      var note = (m.querySelector('#uoMsg').value || '').trim();
-      var info = { text: note || '管理员代录' };
+      var quote = (m.querySelector('#uoMsg').value || '').trim();
+      var info = { text: quote || '管理员代录' };
       var no = ygOrderNo();
       setMsg('uMsg', '正在生成码并建单…');
       insertRecordGuarded({ code: uniqueCode(), product_ref: name, info: info, image_urls: img }).then(function (rr) {
         var rec = rr.row || {};
         var code = rec.code || uniqueCode();
-        var items = [{ name: name, code: code }];
+        var items = [{ name: name, code: code, quote: quote, image_urls: img }];
         if (amount !== undefined) items[0].price = amount;
-        var row = { order_no: no, account: u.account, phone: u.phone || '', items: items, amount: (amount === undefined ? 0 : amount), status: 'shipped', note: '管理员代录' + (note ? '\n' + note : '') };
+        var row = { order_no: no, account: u.account, phone: u.phone || '', items: items, amount: (amount === undefined ? 0 : amount), status: 'shipped', note: '管理员代录' + (quote ? '\n' + quote : '') };
         return adm({ op: 'insert', table: 'orders', row: row }).then(function (r) {
           closeModal(m);
-          if (r.ok) {
-            U.lastMsg = '✅ 已为 ' + u.account + ' 加单：' + no + '（防伪码 ' + code + '）';
-            U.lastBad = '';
-            renderUsers();
-            loadUserOrders(u);
-          } else throw new Error(r.error || '建单失败');
+          if (!r.ok) throw new Error(r.error || '建单失败');
+          U.lastMsg = '✅ 已为 ' + u.account + ' 加单：' + no;
+          U.lastBad = '';
+          renderUsers();
+          var m2 = openModal(
+            '<h3>✅ 加单成功</h3>' +
+            '<div class="small-note" style="margin-bottom:8px;">订单已以 已发货(shipped) 挂到 ' + esc(u.account) + ' 名下，请把以下信息发给客户（可复制）。</div>' +
+            '<label class="f-label">订单号</label><div class="code-box">' + esc(no) + '</div>' +
+            '<label class="f-label">官方防伪码（客户可在验真页输入查询）</label><div class="code-box">' + esc(code) + '</div>' +
+            '<div class="btn-row">' +
+            '<button class="btn-line" data-cpno type="button" title="复制订单号">📋 复制订单号</button>' +
+            '<button class="btn-line" data-cpcode type="button" title="复制防伪码">📋 复制防伪码</button>' +
+            '<button class="btn-ghost" data-x type="button">关闭</button></div>');
+          bindModalClose(m2);
+          m2.querySelector('[data-cpno]').addEventListener('click', function () { copyText(no); });
+          m2.querySelector('[data-cpcode]').addEventListener('click', function () { copyText(code); });
         });
       }).catch(function (e) { setMsg('uMsg', '加单失败：' + (e.message || e), 'bad'); });
     });
@@ -1326,25 +1686,104 @@
       } else setMsg('uMsg', '删除失败：' + (r.error || ''), 'bad');
     }).catch(function () { setMsg('uMsg', '网络错误', 'bad'); });
   }
+  function emailLike(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || '').trim()); }
+  function waitMs(ms) { return new Promise(function (res) { setTimeout(res, ms); }); }
+  function emailOnce(to, title, body) {
+    var payload = { kind: 'notice', subject: title || '予光通知', fields: { 内容: body, 来源: '予光管理后台' } };
+    return fetch(cfg.emailUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+      .then(function (r) { return r.json().catch(function () { return { ok: false, error: 'HTTP ' + r.status }; }); });
+  }
+  function progEl(m) { return m ? m.querySelector('#bcProg') : null; }
   function openBroadcastModal() {
     var m = openModal(
-      '<h3>📢 群发站内信</h3>' +
-      '<div class="small-note" style="margin-bottom:8px;">以 kind=notice 发送到全部注册用户的信箱（admin-api op:broadcast）。</div>' +
+      '<h3>📢 群发消息（站内信 + 可选邮件）</h3>' +
+      '<div class="small-note" style="margin-bottom:8px;">范围二选一：<b style="color:var(--gold);">全部用户</b> → 每个注册账号信箱各发一封（admin-api op:broadcast）；<b style="color:var(--gold);">仅订阅者</b> → 把订阅登记的 contact 当站内信账号名发送（微信号等非邮箱也发）。勾选“同时发邮件”后：全部用户模式发给每个已填邮箱的账号，订阅者模式只发给形如邮箱的 contact。</div>' +
       '<label class="f-label">标题</label><input id="bcTitle" placeholder="如：新品上架 / 活动公告" style="width:100%;">' +
-      '<label class="f-label">正文</label><textarea id="bcBody" style="min-height:100px;"></textarea>' +
-      '<div class="btn-row"><button class="btn-ghost" data-x type="button">取消</button><button class="btn-gold" data-ok type="button">📨 群发</button></div>');
+      '<label class="f-label">发送范围</label><div>' +
+      '<label class="rad"><input type="radio" name="bcRange" value="all" checked> 全部用户</label>' +
+      '<label class="rad"><input type="radio" name="bcRange" value="sub"> 仅订阅者</label></div>' +
+      '<label class="f-label" style="display:inline-flex;gap:6px;align-items:center;margin-top:2px;"><input type="checkbox" id="bcEmail" class="chk"> 同时发邮件（可选）</label>' +
+      '<div class="small-note" style="margin:2px 0 6px;">邮件经 emailUrl（email-send 函数，to 覆盖收件人）逐封发送、间隔 200ms，未填邮箱的账号自动跳过。</div>' +
+      '<label class="f-label">正文</label><textarea id="bcBody" style="min-height:110px;"></textarea>' +
+      '<div class="small-note" id="bcProg"></div>' +
+      '<div class="btn-row"><button class="btn-ghost" data-x type="button">取消</button><button class="btn-gold" data-ok type="button">📨 发送</button></div>');
     bindModalClose(m);
     m.querySelector('[data-ok]').addEventListener('click', function () {
       var title = (m.querySelector('#bcTitle').value || '').trim();
       var body = (m.querySelector('#bcBody').value || '').trim();
       if (!title && !body) { setMsg('uMsg', '标题与正文至少填一项', 'bad'); return; }
-      if (!confirm('确认向全部注册用户群发站内信？')) return;
-      adm({ op: 'broadcast', title: title, body: body }).then(function (r) {
-        closeModal(m);
-        if (r.ok) { U.lastMsg = '✅ 已发送 ' + (r.sent || 0) + ' / ' + (r.users || 0) + ' 个用户信箱'; U.lastBad = ''; renderUsers(); }
-        else setMsg('uMsg', '群发失败：' + (r.error || ''), 'bad');
-      }).catch(function () { setMsg('uMsg', '网络错误', 'bad'); });
+      var range = 'all';
+      var radios = m.querySelectorAll('input[name="bcRange"]');
+      for (var i = 0; i < radios.length; i++) if (radios[i].checked) range = radios[i].value;
+      var withMail = m.querySelector('#bcEmail').checked;
+      var okBtn = m.querySelector('[data-ok]');
+      if (!confirm('确认按「' + (range === 'all' ? '全部用户' : '仅订阅者') + '」范围' + (withMail ? '（同时发邮件）' : '') + '群发？')) return;
+      okBtn.disabled = true;
+      broadcastRun(m, range, withMail, title, body);
     });
+  }
+  function broadcastRun(m, range, withMail, title, body) {
+    var ins = 0, insFail = 0, mailOk = 0, mailFail = 0, mailSkip = 0, fatal = '';
+    function show(t) { var p = progEl(m); if (p) p.innerHTML = t; }
+    function sendMailList(list, label) {
+      var i = 0;
+      function nx() {
+        if (i >= list.length) { show(label + ' · 邮件完成：成功 ' + mailOk + '，失败 ' + mailFail + (mailSkip ? '，跳过 ' + mailSkip : '')); return Promise.resolve(); }
+        var to = list[i++];
+        return emailOnce(to, title, body).then(function (r) {
+          if (r && r.ok) mailOk++; else mailFail++;
+          show(label + ' · 邮件 ' + i + '/' + list.length + '（成功 ' + mailOk + '，失败 ' + mailFail + '）…');
+          return waitMs(200).then(nx);
+        }).catch(function () { mailFail++; return waitMs(200).then(nx); });
+      }
+      return nx();
+    }
+    if (range === 'all') {
+      show('站内信群发中（全部用户）…');
+      adm({ op: 'broadcast', title: title, body: body }).then(function (r) {
+        if (!r.ok) { fatal = '站内信群发失败：' + esc(r.error || ''); show(fatal); return null; }
+        ins = r.sent || 0;
+        show('✅ 站内信已发 ' + ins + '/' + (r.users || 0) + ' 个用户' + (withMail ? '，继续发邮件…' : ''));
+        if (!withMail) return null;
+        return adm({ op: 'list', table: 'users', limit: 200 }).then(function (ru) {
+          var rows = ru.rows || [];
+          var list = [];
+          rows.forEach(function (u2) { if (emailLike(u2.email)) list.push(String(u2.email).trim()); });
+          mailSkip = rows.length - list.length;
+          return sendMailList(list, '全部用户');
+        });
+      }).then(function () {
+        show(fatal || ('全部完成：站内信 ' + ins + ' 个用户 · 邮件成功 ' + mailOk + '，失败 ' + mailFail + (mailSkip ? '，跳过 ' + mailSkip : '')));
+      }).catch(function () { show(fatal || '群发出错，请重试'); });
+    } else {
+      show('读取订阅列表…');
+      adm({ op: 'list', table: 'subscribers', limit: 200 }).then(function (rs) {
+        if (!rs.ok) { fatal = '读取订阅列表失败：' + esc(rs.error || ''); show(fatal); return null; }
+        var subs = rs.rows || [];
+        if (!subs.length) { fatal = '暂无订阅登记（subscribers 为空）。'; show(fatal); return null; }
+        var i = 0;
+        function nx() {
+          if (i >= subs.length) {
+            show('订阅站内信完成：成功 ' + ins + '，失败 ' + insFail + (withMail ? '，继续发邮件…' : ''));
+            if (!withMail) return Promise.resolve();
+            var list = [];
+            subs.forEach(function (s) { if (emailLike(s.contact)) list.push(String(s.contact).trim()); });
+            mailSkip = subs.length - list.length;
+            return sendMailList(list, '仅订阅者');
+          }
+          var s = subs[i++];
+          var acct = String(s.contact || '').trim() || ('subscriber_' + s.id);
+          return adm({ op: 'insert', table: 'mailboxes', row: { account: acct, kind: 'notice', title: title || '予光通知', body: body } }).then(function (r) {
+            if (r.ok) ins++; else insFail++;
+            show('订阅站内信 ' + i + '/' + subs.length + '（成功 ' + ins + '，失败 ' + insFail + '）…');
+            return waitMs(120).then(nx);
+          }).catch(function () { insFail++; return waitMs(120).then(nx); });
+        }
+        return nx();
+      }).then(function () {
+        show(fatal || ('全部完成：订阅站内信成功 ' + ins + '，失败 ' + insFail + ' · 邮件成功 ' + mailOk + '，失败 ' + mailFail + (mailSkip ? '，跳过非邮箱 ' + mailSkip : '')));
+      }).catch(function () { show(fatal || '群发出错，请重试'); });
+    }
   }
 
   /* ============================================================
@@ -1379,38 +1818,65 @@
     Object.keys(rest).forEach(function (k) { value[k] = rest[k]; });
     value.to = toList;
     setMsg('mMsg', '保存中…');
-    // admin-api 的 update 对不存在键也会返回 ok，故以「已存在→update，不存在→insert」区分
-    var put = MAIL_EXISTS
-      ? adm({ op: 'update', table: 'settings', id: 'mail', set: { value: value } })
-      : adm({ op: 'insert', table: 'settings', row: { key: 'mail', value: value } });
-    put.then(function (r) {
-      if (r.ok) {
-        MAIL_EXISTS = true;
-        setMsg('mMsg', MAIL_EXISTS ? ('✅ 已保存：通知收件邮箱 ' + toList.length + ' 个 → settings.mail.to；SMTP 等其余键已合并保留') : '保存完成', 'ok');
-      } else {
-        // 兜底：与预期相反时互换操作
-        var fb = MAIL_EXISTS
+    // 先查 settings 是否存在 key=mail：存在 → update，不存在 → insert（不丢配置）
+    adm({ op: 'list', table: 'settings', limit: 200 }).then(function (r) {
+      if (!r.ok) { setMsg('mMsg', '读取 settings 失败：' + (r.error || ''), 'bad'); return; }
+      var exists = false;
+      (r.rows || []).forEach(function (x) { if (x.key === 'mail') exists = true; });
+      var put = exists
+        ? adm({ op: 'update', table: 'settings', id: 'mail', set: { value: value } })
+        : adm({ op: 'insert', table: 'settings', row: { key: 'mail', value: value } });
+      return put.then(function (r2) {
+        if (r2.ok) {
+          MAIL_EXISTS = true;
+          setMsg('mMsg', '✅ 已保存：通知收件邮箱 ' + toList.length + ' 个 → settings.mail.to；SMTP 等其余键已合并保留（' + (exists ? '更新' : '新建') + '）', 'ok');
+          return;
+        }
+        // 兜底：若并发写入导致与查询结果相反，互换 insert/update 重试一次
+        var fb = exists
           ? adm({ op: 'insert', table: 'settings', row: { key: 'mail', value: value } })
           : adm({ op: 'update', table: 'settings', id: 'mail', set: { value: value } });
-        fb.then(function (r2) {
-          if (r2.ok) { MAIL_EXISTS = true; setMsg('mMsg', '✅ 已保存 settings.mail', 'ok'); }
-          else setMsg('mMsg', '保存失败：' + ((r2 && r2.error) || (r.error || '')), 'bad');
-        }).catch(function () { setMsg('mMsg', '网络错误', 'bad'); });
-      }
+        return fb.then(function (r3) {
+          if (r3.ok) { MAIL_EXISTS = true; setMsg('mMsg', '✅ 已保存 settings.mail', 'ok'); }
+          else setMsg('mMsg', '保存失败：' + ((r3 && r3.error) || (r2.error || '')), 'bad');
+        });
+      });
     }).catch(function () { setMsg('mMsg', '网络错误', 'bad'); });
   }
 
   /* ============================================================
      ⑥ 数据浏览（通用表工具，沿用原逻辑）
      ============================================================ */
-  var DB = { rows: [], t: 'orders' };
+  var DB = { rows: [], t: 'orders', sel: {} };
   var dSTATUS = { orders: ['new', 'paid', 'making', 'shipped', 'done', 'refund'], messages: ['new', 'read', 'done'] };
   function dbCurrent() { return (DB.t === 'settings') ? $('dSettings') : null; }
+  function dbFindRow(id) {
+    for (var i = 0; i < DB.rows.length; i++) {
+      var r = DB.rows[i];
+      var rid = r.id !== undefined ? r.id : r.key;
+      if (String(rid) === String(id)) return r;
+    }
+    return null;
+  }
+  function dbSelRows() {
+    var out = [];
+    DB.rows.forEach(function (row) { if (DB.sel[String(row.id)]) out.push(row); });
+    return out;
+  }
+  function dbRecRefreshBar() {
+    var t = $('dRecTool');
+    if (t) t.style.display = (DB.t === 'records') ? 'flex' : 'none';
+    var el = $('dRecSelN');
+    if (el) {
+      var n = dbSelRows().length;
+      el.textContent = n ? '已选 ' + n + ' 条' : '';
+    }
+  }
   function loadDb(force) {
     if (DB.busy && !force) return;
     DB.busy = true;
     var t = $('dTable').value;
-    DB.t = t;
+    if (DB.t !== t) { DB.sel = {}; DB.t = t; }
     adm({ op: 'list', table: t, limit: 200 }).then(function (r) {
       DB.busy = false;
       if (!r.ok) { setMsg('dMsg', '加载失败：' + (r.error || '（无管理员权限？）'), 'bad'); return; }
@@ -1418,6 +1884,7 @@
       var settingsBox = $('dSettings');
       if (t === 'settings') { settingsBox.style.display = 'block'; dbLoadSettings(DB.rows); }
       else settingsBox.style.display = 'none';
+      dbRecRefreshBar();
       dbRenderRows();
     }).catch(function () { DB.busy = false; setMsg('dMsg', '网络错误', 'bad'); });
   }
@@ -1432,47 +1899,162 @@
     var t = DB.t;
     var msgEl = $('dMsg');
     var table = $('dRows');
+    var hasQ = !!($('dSearch').value || '').trim();
     if (t !== 'settings' && msgEl) {
-      msgEl.textContent = t + ' 共 ' + rows.length + ' 条' + (($('dSearch').value || '').trim() ? '（过滤）' : '');
+      msgEl.textContent = t + ' 共 ' + rows.length + ' 条' + (hasQ ? '（过滤）' : '');
       msgEl.className = 'msg';
     }
-    if (!rows.length) { table.innerHTML = '<tr><td style="color:var(--text-dim);">（暂无数据）</td></tr>'; return; }
-    var head = Object.keys(rows[0]);
-    var h = '<tr><th>操作</th>';
-    head.slice(0, 7).forEach(function (k) { h += '<th>' + esc(k) + '</th>'; });
-    h += '<th>详情</th></tr>';
-    rows.forEach(function (row, idx) {
-      var id = row.id !== undefined ? row.id : row.key;
-      var isRootUser = t === 'users' && row.role === 'root';
-      var isAdminUser = t === 'users' && row.role === 'admin';
-      h += '<tr><td style="white-space:nowrap;">';
-      if ((t === 'orders' || t === 'messages')) {
-        h += '<select class="btn-sm" data-act="status" data-t="' + t + '" data-id="' + esc(id) + '" style="border-radius:8px;">';
-        (dSTATUS[t] || []).forEach(function (s) { h += '<option value="' + s + '"' + (row.status === s ? ' selected' : '') + '>' + s + '</option>'; });
-        h += '</select> ';
-      }
-      if (t === 'gallery') {
-        h += '<button class="btn-sm" data-act="tg" data-col="approved" data-id="' + esc(id) + '" data-v="' + (row.approved ? 'false' : 'true') + '">' + (row.approved ? '下架(approved)' : '授权(approved)') + '</button> ';
-        h += '<button class="btn-sm" data-act="tg" data-col="visible" data-id="' + esc(id) + '" data-v="' + (row.visible ? 'false' : 'true') + '">' + (row.visible ? '隐藏' : '显示') + '</button> ';
-      }
-      if (t === 'users') {
-        if (row.role === 'root') h += '<span class="badge" style="color:#e3c47c;border-color:#e3c47c55;">终端</span> ';
-        else if (ME.role !== 'root' && isAdminUser) h += '<span style="color:var(--text-dim);font-size:11px;">仅终端可管理</span> ';
-        else h += '<button class="btn-sm" data-act="role" data-id="' + esc(id) + '" data-v="' + (row.role === 'admin' ? 'user' : 'admin') + '">' + (row.role === 'admin' ? '降为user' : '设为admin') + '</button> ';
-      }
-      if (!isRootUser && !(ME.role !== 'root' && isAdminUser)) h += '<button class="btn-sm" data-act="edit" data-t="' + t + '" data-id="' + esc(id) + '">编辑</button> ';
-      h += '<button class="btn-sm" data-act="view" data-i="' + idx + '">JSON</button> ';
-      if (!isRootUser && !(ME.role !== 'root' && isAdminUser)) h += '<button class="btn-sm danger" data-act="del" data-t="' + t + '" data-id="' + esc(id) + '">删除</button>';
-      else if (isRootUser) h += '<span style="color:var(--text-dim);font-size:11px;">受保护</span>';
-      h += '</td>';
-      head.slice(0, 7).forEach(function (k) {
-        var v = row[k];
-        h += '<td>' + esc(typeof v === 'object' ? JSON.stringify(v) : String(v === undefined || v === null ? '' : v)).slice(0, 60) + '</td>';
+    var h;
+    if (!rows.length) {
+      h = '<tr><td style="color:var(--text-dim);">（暂无数据）</td></tr>';
+    } else if (t === 'records') {
+      h = dbRecRowsHtml(rows);
+    } else {
+      var head = Object.keys(rows[0]);
+      h = '<tr><th>操作</th>';
+      head.slice(0, 7).forEach(function (k) { h += '<th>' + esc(k) + '</th>'; });
+      h += '<th>详情</th></tr>';
+      rows.forEach(function (row, idx) {
+        var id = row.id !== undefined ? row.id : row.key;
+        var isRootUser = t === 'users' && row.role === 'root';
+        var isAdminUser = t === 'users' && row.role === 'admin';
+        h += '<tr><td style="white-space:nowrap;">';
+        if ((t === 'orders' || t === 'messages')) {
+          h += '<select class="btn-sm" data-act="status" data-t="' + t + '" data-id="' + esc(id) + '" style="border-radius:8px;">';
+          (dSTATUS[t] || []).forEach(function (s) { h += '<option value="' + s + '"' + (row.status === s ? ' selected' : '') + '>' + s + '</option>'; });
+          h += '</select> ';
+        }
+        if (t === 'gallery') {
+          h += '<button class="btn-sm" data-act="tg" data-col="approved" data-id="' + esc(id) + '" data-v="' + (row.approved ? 'false' : 'true') + '">' + (row.approved ? '下架(approved)' : '授权(approved)') + '</button> ';
+          h += '<button class="btn-sm" data-act="tg" data-col="visible" data-id="' + esc(id) + '" data-v="' + (row.visible ? 'false' : 'true') + '">' + (row.visible ? '隐藏' : '显示') + '</button> ';
+        }
+        if (t === 'users') {
+          if (row.role === 'root') h += '<span class="badge" style="color:#e3c47c;border-color:#e3c47c55;">终端</span> ';
+          else if (ME.role !== 'root' && isAdminUser) h += '<span style="color:var(--text-dim);font-size:11px;">仅终端可管理</span> ';
+          else h += '<button class="btn-sm" data-act="role" data-id="' + esc(id) + '" data-v="' + (row.role === 'admin' ? 'user' : 'admin') + '">' + (row.role === 'admin' ? '降为user' : '设为admin') + '</button> ';
+        }
+        if (!isRootUser && !(ME.role !== 'root' && isAdminUser)) h += '<button class="btn-sm" data-act="edit" data-t="' + t + '" data-id="' + esc(id) + '">编辑</button> ';
+        h += '<button class="btn-sm" data-act="view" data-i="' + idx + '">JSON</button> ';
+        if (!isRootUser && !(ME.role !== 'root' && isAdminUser)) h += '<button class="btn-sm danger" data-act="del" data-t="' + t + '" data-id="' + esc(id) + '">删除</button>';
+        else if (isRootUser) h += '<span style="color:var(--text-dim);font-size:11px;">受保护</span>';
+        h += '</td>';
+        head.slice(0, 7).forEach(function (k) {
+          var v = row[k];
+          h += '<td>' + esc(typeof v === 'object' ? JSON.stringify(v) : String(v === undefined || v === null ? '' : v)).slice(0, 60) + '</td>';
+        });
+        h += '<td><div class="json-detail" data-detail="' + idx + '">' + esc(JSON.stringify(row, null, 2)) + '</div></td></tr>';
       });
-      h += '<td><div class="json-detail" data-detail="' + idx + '">' + esc(JSON.stringify(row, null, 2)) + '</div></td></tr>';
-    });
+    }
     table.innerHTML = h;
     bindDbRows();
+    dbRecRefreshBar();
+  }
+  /* ——— records 专属行渲染 ——— */
+  function dbRecRowsHtml(rows) {
+    var h = '<tr><th style="width:26px;"><input type="checkbox" id="dRecAllChk" class="chk" title="全选/取消当前列表"></th>' +
+      '<th>防伪码 code</th><th>产品 product_ref</th><th>光语 / 批次 info</th><th>图片 image_urls</th><th>建档时间</th><th>操作</th></tr>';
+    rows.forEach(function (row) {
+      var info = recInfo(row);
+      var checked = DB.sel[String(row.id)] ? ' checked' : '';
+      h += '<tr><td><input type="checkbox" class="dRecChk" data-id="' + row.id + '"' + checked + '></td>' +
+        '<td style="font-family:monospace;color:var(--gold);font-size:12px;">' + esc(row.code || '') + '</td>' +
+        '<td>' + esc(row.product_ref || '—') + '</td>' +
+        '<td>' + esc(info.text || '—') + (info.batch ? '<div class="dim" style="font-size:11px;">批次：' + esc(info.batch) + '</div>' : '') + '</td>' +
+        '<td class="dim">' + esc(String(row.image_urls || '').split(/[,，]/).filter(Boolean).join('、') || '—').slice(0, 120) + '</td>' +
+        '<td class="dim">' + esc(fmtTime(row.created_at)) + '</td>' +
+        '<td style="white-space:nowrap;">' +
+        '<button class="btn-sm" data-rr="copy" data-id="' + row.id + '" title="复制该防伪码">📋 复制</button>' +
+        '<button class="btn-sm" data-rr="preview" data-id="' + row.id + '" title="打开验证卡预览（可下载 JPG）">🖼️ 预览</button>' +
+        '<button class="btn-sm" data-rr="detail" data-id="' + row.id + '" title="详情弹窗：编辑 产品名/批次/光语/图片 → 保存修改；另含 导出 JPG / 复制码">查看详情</button>' +
+        '<button class="btn-sm danger" data-rr="del" data-id="' + row.id + '" title="硬删除该记录（确认后不可恢复）">🗑️ 删除</button></td></tr>';
+    });
+    return h;
+  }
+  function buildInfo(cur, text, batch) {
+    var o = {};
+    Object.keys(cur || {}).forEach(function (k) { if (k !== 'text' && k !== 'batch') o[k] = cur[k]; });
+    if (text) o.text = text;
+    if (batch) o.batch = batch;
+    return o;
+  }
+  /* records 行操作 */
+  function dbRecCopyCode(id) {
+    var row = dbFindRow(id);
+    if (row && row.code) { copyText(row.code); dbSaveCfgMsg('已复制 ' + row.code); }
+  }
+  function dbRecPreview(id) {
+    var row = dbFindRow(id);
+    if (!row) return;
+    var m = openModal(
+      '<h3>🖼️ 验证卡预览 · ' + esc(row.code || '') + '</h3>' +
+      '<div style="margin:8px 0;">' + vCardHtml(row) + '</div>' +
+      '<div class="btn-row"><button class="btn-line" data-pcopy type="button">📋 复制码</button>' +
+      '<button class="btn-line" data-pexp type="button" title="canvas 绘制并下载 JPG">📷 下载 JPG</button>' +
+      '<button class="btn-ghost" data-x type="button">关闭</button></div>');
+    bindModalClose(m);
+    m.querySelector('[data-pcopy]').addEventListener('click', function () { copyText(row.code); });
+    m.querySelector('[data-pexp]').addEventListener('click', function () { downloadVCard(row); });
+  }
+  function dbRecDetail(id) {
+    var row = dbFindRow(id);
+    if (!row) return;
+    var info = recInfo(row);
+    var m = openModal(
+      '<h3>查看详情 · 编辑 · ' + esc(row.code || '') + '</h3>' +
+      '<div class="small-note" style="margin-bottom:8px;">记录 id=' + esc(row.id) + ' · 建档：' + esc(fmtTime(row.created_at)) + ' · 保存以 update 写回 records。</div>' +
+      '<label class="f-label">产品名 product_ref</label><input id="drName" style="width:100%;" value="' + esc(row.product_ref || '') + '">' +
+      '<label class="f-label">批次号 info.batch</label><input id="drBatch" style="width:100%;" value="' + esc(info.batch || '') + '">' +
+      '<label class="f-label">光语 info.text</label><textarea id="drMsg" style="min-height:70px;">' + esc(info.text || '') + '</textarea>' +
+      '<label class="f-label">图片文件名 image_urls（逗号分隔）</label><input id="drImg" style="width:100%;" value="' + esc(row.image_urls || '') + '">' +
+      '<div class="small-note" style="margin-top:6px;">原始记录（只读）：</div><div class="code-box" style="font-size:11px;max-height:120px;overflow:auto;">' + esc(JSON.stringify(row)) + '</div>' +
+      '<div class="btn-row"><button class="btn-line" data-dcp type="button" title="复制防伪码">📋 复制码</button>' +
+      '<button class="btn-line" data-dexp type="button" title="按当前输入导出验证卡 JPG">📷 导出 JPG</button>' +
+      '<button class="btn-gold" data-dsave type="button" title="update records（产品名/批次/光语/图片）">💾 保存修改</button>' +
+      '<button class="btn-ghost" data-x type="button">关闭</button></div>');
+    bindModalClose(m);
+    m.querySelector('[data-dcp]').addEventListener('click', function () { copyText(row.code); });
+    m.querySelector('[data-dexp]').addEventListener('click', function () {
+      var o = buildInfo(recInfo(row), (m.querySelector('#drMsg').value || '').trim(), (m.querySelector('#drBatch').value || '').trim());
+      downloadVCard({ code: row.code, product_ref: (m.querySelector('#drName').value || '').trim() || row.product_ref, info: o, image_urls: (m.querySelector('#drImg').value || '').trim(), created_at: row.created_at });
+    });
+    m.querySelector('[data-dsave]').addEventListener('click', function () {
+      var name = (m.querySelector('#drName').value || '').trim();
+      if (!name) { setMsg('dMsg', '产品名不能为空', 'bad'); return; }
+      var o = buildInfo(recInfo(row), (m.querySelector('#drMsg').value || '').trim(), (m.querySelector('#drBatch').value || '').trim());
+      adm({ op: 'update', table: 'records', id: row.id, set: { product_ref: name, info: o, image_urls: (m.querySelector('#drImg').value || '').trim() } }).then(function (r) {
+        closeModal(m);
+        if (r.ok) { dbSaveCfgMsg('已保存记录 ' + row.code); loadDb(); }
+        else setMsg('dMsg', '保存失败：' + (r.error || ''), 'bad');
+      }).catch(function () { setMsg('dMsg', '网络错误', 'bad'); });
+    });
+  }
+  /* records 工具栏：全选 / 复制选中码 / 批量删除 */
+  function dbRecSelAllToggle() {
+    var rows = dbFiltered();
+    var allSel = rows.length > 0 && rows.every(function (r) { return DB.sel[String(r.id)]; });
+    rows.forEach(function (r) { if (allSel) delete DB.sel[String(r.id)]; else DB.sel[String(r.id)] = 1; });
+    dbRenderRows();
+  }
+  function dbRecCopySel() {
+    var rows = dbSelRows();
+    if (!rows.length) { setMsg('dMsg', '请先勾选记录（records）', 'bad'); return; }
+    copyText(rows.map(function (r) { return r.code || ''; }).filter(Boolean).join('\n'));
+    dbSaveCfgMsg('已复制 ' + rows.length + ' 枚防伪码');
+  }
+  function dbRecDelSel() {
+    var rows = dbSelRows();
+    if (!rows.length) { setMsg('dMsg', '请先勾选记录（records）', 'bad'); return; }
+    if (!confirm('确认硬删除勾选的 ' + rows.length + ' 条记录？无回收站，不可恢复。')) return;
+    var i = 0, done = 0;
+    function nx() {
+      if (i >= rows.length) { dbSaveCfgMsg('已删除 ' + done + ' / ' + rows.length); loadDb(); return; }
+      var id = rows[i++].id;
+      adm({ op: 'delete', table: 'records', id: id }).then(function (r) {
+        if (r.ok) { delete DB.sel[String(id)]; done++; }
+        nx();
+      }).catch(function () { nx(); });
+    }
+    nx();
   }
   function bindDbRows() {
     var table = $('dRows');
@@ -1521,6 +2103,41 @@
         });
       });
     });
+    /* records 专属 */
+    table.querySelectorAll('.dRecChk').forEach(function (c) {
+      c.addEventListener('change', function () {
+        var cid = String(c.getAttribute('data-id'));
+        if (c.checked) DB.sel[cid] = 1; else delete DB.sel[cid];
+        dbRecRefreshBar();
+      });
+    });
+    var allChk = $('dRecAllChk');
+    if (allChk) allChk.addEventListener('change', function () {
+      var rows = dbFiltered();
+      rows.forEach(function (r) { if (allChk.checked) DB.sel[String(r.id)] = 1; else delete DB.sel[String(r.id)]; });
+      dbRecRefreshBar();
+      dbRenderRows();
+    });
+    table.querySelectorAll('[data-rr="copy"]').forEach(function (b) {
+      b.addEventListener('click', function () { dbRecCopyCode(b.getAttribute('data-id')); });
+    });
+    table.querySelectorAll('[data-rr="preview"]').forEach(function (b) {
+      b.addEventListener('click', function () { dbRecPreview(b.getAttribute('data-id')); });
+    });
+    table.querySelectorAll('[data-rr="detail"]').forEach(function (b) {
+      b.addEventListener('click', function () { dbRecDetail(b.getAttribute('data-id')); });
+    });
+    table.querySelectorAll('[data-rr="del"]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var row = dbFindRow(b.getAttribute('data-id'));
+        if (!row) return;
+        if (!confirm('确认硬删除记录 ' + (row.code || row.id) + '？无回收站，不可恢复。')) return;
+        adm({ op: 'delete', table: 'records', id: row.id }).then(function (r) {
+          if (r.ok) { delete DB.sel[String(row.id)]; dbSaveCfgMsg('已删除记录 ' + (row.code || '')); loadDb(); }
+          else setMsg('dMsg', '删除失败：' + (r.error || ''), 'bad');
+        });
+      });
+    });
   }
   function dbSaveCfgMsg(t) {
     var el = $('dMsg');
@@ -1529,23 +2146,17 @@
   function dbLoadSettings(rows) {
     function pick(k) { for (var i = 0; i < rows.length; i++) if (rows[i].key === k) return rows[i]; return null; }
     function pretty(v) { return typeof v === 'string' ? v : JSON.stringify(v, null, 2); }
-    var mail = pick('mail'), ai = pick('ai'), hb = pick('home_banners');
+    var mail = pick('mail'), hb = pick('home_banners');
     $('dMailCfg').value = mail ? pretty(mail.value) : '{}';
-    $('dAiCfg').value = ai ? pretty(ai.value) : '{}';
     $('dHomeCfg').value = hb ? pretty(hb.value) : '[]';
   }
   function dbOpenEdit(t, id) {
-    var row = null;
-    for (var i = 0; i < DB.rows.length; i++) {
-      var r = DB.rows[i];
-      var rid = r.id !== undefined ? r.id : r.key;
-      if (String(rid) === String(id)) { row = r; break; }
-    }
+    var row = dbFindRow(id);
     if (!row) return;
     var m = openModal(
       '<h3>✏️ 编辑行（JSON）· ' + esc(t) + '</h3>' +
       '<textarea id="dbJson" style="min-height:320px;font-family:monospace;font-size:12px;width:100%;"></textarea>' +
-      '<div class="hint">修改将按 update 提交；id/key/created_at 自动排除。</div>' +
+      '<div class="hint">修改将按 update 提交；id/key/created_at 自动排除。records 建议用「查看详情」表单编辑。</div>' +
       '<div class="btn-row"><button class="btn-ghost" data-x type="button">取消</button><button class="btn-gold" data-ok type="button">保存修改</button></div>');
     bindModalClose(m);
     m.querySelector('#dbJson').value = JSON.stringify(row, null, 2);
@@ -1564,14 +2175,16 @@
   function dbCfgSave() {
     var updates = [
       { k: 'mail', el: $('dMailCfg'), dft: '{}' },
-      { k: 'ai', el: $('dAiCfg'), dft: '{}' },
       { k: 'home_banners', el: $('dHomeCfg'), dft: '[]' }
     ];
     function cfgPut(k, v) {
-      // settings 键存在与否未知：先 insert（冲突再 update），避免 update 空匹配静默成功
-      return adm({ op: 'insert', table: 'settings', row: { key: k, value: v } }).then(function (r) {
-        if (r.ok) return r;
-        return adm({ op: 'update', table: 'settings', id: k, set: { value: v } });
+      // settings 键存在与否未知：先查再 insert/update，避免 update 空匹配静默成功
+      return adm({ op: 'list', table: 'settings', limit: 200 }).then(function (r) {
+        var exists = false;
+        (r.rows || []).forEach(function (x) { if (x.key === k) exists = true; });
+        return exists
+          ? adm({ op: 'update', table: 'settings', id: k, set: { value: v } })
+          : adm({ op: 'insert', table: 'settings', row: { key: k, value: v } });
       });
     }
     var ps = [];
@@ -1589,7 +2202,7 @@
   }
 
   /* ============================================================
-     ⑦ 快捷工具（新增晶石/商品/光集/活动通知）
+     ⑦ 快捷工具（新增商品/上架光集/活动通知；晶石已在 💎 水晶知识库分区维护）
      ============================================================ */
   function toolToggle(t) {
     var el = $(t);
@@ -1597,26 +2210,6 @@
     var open = el.classList.contains('open');
     document.querySelectorAll('.adm-tool').forEach(function (x) { x.classList.remove('open'); });
     if (!open) el.classList.add('open');
-  }
-  function tSaveCrystal() {
-    var name = ($('tCrName').value || '').trim();
-    if (!name) { setMsg('tCrMsg', '名称不能为空', 'bad'); return; }
-    var row = { name: name, visible: true };
-    var map = [['tCrKind', 'kind'], ['tCrElement', 'element'], ['tCrMeaning', 'meaning'], ['tCrCare', 'care_tip'], ['tCrColor', 'color_hex'], ['tCrImg', 'image_url']];
-    map.forEach(function (p) {
-      var v = ($(p[0]).value || '').trim();
-      if (v) row[p[1]] = v;
-    });
-    var sort = num($('tCrSort').value);
-    if (sort !== undefined) row.sort = sort;
-    setMsg('tCrMsg', '保存中…');
-    adm({ op: 'insert', table: 'crystals', row: row }).then(function (r) {
-      if (r.ok) { setMsg('tCrMsg', '✅ 已保存晶石「' + name + '」', 'ok'); clearCrystalForm(); }
-      else setMsg('tCrMsg', '失败：' + (r.error || ''), 'bad');
-    }).catch(function () { setMsg('tCrMsg', '网络错误', 'bad'); });
-  }
-  function clearCrystalForm() {
-    ['tCrName', 'tCrKind', 'tCrElement', 'tCrMeaning', 'tCrCare', 'tCrColor', 'tCrImg', 'tCrSort'].forEach(function (id) { $(id).value = ''; });
   }
   function tSaveProduct() {
     var name = ($('tPrName').value || '').trim();
@@ -1670,6 +2263,387 @@
     }).catch(function () { setMsg('tNoticeMsg', '网络错误', 'bad'); });
   }
 
+  /* ============================================================
+     ⑧ 💎 水晶知识库 secCrystal（白桦规格 11）
+     ============================================================ */
+  var CR = { all: [], q: '', editId: null };
+  var CR_FIELDS = [['crName', 'name'], ['crKind', 'kind'], ['crElement', 'element'], ['crMeaning', 'meaning'], ['crCare', 'care_tip'], ['crColor', 'color_hex'], ['crImg', 'image_url']];
+  function loadCrystals(force) {
+    if (!force && CR.busy) return;
+    CR.busy = true;
+    adm({ op: 'list', table: 'crystals', limit: 200 }).then(function (r) {
+      CR.busy = false;
+      if (!r.ok) { setMsg('crMsg', '加载失败：' + (r.error || ''), 'bad'); return; }
+      CR.all = r.rows || [];
+      renderCrystals();
+    }).catch(function () { CR.busy = false; setMsg('crMsg', '网络错误', 'bad'); });
+  }
+  function crFiltered() {
+    if (!CR.q) return CR.all.slice();
+    return CR.all.filter(function (x) {
+      return [x.name, x.kind, x.element, x.meaning].join(' ').toLowerCase().indexOf(CR.q) > -1;
+    });
+  }
+  function crFind(id) {
+    for (var i = 0; i < CR.all.length; i++) if (String(CR.all[i].id) === String(id)) return CR.all[i];
+    return null;
+  }
+  function renderCrystals() {
+    var rows = crFiltered();
+    var box = $('crBody');
+    $('crCount').textContent = '共 ' + CR.all.length + ' 条' + (CR.q ? '（命中 ' + rows.length + '）' : '');
+    if (!rows.length) { box.innerHTML = '<div style="padding:22px;text-align:center;color:var(--text-dim);font-size:13px;">' + (CR.q ? '（无匹配晶石）' : '（暂无晶石，可在上方表单新增）') + '</div>'; return; }
+    var h = '<table class="tbl"><tr><th>名称</th><th>归属 / 五行</th><th>寓意 meaning</th><th>养护 / 色值</th><th>排序</th><th>可见</th><th>操作</th></tr>';
+    rows.forEach(function (x) {
+      h += '<tr' + (CR.editId && String(CR.editId) === String(x.id) ? ' style="background:rgba(227,196,124,.07);"' : '') + '>' +
+        '<td><span class="swatch" style="background:' + esc(x.color_hex || '#8FA3D9') + ';"></span>' + esc(x.name || '') + (x.image_url ? '<div class="dim" style="font-size:11px;">' + esc(x.image_url) + '</div>' : '') + '</td>' +
+        '<td>' + esc(x.kind || '—') + (x.element ? ' <span class="badge" style="color:#8fb6e8;border-color:#8fb6e855;">' + esc(x.element) + '</span>' : '') + '</td>' +
+        '<td class="dim">' + esc(x.meaning || '—') + '</td>' +
+        '<td class="dim">' + esc(x.care_tip || '—') + '<br>' + esc(x.color_hex || '') + '</td>' +
+        '<td>' + esc(x.sort === undefined || x.sort === null ? '—' : x.sort) + '</td>' +
+        '<td><button class="btn-sm" data-crvis="' + x.id + '" data-v="' + (x.visible ? 'false' : 'true') + '" title="切换对外可见">' + (x.visible ? '可见' : '隐藏') + '</button></td>' +
+        '<td style="white-space:nowrap;">' +
+        '<button class="btn-sm" data-credit="' + x.id + '" title="载入表单编辑该晶石">✏️ 编辑</button>' +
+        '<button class="btn-sm" data-crdel="' + x.id + '" title="删除该晶石">🗑️ 删除</button>' +
+        '<button class="btn-sm" data-crcopy="' + x.id + '" title="复制为「名称 · 寓意」文本（发微信用）">📋 复制</button></td></tr>';
+    });
+    h += '</table>';
+    box.innerHTML = h;
+    box.querySelectorAll('[data-credit]').forEach(function (b) { b.addEventListener('click', function () { crEdit(b.getAttribute('data-credit')); }); });
+    box.querySelectorAll('[data-crdel]').forEach(function (b) {
+      b.addEventListener('click', function () { crDel(b.getAttribute('data-crdel')); });
+    });
+    box.querySelectorAll('[data-crcopy]').forEach(function (b) { b.addEventListener('click', function () { crCopy(b.getAttribute('data-crcopy')); }); });
+    box.querySelectorAll('[data-crvis]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        adm({ op: 'update', table: 'crystals', id: b.getAttribute('data-crvis'), set: { visible: b.getAttribute('data-v') === 'true' } }).then(function (r) {
+          if (r.ok) { setMsg('crMsg', '已更新可见状态', 'ok'); loadCrystals(true); }
+          else setMsg('crMsg', '失败：' + (r.error || ''), 'bad');
+        });
+      });
+    });
+  }
+  function crResetForm() {
+    CR.editId = null;
+    CR_FIELDS.forEach(function (p) { var el = $(p[0]); if (el) el.value = ''; });
+    var s = $('crSort'); if (s) s.value = '';
+    var v = $('crVisible'); if (v) v.checked = true;
+    var t = $('crFormTitle'); if (t) t.textContent = '💎 新增晶石';
+    var msg = $('crMsg'); if (msg) { msg.textContent = ''; msg.className = 'msg'; }
+  }
+  function crEdit(id) {
+    var x = crFind(id);
+    if (!x) return;
+    CR.editId = id;
+    var map = { name: 'crName', kind: 'crKind', element: 'crElement', meaning: 'crMeaning', care_tip: 'crCare', color_hex: 'crColor', image_url: 'crImg' };
+    Object.keys(map).forEach(function (k) {
+      var el = $(map[k]);
+      if (el) el.value = (x[k] === undefined || x[k] === null) ? '' : String(x[k]);
+    });
+    var s = $('crSort'); if (s) s.value = (x.sort === undefined || x.sort === null) ? '' : String(x.sort);
+    var v = $('crVisible'); if (v) v.checked = x.visible !== false;
+    var t = $('crFormTitle'); if (t) t.textContent = '✏️ 编辑晶石（id ' + id + '）';
+    var f = $('crForm');
+    if (f) f.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setMsg('crMsg', '正在编辑「' + x.name + '」…', 'ok');
+  }
+  function crSave() {
+    var name = ($('crName').value || '').trim();
+    if (!name) { setMsg('crMsg', '名称不能为空', 'bad'); return; }
+    var row = { name: name };
+    CR_FIELDS.forEach(function (p) {
+      if (p[0] === 'crName') return;
+      var v = ($(p[0]).value || '').trim();
+      if (v) row[p[1]] = v;
+    });
+    var sort = num($('crSort').value);
+    if (sort !== undefined) row.sort = sort;
+    row.visible = $('crVisible').checked !== false;
+    var isEdit = CR.editId !== null;
+    setMsg('crMsg', '保存中…');
+    var p = isEdit
+      ? adm({ op: 'update', table: 'crystals', id: CR.editId, set: row })
+      : adm({ op: 'insert', table: 'crystals', row: row });
+    p.then(function (r) {
+      if (r.ok) {
+        var oldName = CR.editId ? (crFind(CR.editId) || {}).name : '';
+        setMsg('crMsg', '✅ 已' + (isEdit ? '更新' : '新增') + '晶石「' + (isEdit ? oldName : name) + '」', 'ok');
+        crResetForm();
+        loadCrystals(true);
+      } else {
+        setMsg('crMsg', (isEdit ? '更新' : '新增') + '失败：' + (r.error || '') + (String(r.error || '').indexOf('duplicate') > -1 ? '（名称重复）' : ''), 'bad');
+      }
+    }).catch(function () { setMsg('crMsg', '网络错误', 'bad'); });
+  }
+  function crDel(id) {
+    var x = crFind(id);
+    if (!x) return;
+    if (!confirm('确认删除晶石「' + x.name + '」？')) return;
+    adm({ op: 'delete', table: 'crystals', id: x.id }).then(function (r) {
+      if (r.ok) {
+        if (CR.editId && String(CR.editId) === String(x.id)) crResetForm();
+        setMsg('crMsg', '已删除「' + x.name + '」', 'ok');
+        loadCrystals(true);
+      } else setMsg('crMsg', '删除失败：' + (r.error || ''), 'bad');
+    }).catch(function () { setMsg('crMsg', '网络错误', 'bad'); });
+  }
+  function crCopy(id) {
+    var x = crFind(id);
+    if (!x) return;
+    var txt = x.name + (x.meaning ? ' · ' + x.meaning : '');
+    copyText(txt);
+    setMsg('crMsg', '已复制：' + txt, 'ok');
+  }
+
+  /* ============================================================
+     ⑨ 🎁 转盘优惠 secWheel（白桦规格 10）
+     ============================================================ */
+  function wdSumTxt() {
+    var el = $('wdSumTxt');
+    if (!el) return;
+    var sum = 0;
+    for (var i = 1; i <= 4; i++) sum += num(($('wdP' + i).value || '').trim()) || 0;
+    var min = num(($('wdMin').value || '').trim());
+    var max = num(($('wdMax').value || '').trim());
+    var ok = Math.abs(sum - 100) <= 0.001 && min !== undefined && max !== undefined && min >= 0 && max >= min;
+    el.textContent = '当前合计 ' + sum + '%' + (ok ? ' ✅' : '（须合计 100%）') + (min !== undefined && max !== undefined ? ' · 立减 ' + min + '~' + max + ' 元均分四档' : '');
+    el.style.color = ok ? 'var(--gold)' : '#ff9b9b';
+    return ok;
+  }
+  function wdLoad() {
+    adm({ op: 'list', table: 'app_data', limit: 200 }).then(function (r) {
+      if (!r.ok) { setMsg('wdMsg', '读取失败：' + (r.error || ''), 'bad'); return; }
+      var row = null;
+      (r.rows || []).forEach(function (x) { if (x.key === 'wheel') row = x; });
+      var v = row ? jsonValToObj(row.value) : null;
+      var cfg = (v && typeof v.min === 'number' && typeof v.max === 'number') ? v : null;
+      var min = cfg ? cfg.min : 5, max = cfg ? cfg.max : 20;
+      var probs = (cfg && Array.isArray(cfg.probs) && cfg.probs.length === 4) ? cfg.probs : [25, 25, 25, 25];
+      $('wdMin').value = min; $('wdMax').value = max;
+      for (var i = 0; i < 4; i++) $('wdP' + (i + 1)).value = Number(probs[i]);
+      wdSumTxt();
+      setMsg('wdMsg', cfg ? '已读取 app_data.wheel（min=' + min + '，max=' + max + '）' : 'app_data 尚无 wheel 键，已填入默认值（保存后新建）', 'ok');
+    }).catch(function () { setMsg('wdMsg', '网络错误', 'bad'); });
+  }
+  function wdSave() {
+    var min = num(($('wdMin').value || '').trim());
+    var max = num(($('wdMax').value || '').trim());
+    if (min === undefined || max === undefined) { setMsg('wdMsg', '请填写最小/最大立减金额', 'bad'); return; }
+    if (min < 0 || max < min) { setMsg('wdMsg', '金额须 0 ≤ 最小 ≤ 最大', 'bad'); return; }
+    var probs = [];
+    for (var i = 0; i < 4; i++) {
+      var p = num(($('wdP' + (i + 1)).value || '').trim());
+      if (p === undefined) { setMsg('wdMsg', '请完整填写第 ' + (i + 1) + ' 档概率', 'bad'); return; }
+      probs.push(p);
+    }
+    if (Math.abs(probs[0] + probs[1] + probs[2] + probs[3] - 100) > 0.001) { setMsg('wdMsg', '四档概率合计须为 100%（当前 ' + (probs[0] + probs[1] + probs[2] + probs[3]) + '%）', 'bad'); return; }
+    var value = { min: min, max: max, probs: probs };
+    setMsg('wdMsg', '保存中…');
+    adm({ op: 'list', table: 'app_data', limit: 200 }).then(function (r) {
+      if (!r.ok) { setMsg('wdMsg', '读取 app_data 失败：' + (r.error || ''), 'bad'); return; }
+      var exists = false;
+      (r.rows || []).forEach(function (x) { if (x.key === 'wheel') exists = true; });
+      var put = exists
+        ? adm({ op: 'update', table: 'app_data', id: 'wheel', set: { value: value } })
+        : adm({ op: 'insert', table: 'app_data', row: { key: 'wheel', value: value } });
+      return put.then(function (r2) {
+        if (r2.ok) { setMsg('wdMsg', '✅ 已保存转盘配置（app_data.wheel，' + (exists ? '更新' : '新建') + '）：立减 ' + min + '~' + max + ' 元，概率 ' + probs.join('/') + '；前台接入后生效', 'ok'); }
+        else setMsg('wdMsg', '保存失败：' + (r2.error || ''), 'bad');
+      });
+    }).catch(function () { setMsg('wdMsg', '网络错误', 'bad'); });
+  }
+
+  /* ============================================================
+     ⑩ ⚙️ 站点文案 secCms（白桦规格 9 → app_data 各键）
+     ============================================================ */
+  var CMS = { map: {}, loaded: false };
+  var CMS_DESC = {
+    brand: '品牌理念（JSON：name / slogan / disclaimer）',
+    notice: '活动通知横幅文案（纯文本；留空则关闭）',
+    join: '「加入我们 · 分成」政策文案',
+    quotes: '加载语录（每行一条，图片加载前轮播）',
+    home_banners: '主页展示条数组（title / text / image / link）'
+  };
+  function cmsLoadAll() {
+    adm({ op: 'list', table: 'app_data', limit: 200 }).then(function (r) {
+      if (!r.ok) { setMsg('cmsMsg', '读取失败：' + (r.error || ''), 'bad'); return; }
+      CMS.map = {};
+      (r.rows || []).forEach(function (x) { CMS.map[x.key] = x.value; });
+      CMS.loaded = true;
+      cmsPick();
+      setMsg('cmsMsg', '已读取 app_data（' + Object.keys(CMS.map).length + ' 个键）', 'ok');
+    }).catch(function () { setMsg('cmsMsg', '网络错误', 'bad'); });
+  }
+  function cmsPick() {
+    var key = ($('cmsKey').value || '').trim();
+    var desc = $('cmsDesc');
+    if (desc) desc.textContent = CMS_DESC[key] ? (CMS_DESC[key] + '（前台对应读取处接入后生效）') : (key ? '自定义键：前台需对应读取处接入后生效' : '输入或选择配置键（支持任意键名）');
+    var ta = $('cmsVal');
+    if (!ta) return;
+    if (!key) { ta.value = ''; return; }
+    var v = CMS.map[key];
+    if (v === undefined || v === null) { ta.value = ''; return; }
+    ta.value = (typeof v === 'object') ? JSON.stringify(v, null, 2) : String(v);
+  }
+  function cmsSave() {
+    var key = ($('cmsKey').value || '').trim();
+    if (!key) { setMsg('cmsMsg', '请填写配置键 key', 'bad'); return; }
+    var raw = $('cmsVal').value;
+    var value;
+    try { value = JSON.parse(raw || '{}'); }
+    catch (e) { value = raw; } // 非 JSON → 存为纯文本
+    if (value === undefined || value === null) value = raw;
+    setMsg('cmsMsg', '保存中…');
+    adm({ op: 'list', table: 'app_data', limit: 200 }).then(function (r) {
+      if (!r.ok) { setMsg('cmsMsg', '读取 app_data 失败：' + (r.error || ''), 'bad'); return; }
+      var exists = false;
+      (r.rows || []).forEach(function (x) { if (x.key === key) exists = true; });
+      var put = exists
+        ? adm({ op: 'update', table: 'app_data', id: key, set: { value: value } })
+        : adm({ op: 'insert', table: 'app_data', row: { key: key, value: value } });
+      return put.then(function (r2) {
+        if (r2.ok) { CMS.map[key] = value; setMsg('cmsMsg', '✅ 已保存 app_data.' + key + '（' + (exists ? '更新' : '新建') + '）', 'ok'); }
+        else setMsg('cmsMsg', '保存失败：' + (r2.error || ''), 'bad');
+      });
+    }).catch(function () { setMsg('cmsMsg', '网络错误', 'bad'); });
+  }
+
+  /* ============================================================
+     ⑪ 📮 发订阅邮件 secSubMail（白桦规格 14）
+     ============================================================ */
+  var SM = { all: [], busy: false };
+  function loadSubscribers(force) {
+    if (!force && SM.busy) return;
+    SM.busy = true;
+    adm({ op: 'list', table: 'subscribers', limit: 200 }).then(function (r) {
+      SM.busy = false;
+      if (!r.ok) { setMsg('smMsg', '加载失败：' + (r.error || ''), 'bad'); return; }
+      SM.all = r.rows || [];
+      var emails = SM.all.filter(function (s) { return emailLike(s.contact); }).length;
+      $('smCount').textContent = '订阅登记共 ' + SM.all.length + ' 条 · 其中形如邮箱 ' + emails + ' 条（可发送）· 非邮箱 ' + (SM.all.length - emails) + ' 条（跳过）';
+      var box = $('smList');
+      if (!SM.all.length) { box.innerHTML = '<div style="padding:18px;text-align:center;color:var(--text-dim);font-size:13px;">（暂无订阅登记）</div>'; return; }
+      var h = '<table class="tbl"><tr><th>contact</th><th>来源 source</th><th>登记时间</th></tr>';
+      SM.all.slice().reverse().forEach(function (s) {
+        var isMail = emailLike(s.contact);
+        h += '<tr><td>' + (isMail ? '<span style="color:var(--gold);">✉ ' : '') + esc(s.contact || '') + (isMail ? '</span>' : '') + '</td>' +
+          '<td class="dim">' + esc(s.source || '—') + '</td>' +
+          '<td class="dim">' + esc(fmtTime(s.created_at)) + '</td></tr>';
+      });
+      h += '</table>';
+      box.innerHTML = h;
+    }).catch(function () { SM.busy = false; setMsg('smMsg', '网络错误', 'bad'); });
+  }
+  function smSend() {
+    var title = ($('smTitle').value || '').trim() || '予光来信';
+    var body = ($('smBody').value || '').trim();
+    if (!body) { setMsg('smMsg', '请填写邮件正文', 'bad'); return; }
+    if (!SM.all.length && !SM.busy) { setMsg('smMsg', '订阅列表为空，请先刷新', 'bad'); return; }
+    var list = SM.all.filter(function (s) { return emailLike(s.contact); }).map(function (s) { return String(s.contact).trim(); });
+    if (!list.length) { setMsg('smMsg', '订阅登记中没有形如邮箱的 contact，无法发邮件', 'bad'); return; }
+    var btn = $('smSend');
+    btn.disabled = true;
+    var ok = 0, fail = 0;
+    setMsg('smMsg', '开始发送 0/' + list.length + '（间隔 200ms）…', 'ok');
+    var i = 0;
+    function nx() {
+      if (i >= list.length) {
+        btn.disabled = false;
+        setMsg('smMsg', (fail ? '完成：成功 ' + ok + '，失败 ' + fail + '（可刷新列表后重试失败项）' : '✅ 全部 ' + ok + ' 封已发送') + '；另有 ' + (SM.all.length - list.length) + ' 条非邮箱已跳过', fail ? 'bad' : 'ok');
+        return;
+      }
+      var to = list[i++];
+      emailOnce(to, title, body).then(function (r) {
+        if (r && r.ok) ok++; else fail++;
+        setMsg('smMsg', '发送中 ' + i + '/' + list.length + '（成功 ' + ok + '，失败 ' + fail + '）…', ok ? 'ok' : '');
+        return waitMs(200).then(nx);
+      }).catch(function () { fail++; return waitMs(200).then(nx); });
+    }
+    nx();
+  }
+
+  /* ============================================================
+     ⑫ 🔑 修改操作密码 secPwd（白桦规格 13）
+     ============================================================ */
+  function pwSave() {
+    var oldPw = $('pwOld').value;
+    var n1 = $('pwNew').value;
+    var n2 = $('pwNew2').value;
+    if (!oldPw) { setMsg('pwMsg', '请填写旧密码', 'bad'); return; }
+    if (!n1 || n1.length < 6) { setMsg('pwMsg', '新密码至少 6 位', 'bad'); return; }
+    if (n1 !== n2) { setMsg('pwMsg', '两次输入的新密码不一致', 'bad'); return; }
+    setMsg('pwMsg', '校验并修改中…');
+    acc({ op: 'change_pw', old_password: oldPw, new_password: n1 }).then(function (r) {
+      if (r.ok) {
+        ['pwOld', 'pwNew', 'pwNew2'].forEach(function (id) { var el = $(id); if (el) el.value = ''; });
+        setMsg('pwMsg', '✅ 已修改 ' + (ME.account || '本账号') + ' 的密码，立即生效', 'ok');
+      } else setMsg('pwMsg', '修改失败：' + (r.error || '（原密码错误？）'), 'bad');
+    }).catch(function () { setMsg('pwMsg', '网络错误', 'bad'); });
+  }
+
+  /* ============================================================
+     ⑬ 🤖 AI 设计 secAi（白桦规格 12 → settings.ai）
+     ============================================================ */
+  var AI_MASK = '•••••（已配置，留空保持不变）';
+  function isSecretKey(k) {
+    var keys = ['key', 'apiKey', 'api_key', 'apikey', 'token', 'secret', 'password', 'deepseek_key'];
+    for (var i = 0; i < keys.length; i++) if (k === keys[i]) return true;
+    return false;
+  }
+  var AI_ORIG = {};
+  function aiLoad() {
+    var show = $('aiUrlShown');
+    if (show) show.textContent = cfg.aiUrl || (cfg.url + '/functions/v1/ai-assistant');
+    adm({ op: 'list', table: 'settings', limit: 200 }).then(function (r) {
+      if (!r.ok) { setMsg('aiMsg', '读取失败：' + (r.error || ''), 'bad'); return; }
+      var row = null;
+      (r.rows || []).forEach(function (x) { if (x.key === 'ai') row = x; });
+      var v = row ? jsonValToObj(row.value) : null;
+      var obj = (v && typeof v === 'object' && !Array.isArray(v)) ? v : {};
+      AI_ORIG = obj;
+      var disp = {};
+      Object.keys(obj).forEach(function (k) {
+        var val = obj[k];
+        disp[k] = (isSecretKey(k) && val !== undefined && val !== null && String(val) !== '') ? AI_MASK : val;
+      });
+      var ta = $('aiJson');
+      if (ta) ta.value = Object.keys(disp).length ? JSON.stringify(disp, null, 2) : '';
+      setMsg('aiMsg', '已读取 settings.ai' + (row ? '' : '（尚无 ai 键，将新建）') + '；含密钥类键会以占位符显示，不明文回显', 'ok');
+    }).catch(function () { setMsg('aiMsg', '网络错误', 'bad'); });
+  }
+  function aiSave() {
+    var ta = $('aiJson');
+    var obj;
+    try { obj = JSON.parse(ta.value || '{}'); } catch (e) { setMsg('aiMsg', 'JSON 格式错误：' + e.message, 'bad'); return; }
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) { setMsg('aiMsg', '配置需为 JSON 对象', 'bad'); return; }
+    // 密钥占位 → 沿用库中原值（不覆盖、不明文回显）
+    Object.keys(obj).forEach(function (k) {
+      var val = obj[k];
+      if (isSecretKey(k) && (val === AI_MASK || val === '' || val === undefined || val === null)) {
+        if (AI_ORIG[k] !== undefined && AI_ORIG[k] !== null) obj[k] = AI_ORIG[k];
+        else delete obj[k];
+      }
+    });
+    setMsg('aiMsg', '保存中…');
+    adm({ op: 'list', table: 'settings', limit: 200 }).then(function (r) {
+      if (!r.ok) { setMsg('aiMsg', '读取 settings 失败：' + (r.error || ''), 'bad'); return; }
+      var exists = false;
+      (r.rows || []).forEach(function (x) { if (x.key === 'ai') exists = true; });
+      var put = exists
+        ? adm({ op: 'update', table: 'settings', id: 'ai', set: { value: obj } })
+        : adm({ op: 'insert', table: 'settings', row: { key: 'ai', value: obj } });
+      return put.then(function (r2) {
+        if (r2.ok) { setMsg('aiMsg', '✅ 已保存 AI 设置（settings.ai，' + (exists ? '更新' : '新建') + '）', 'ok'); aiLoad(); }
+        else setMsg('aiMsg', '保存失败：' + (r2.error || ''), 'bad');
+      });
+    }).catch(function () { setMsg('aiMsg', '网络错误', 'bad'); });
+  }
+  function jsonValToObj(v) {
+    if (!v) return null;
+    if (typeof v === 'object') return v;
+    try { return JSON.parse(String(v).replace(/^"(.*)"$/, '$1')); } catch (e) { return null; }
+  }
+
   /* ================= 20s 轮询（分区在视野内时） ================= */
   var pollTimer = null;
   function startPoller() {
@@ -1681,6 +2655,8 @@
       if (isOn('secOrders') && !modalOpen && !O.editId) loadOrders();
       if (isOn('secDb') && !modalOpen) loadDb();
       if (isOn('secUsers') && !modalOpen) loadUsers();
+      if (isOn('secCrystal') && !modalOpen) loadCrystals();
+      if (isOn('secSubMail') && !modalOpen) loadSubscribers();
     }, 20000);
   }
 
@@ -1724,10 +2700,45 @@
     document.querySelectorAll('[data-tool]').forEach(function (b) {
       b.addEventListener('click', function () { toolToggle(b.getAttribute('data-tool')); });
     });
-    $('tCrSave').addEventListener('click', tSaveCrystal);
     $('tPrSave').addEventListener('click', tSaveProduct);
     $('tGalSave').addEventListener('click', tSaveGallery);
     $('tNoticeSave').addEventListener('click', tSaveNotice);
+
+    /* 数据库记录管理 · records 工具栏 */
+    $('dRecSelAll').addEventListener('click', dbRecSelAllToggle);
+    $('dRecCopySel').addEventListener('click', dbRecCopySel);
+    $('dRecDelSel').addEventListener('click', dbRecDelSel);
+
+    /* 水晶知识库 */
+    $('crRefresh').addEventListener('click', function () { loadCrystals(true); });
+    $('crReset').addEventListener('click', crResetForm);
+    $('crSave').addEventListener('click', crSave);
+    $('crSearch').addEventListener('input', function () { CR.q = ($('crSearch').value || '').trim().toLowerCase(); renderCrystals(); });
+
+    /* 转盘 */
+    $('wdRefresh').addEventListener('click', wdLoad);
+    $('wdSave').addEventListener('click', wdSave);
+    ['wdMin', 'wdMax', 'wdP1', 'wdP2', 'wdP3', 'wdP4'].forEach(function (id) {
+      var el = $(id);
+      if (el) el.addEventListener('input', wdSumTxt);
+    });
+
+    /* 站点文案 */
+    $('cmsRefresh').addEventListener('click', cmsLoadAll);
+    $('cmsReload').addEventListener('click', cmsPick);
+    $('cmsSave').addEventListener('click', cmsSave);
+    $('cmsKey').addEventListener('input', cmsPick);
+
+    /* 发订阅邮件 */
+    $('smRefresh').addEventListener('click', function () { loadSubscribers(true); });
+    $('smSend').addEventListener('click', smSend);
+
+    /* 修改操作密码 */
+    $('pwSave').addEventListener('click', pwSave);
+
+    /* AI 设计 */
+    $('aiRefresh').addEventListener('click', aiLoad);
+    $('aiSave').addEventListener('click', aiSave);
   }
 
   bindStatic();
