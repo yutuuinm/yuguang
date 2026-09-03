@@ -68,6 +68,8 @@
       <button class="btn-ghost" id="admExport" type="button" style="font-size:13px;padding:8px 18px;">导出 CSV</button>
       <a class="btn-ghost" style="font-size:13px;padding:8px 18px;" href="index.html">返回主页</a>
       <button class="btn-ghost" style="font-size:13px;padding:8px 18px;" id="admLogout" type="button">退出</button>
+      <input id="admResetAcc" placeholder="用户邮箱(重置密码)" style="width:auto;min-width:200px;margin:0;padding:8px 10px;">
+      <button class="btn-ghost" style="font-size:13px;padding:8px 14px;" id="admResetBtn" type="button">重置该用户密码</button>
     </div>
     <div class="msg" id="admMsg"></div>
     <div style="overflow-x:auto;"><table class="tbl" id="admRows"></table></div>
@@ -132,6 +134,14 @@
       localStorage.setItem('yg_token', token);
       enter(r.account, r.role, r.nickname);
     }).catch(function () { errEl.textContent = '网络错误'; });
+  });
+  document.getElementById('admResetBtn').addEventListener('click', function () {
+    var ac = (document.getElementById('admResetAcc').value || '').trim();
+    if (!ac) { msg.textContent = '请输入用户邮箱'; return; }
+    if (!confirm('确认重置 ' + ac + ' 的密码？（临时密码将发送到其邮箱）')) return;
+    api(AAPI, { op: 'admin_reset', account: ac }).then(function (r) {
+      msg.textContent = r.ok ? '已重置，临时密码已发送' : (r.error || '失败');
+    }).catch(function () { msg.textContent = '网络错误'; });
   });
   document.getElementById('admLogout').addEventListener('click', function () {
     api(AAPI, { op: 'logout' }).catch(function () {});
