@@ -848,7 +848,8 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
 
   function refreshChip() {
     if (account) {
-      chip.innerHTML = '<span class="chip-av">' + av() + '</span>' + (nick() || account);
+      chip.innerHTML = '<span class="chip-av">' + av() + '</span>';
+      chip.title = nick() || account;
       chip.setAttribute('data-logged', '1');
       chip.title = '个人中心';
     } else {
@@ -991,7 +992,7 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
 
   chip.addEventListener('click', function () {
     if (chip.getAttribute('data-logged') !== '1') { show('login'); useCode = false; mask.classList.add('show'); emailEl.focus(); return; }
-    openProfile();
+    if (location.pathname.indexOf('account.html') === -1) location.href = 'account.html';
   });
 
   function openProfile() {
