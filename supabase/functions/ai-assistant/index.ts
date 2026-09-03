@@ -49,6 +49,15 @@ async function deepseekChat(apiKey, model, messages) {
   return (text || "").trim();
 }
 
+async function recordUsage(SB_URL, SK, mode, question) {
+  try {
+    await fetch(SB_URL + "/rest/v1/ai_usage", {
+      method: "POST", headers: { apikey: SK, Authorization: "Bearer " + SK, "Content-Type": "application/json", Prefer: "return=minimal" },
+      body: JSON.stringify({ mode: mode || "chat", question: String(question || "").slice(0, 200) }),
+    });
+  } catch (e) { /* 表未建则忽略 */ }
+}
+
 async function fetchCrystals(SB_URL, SK) {
   try {
     const r = await fetch(SB_URL + "/rest/v1/crystals?select=name,kind,element,meaning&visible=eq.true&order=sort.asc&limit=100", {
@@ -97,6 +106,7 @@ Deno.serve(async (req) => {
         { role: "system", content: SYSTEM },
         { role: "user", content: `用户需求：「${need}」。已知晶石：${crystalText}。请给出 2-4 个「文化意象参考」建议（含可考虑的款式方向与一句予光风格的光语），并提醒不构成任何效果承诺。` },
       ]);
+      await recordUsage(SB_URL, SK, 'stones', need);
       return Response.json({ ok: true, answer: out }, { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
@@ -108,6 +118,7 @@ Deno.serve(async (req) => {
       ...history.slice(-8),
       { role: "user", content: question },
     ]);
+    await recordUsage(SB_URL, SK, 'chat', question);
     return Response.json({ ok: true, answer }, { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
     return Response.json({ ok: false, error: (e as Error).message }, {
