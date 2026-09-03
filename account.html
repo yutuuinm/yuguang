@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>个人中心 · 予光</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09032123"?>
+<link rel="stylesheet" href="css/style.css?v=09032130"?>
 <style>
   .acc{max-width:620px;margin:0 auto;padding:110px 18px 80px;}
   .back{color:var(--gold);font-size:13px;text-decoration:none;}
@@ -117,43 +117,57 @@
   function msg(id, t) { var el = document.getElementById(id); if (el) el.textContent = t; }
 
   var menuList = document.getElementById('menuList');
+  var meTop = document.getElementById('meTop');
+
+  function closeAll() { document.querySelectorAll('.panel').forEach(function (x) { x.classList.remove('open'); }); }
   function goBack() {
-    document.querySelectorAll('.panel').forEach(function (x) { x.classList.remove('open'); });
-    menuList.classList.remove('hide');
-    menuList.classList.remove('anim-in'); void menuList.offsetWidth; menuList.classList.add('anim-in');
+    closeAll();
+    if (meTop) meTop.classList.remove('hide');
+    if (menuList) { menuList.classList.remove('hide'); menuList.classList.remove('anim-in'); void menuList.offsetWidth; menuList.classList.add('anim-in'); }
   }
   document.querySelectorAll('.menu-card').forEach(function (b) {
     b.addEventListener('click', function () {
       var p = 'p-' + b.getAttribute('data-p');
       var panel = document.getElementById(p);
       if (!panel) return;
-      menuList.classList.add('hide');
-      document.querySelectorAll('.panel').forEach(function (x) { x.classList.remove('open'); });
+      if (menuList) menuList.classList.add('hide');
+      if (meTop) meTop.classList.add('hide');
+      closeAll();
       panel.classList.remove('open'); void panel.offsetWidth; panel.classList.add('open');
       if (p === 'p-orders') loadOrders();
       if (p === 'p-inbox') loadInbox();
+      if (p === 'p-email') { var ce = document.getElementById('curEmail'); if (ce) ce.textContent = account; }
     });
   });
-  document.querySelectorAll('[data-back]').forEach(function (a) {
-    a.addEventListener('click', goBack);
-  });
+  document.querySelectorAll('[data-back]').forEach(function (a) { a.addEventListener('click', goBack); });
 
-  function load() {
-    if (!token) { document.getElementById('meInfo').textContent = '请先登录'; return; }
-    api({ op: 'me' }).then(function (r) {
-      if (!r.ok) { document.getElementById('meInfo').textContent = '未登录（会话失效请重新登录）'; return; }
-      account = r.account;
-      localStorage.setItem('yg_account', r.account);
-      var s = ((r.nickname || '') || r.account || '光').trim();
-      document.getElementById('meAv').textContent = s.charAt(0);
-      document.getElementById('meName').textContent = r.nickname || r.account;
-      document.getElementById('meInfo').textContent = '账号：' + r.account + ' · ' + r.role;
-      document.getElementById('acAccount').value = r.account;
-      document.getElementById('acNick').value = r.nickname || '';
-      document.getElementById('acPhone').value = r.phone || '';
-      document.getElementById('acEmail').value = r.email || r.account;
-    }).catch(function () {});
+  function fill(r) {
+    account = r.account;
+    localStorage.setItem('yg_account', r.account);
+    var s = ((r.nickname || '') || r.account || '光').trim();
+    document.getElementById('meAv').textContent = s.charAt(0);
+    document.getElementById('meName').textContent = r.nickname || r.account;
+    document.getElementById('meInfo').textContent = '账号：' + r.account + ' · ' + r.role;
+    document.getElementById('acAccount').value = r.account;
+    document.getElementById('acNick').value = r.nickname || '';
+    document.getElementById('acPhone').value = r.phone || '';
+    document.getElementById('acEmail').value = r.email || r.account;
+    var ce = document.getElementById('curEmail'); if (ce) ce.textContent = r.email || r.account;
   }
+  function doMe(times) {
+    if (!token) { msg('meInfo', '请先登录'); return; }
+    api({ op: 'me' }).then(function (r) {
+      if (!r.ok) {
+        if ((times || 0) < 1) { setTimeout(function () { doMe((times || 0) + 1); }, 900); return; }
+        document.getElementById('meInfo').textContent = '登录状态失效，请返回右上角重新登录';
+        return;
+      }
+      fill(r);
+    }).catch(function () {
+      if ((times || 0) < 1) { setTimeout(function () { doMe((times || 0) + 1); }, 1200); }
+    });
+  }
+
   function loadOrders() {
     var box = document.getElementById('ordersBox');
     api({ op: 'orders' }).then(function (r) {
@@ -198,14 +212,18 @@
     api({ op: 'send_code', email: account }).then(function (r) {
       if (r.ok) {
         document.getElementById('acCode').style.display = 'block';
-        msg('mailMsg', '发送成功，请前往原邮箱查看（10 分钟内有效）');
+        document.getElementById('acEmail').disabled = false;
+        msg('mailMsg', '发送成功，请查看原邮箱并输入验证码，再填新邮箱');
         cd = 60; var b = document.getElementById('acSend'); b.textContent = '已发送(' + cd + ')';
-        var t = setInterval(function () { cd--; if (cd <= 0) { clearInterval(t); b.textContent = '发码到原邮箱'; } else b.textContent = '已发送(' + cd + ')'; }, 1000);
+        var t = setInterval(function () { cd--; if (cd <= 0) { clearInterval(t); b.textContent = '发验证码'; } else b.textContent = '已发送(' + cd + ')'; }, 1000);
       } else msg('mailMsg', r.error || '发送失败');
     }).catch(function () { msg('mailMsg', '网络错误'); });
   });
   document.getElementById('acSaveEmail').addEventListener('click', function () {
-    api({ op: 'update_profile', email: document.getElementById('acEmail').value.trim(), code: document.getElementById('acCode').value.trim() })
+    var newEmail = document.getElementById('acEmail').value.trim();
+    var code = document.getElementById('acCode').value.trim();
+    if (!newEmail || !code) { msg('mailMsg', '请先获取验证码并填写新邮箱'); return; }
+    api({ op: 'update_profile', email: newEmail, code: code })
       .then(function (r) { if (r.ok) { msg('mailMsg', '邮箱已更换'); } else msg('mailMsg', r.error || '更换失败'); })
       .catch(function () { msg('mailMsg', '网络错误'); });
   });
@@ -219,11 +237,11 @@
     ['yg_token', 'yg_account', 'yg_role', 'yg_nick'].forEach(function (k) { localStorage.removeItem(k); });
     location.href = 'index.html';
   });
-  load();
-  // hash 直达板块
-  var map={edit:"p-edit",email:"p-email",pw:"p-pw",orders:"p-orders",inbox:"p-inbox"};
-  var target=map[(location.hash||"").replace("#","")];
-  if(target){var p=document.getElementById(target);if(p){menuList.classList.add('hide');p.classList.remove('open');void p.offsetWidth;p.classList.add('open');}}
+
+  doMe(0);
+  var map = { edit: 'p-edit', email: 'p-email', pw: 'p-pw', orders: 'p-orders', inbox: 'p-inbox' };
+  var target = map[(location.hash || '').replace('#', '')];
+  if (target) { var p = document.getElementById(target); if (p) { if (menuList) menuList.classList.add('hide'); if (meTop) meTop.classList.add('hide'); p.classList.add('open'); if (target === 'p-orders') loadOrders(); if (target === 'p-inbox') loadInbox(); } }
 })();
 </script>
 </body>
