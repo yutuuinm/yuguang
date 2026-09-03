@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>予光 · 管理后台</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09032217">
+<link rel="stylesheet" href="css/style.css?v=09032218">
 <style>
   .adm{max-width:1000px;margin:0 auto;padding:120px 20px 80px;}
   .adm h2{font-family:var(--serif);letter-spacing:.2em;color:var(--gold);margin-bottom:6px;}
@@ -65,6 +65,7 @@
         <option value="settings">配置 settings</option>
       </select>
       <button class="btn-gold" id="admRefresh" type="button">刷新</button>
+      <input id="admSearch" placeholder="搜索本表…" style="width:auto;min-width:170px;margin:0;padding:8px 10px;">
       <button class="btn-ghost" id="admExport" type="button" style="font-size:13px;padding:8px 18px;">导出 CSV</button>
       <a class="btn-ghost" style="font-size:13px;padding:8px 18px;" href="index.html">返回主页</a>
       <button class="btn-ghost" style="font-size:13px;padding:8px 18px;" id="admLogout" type="button">退出</button>
@@ -115,8 +116,8 @@
 
 <footer class="footer"><div class="wrap"><div class="disclaimer">© 予光 YUGUANG · 管理后台 · 仅供内部使用</div></div></footer>
 
-<script src="js/supabase-config.js?v=09032217"></script>
-<script src="js/main.js?v=09032217"></script>
+<script src="js/supabase-config.js?v=09032218"></script>
+<script src="js/main.js?v=09032218"></script>
 <script>
 (function () {
   var cfg = window.SUPABASE || {};
@@ -211,9 +212,14 @@
     api(DAPI, { op: 'list', table: t }).then(function (r) {
       if (!r.ok) { msg.textContent = '加载失败：' + (r.error || '（无管理员权限？）'); return; }
       msg.textContent = t + ' 共 ' + (r.rows ? r.rows.length : 0) + ' 条';
-      window.__admRows = r.rows || [];
-      if (t === 'settings') { loadSettings(r.rows || []); return; }
-      renderRows(t, r.rows || []);
+      allRows = r.rows || [];
+      window.__admRows = allRows;
+      if (t === 'settings') { loadSettings(allRows); return; }
+      var q = (admSearch && admSearch.value || '').trim().toLowerCase();
+      var rows = q ? allRows.filter(function (x) { return JSON.stringify(x).toLowerCase().indexOf(q) > -1; }) : allRows;
+      window.__admRows = rows;
+      msg.textContent = t + ' 共 ' + rows.length + ' 条';
+      renderRows(t, rows);
     }).catch(function () { msg.textContent = '网络错误'; });
   }
 
@@ -254,6 +260,7 @@
       if (t === 'users') {
         html += '<button class="btn-sm" data-act="role" data-id="' + esc(id) + '" data-v="' + (row.role === 'admin' ? 'user' : 'admin') + '">' + (row.role === 'admin' ? '降为user' : '设为admin') + '</button> ';
       }
+      html += '<button class="btn-sm" data-act="edit" data-t="' + t + '" data-id="' + esc(id) + '">编辑</button> ';
       html += '<button class="btn-sm" data-act="view" data-i="' + idx + '">JSON</button> ';
       html += '<button class="btn-sm" data-act="del" data-t="' + t + '" data-id="' + esc(id) + '">删除</button></td>';
       head.slice(0, 7).forEach(function (k) {
@@ -263,6 +270,12 @@
       html += '<td><div class="json-detail" data-detail="' + idx + '">' + esc(JSON.stringify(row, null, 2)) + '</div></td></tr>';
     });
     rowsEl.innerHTML = html;
+    rowsEl.querySelectorAll('[data-act="edit"]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var idx = Number(b.getAttribute('data-i'));
+        openEdit(window.__admRows[idx], b.getAttribute('data-t'));
+      });
+    });
     rowsEl.querySelectorAll('[data-act="view"]').forEach(function (b) {
       b.addEventListener('click', function () {
         var d = rowsEl.querySelector('[data-detail="' + b.getAttribute('data-i') + '"]');
@@ -293,6 +306,54 @@
       });
     });
   }
+
+
+  // ===== 搜索与行编辑 =====
+  var allRows = [];
+  var admSearch = document.getElementById('admSearch');
+  if (admSearch) admSearch.addEventListener('input', function () {
+    var t = sel.value;
+    if (t === 'settings') return;
+    var q = (admSearch.value || '').trim().toLowerCase();
+    var rows = q ? allRows.filter(function (r) { return JSON.stringify(r).toLowerCase().indexOf(q) > -1; }) : allRows;
+    window.__admRows = rows;
+    msg.textContent = t + ' 共 ' + rows.length + ' 条（过滤）';
+    renderRows(t, rows);
+  });
+  var editBox = null;
+  function openEdit(row, t) {
+    if (!editBox) {
+      editBox = document.createElement('div');
+      editBox.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:99;';
+      var card = document.createElement('div');
+      card.style.cssText = 'width:min(640px,92vw);max-height:82vh;overflow:auto;background:#0d1220;border:1px solid var(--line);border-radius:14px;padding:18px;';
+      card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><b style="color:var(--gold);font-weight:400;">编辑行（JSON）</b><button type="button" id="admeClose" style="background:none;border:none;color:var(--moon);font-size:16px;cursor:pointer;">✕</button></div>' +
+        '<textarea id="admeTxt" style="min-height:300px;font-family:monospace;font-size:12px;"></textarea>' +
+        '<div style="margin-top:10px;display:flex;gap:10px;justify-content:flex-end;"><button type="button" class="btn-ghost" id="admeCancel" style="font-size:13px;padding:8px 16px;">取消</button><button type="button" class="btn-gold" id="admeSave" style="font-size:13px;padding:8px 16px;">保存修改</button></div>';
+      editBox.appendChild(card);
+      document.body.appendChild(editBox);
+      editBox.addEventListener('click', function (e) { if (e.target === editBox) closeEdit(); });
+      card.querySelector('#admeClose').addEventListener('click', closeEdit);
+      card.querySelector('#admeCancel').addEventListener('click', closeEdit);
+      card.querySelector('#admeSave').addEventListener('click', function () {
+        var t2 = editBox.getAttribute('data-t');
+        var id2 = editBox.getAttribute('data-id');
+        var txt = card.querySelector('#admeTxt').value;
+        var obj;
+        try { obj = JSON.parse(txt); } catch (e) { msg.textContent = 'JSON 格式错误'; return; }
+        delete obj.id; delete obj.key; delete obj.created_at;
+        api(DAPI, { op: 'update', table: t2, id: id2, set: obj }).then(function (r) {
+          msg.textContent = r.ok ? '已保存' : ('失败：' + (r.error || ''));
+          if (r.ok) { closeEdit(); load(); }
+        }).catch(function () { msg.textContent = '网络错误'; });
+      });
+    }
+    editBox.setAttribute('data-t', t);
+    editBox.setAttribute('data-id', row.id !== undefined ? row.id : row.key);
+    editBox.querySelector('#admeTxt').value = JSON.stringify(row, null, 2);
+    editBox.style.display = 'flex';
+  }
+  function closeEdit() { if (editBox) editBox.style.display = 'none'; }
 
   // ===== 快捷工具 =====
   document.querySelectorAll('.adm-tool-btn').forEach(function (b) {
