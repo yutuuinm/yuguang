@@ -7,21 +7,107 @@
 <meta name="robots" content="noindex,nofollow">
 <link rel="stylesheet" href="css/style.css?v=09032301">
 <style>
-  .adm{max-width:1000px;margin:0 auto;padding:120px 20px 80px;}
-  .adm h2{font-family:var(--serif);letter-spacing:.2em;color:var(--gold);margin-bottom:6px;}
-  .adm-card{max-width:400px;margin:40px auto;}
-  .adm input, .adm select, .adm textarea{padding:10px 12px;border-radius:10px;border:1px solid rgba(244,239,230,.2);background:var(--night2);color:var(--moon);font-size:14px;outline:none;width:100%;margin-bottom:10px;}
-  .adm .err{color:#ff9b9b;font-size:13px;min-height:16px;text-align:center;}
-  .adm .tbl{width:100%;border-collapse:collapse;font-size:13px;}
-  .adm .tbl th,.adm .tbl td{border-bottom:1px solid var(--line-soft);padding:8px;text-align:left;vertical-align:top;word-break:break-all;}
-  .adm .tbl th{color:var(--gold);font-weight:400;}
-  .btn-sm{padding:3px 10px;font-size:12px;border-radius:8px;cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--moon);margin-right:4px;}
-  .btn-sm:hover{border-color:var(--gold);}
-  .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0;}
-  .json-detail{display:none;background:rgba(7,10,18,.8);padding:8px;border-radius:8px;font-size:11px;color:var(--text-dim);white-space:pre-wrap;}
-  .msg{color:var(--gold);font-size:13px;min-height:18px;}
+  /* ============ 予光 · 管理后台（白桦规格 · 分区式） ============ */
+  .adm{max-width:1180px;margin:0 auto;padding:132px 20px 90px;position:relative;z-index:5;}
+  .adm-title{font-family:var(--serif);font-size:clamp(24px,3vw,32px);letter-spacing:.28em;color:var(--moon);text-align:center;margin-bottom:4px;}
+  .adm-title .dot{color:var(--gold);}
+  .adm-sub{text-align:center;color:var(--text-dim);font-size:13px;letter-spacing:.2em;margin-bottom:8px;}
   .who{color:var(--text-dim);font-size:13px;}
   .who b{color:var(--gold);font-weight:400;}
+  .adm input,.adm select,.adm textarea{padding:9px 12px;border-radius:10px;border:1px solid rgba(244,239,230,.18);background:var(--night2);color:var(--moon);font-size:13px;outline:none;margin-bottom:8px;font-family:var(--sans);}
+  .adm input:focus,.adm select:focus,.adm textarea:focus{border-color:var(--gold);}
+  .adm textarea{width:100%;}
+  .adm label.f-label{display:block;color:var(--gold);font-size:12px;letter-spacing:.1em;margin:4px 0 2px;}
+  .adm .err{color:#ff9b9b;font-size:13px;min-height:16px;}
+  .msg{color:var(--gold);font-size:13px;min-height:18px;line-height:1.8;}
+  .msg.ok{color:#9fd6a8;}
+  .msg.bad{color:#ff9b9b;}
+
+  /* —— 分区切换 —— */
+  .admSec{display:none;}
+  .admSec.on{display:block;animation:admIn .38s cubic-bezier(.2,.7,.3,1) both;}
+  @keyframes admIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  .sec-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;border-bottom:1px solid var(--line-soft);padding-bottom:12px;margin-bottom:16px;}
+  .sec-top h2{font-family:var(--serif);font-size:21px;letter-spacing:.22em;color:var(--moon);font-weight:400;}
+  .sec-top h2 span{color:var(--gold);}
+  .sec-top .sp{flex:1;}
+  .sec-top .btn-sm{padding:5px 14px;}
+
+  /* —— 返回按钮 —— */
+  .back-btn{display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--line);color:var(--moon);border-radius:999px;font-size:13px;padding:5px 16px;cursor:pointer;letter-spacing:.1em;transition:all .25s;}
+  .back-btn:hover{border-color:var(--gold);color:var(--gold);box-shadow:0 0 16px var(--glow);}
+
+  /* —— 首页卡片 —— */
+  .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(236px,1fr));gap:16px;margin:30px 0 6px;}
+  .card{position:relative;border:1px solid var(--line-soft);border-radius:18px;padding:24px 20px 20px;background:linear-gradient(165deg,rgba(20,27,46,.66),rgba(11,14,23,.9));cursor:pointer;transition:transform .3s,border-color .3s,box-shadow .3s;overflow:hidden;text-align:left;color:var(--moon);font-family:var(--sans);}
+  .card::before{content:'';position:absolute;inset:0;background:radial-gradient(60% 40% at 20% 0%,rgba(227,196,124,.07),transparent 70%);opacity:0;transition:opacity .3s;}
+  .card:hover{transform:translateY(-6px);border-color:var(--line);box-shadow:0 12px 34px rgba(0,0,0,.45),0 0 22px var(--glow);}
+  .card:hover::before{opacity:1;}
+  .card .g{font-size:34px;line-height:1;display:block;margin-bottom:14px;position:relative;}
+  .card h3{font-family:var(--serif);font-size:17px;letter-spacing:.14em;color:var(--moon);font-weight:400;margin-bottom:8px;position:relative;}
+  .card h3 em{color:var(--gold);font-style:normal;}
+  .card p{color:var(--text-dim);font-size:12px;line-height:1.9;margin:0;position:relative;}
+  .home-foot{text-align:center;color:var(--text-dim);font-size:12px;letter-spacing:.12em;margin-top:26px;opacity:.7;}
+
+  /* —— 表格 —— */
+  .tbl{width:100%;border-collapse:collapse;font-size:13px;}
+  .tbl th,.tbl td{border-bottom:1px solid var(--line-soft);padding:8px 8px;text-align:left;vertical-align:top;word-break:break-all;}
+  .tbl th{color:var(--gold);font-weight:400;white-space:nowrap;font-size:12px;letter-spacing:.06em;}
+  .tbl td .dim{color:var(--text-dim);}
+  .wrap-scroll{overflow-x:auto;border:1px solid var(--line-soft);border-radius:12px;background:rgba(11,14,23,.55);padding:2px 6px;}
+  .row-edit{background:rgba(16,24,40,.9);}
+  .row-edit input,.row-edit textarea{width:100%;margin:4px 0;}
+
+  /* —— 按钮 —— */
+  .btn-sm{padding:4px 11px;font-size:12px;border-radius:999px;cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--moon);margin:0 4px 6px 0;letter-spacing:.02em;transition:all .2s;line-height:1.7;font-family:var(--sans);white-space:nowrap;}
+  .btn-sm:hover{border-color:var(--gold);color:var(--gold);box-shadow:0 0 12px rgba(227,196,124,.18);}
+  .btn-sm.danger:hover{border-color:#ff8d7d;color:#ff8d7d;box-shadow:0 0 12px rgba(255,141,125,.15);}
+  .btn-sm:disabled{opacity:.4;cursor:not-allowed;}
+  .btn-sm:disabled:hover{border-color:var(--line);color:var(--moon);box-shadow:none;}
+  .btn-gold,.btn-ghost{font-size:13px;padding:8px 20px;}
+  .btn-line{display:inline-flex;gap:6px;align-items:center;background:transparent;border:1px solid var(--line);color:var(--moon);border-radius:999px;padding:7px 18px;font-size:13px;cursor:pointer;letter-spacing:.08em;transition:all .25s;}
+  .btn-line:hover{border-color:var(--gold);color:var(--gold);box-shadow:0 0 14px var(--glow);}
+
+  /* —— 条/栏 —— */
+  .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0;}
+
+  /* —— 文档块 —— */
+  .adm-card{max-width:420px;margin:36px auto;text-align:center;}
+  .adm-card p{color:var(--text-dim);font-size:13px;}
+  .doc-pad{border:1px solid var(--line);border-radius:16px;background:linear-gradient(165deg,rgba(20,27,46,.5),rgba(11,14,23,.85));padding:18px 20px;margin-bottom:16px;}
+
+  /* —— 工具面板（折叠） —— */
+  .tool-head{display:flex;gap:10px;flex-wrap:wrap;}
+  .adm-tool{display:none;margin-top:14px;}
+  .adm-tool.open{display:block;animation:admIn .3s ease both;}
+  .grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:0 14px;}
+
+  /* —— 行内状态徽章已用内联色值 —— */
+  .badge{display:inline-block;border-radius:999px;padding:0 10px;font-size:11px;letter-spacing:.08em;line-height:1.9;border:1px solid;}
+  .v-card{margin:14px auto 0;max-width:520px;text-align:center;padding:34px 22px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(165deg,#131b30,#0b0e17);box-shadow:0 0 30px rgba(0,0,0,.4);}
+  .v-card .v-brand{font-family:var(--serif);letter-spacing:.5em;color:var(--gold);font-size:15px;margin-bottom:18px;}
+  .v-card .v-code{font-size:clamp(30px,6vw,44px);letter-spacing:.12em;color:var(--moon);font-family:"Courier New",monospace;font-weight:700;margin:6px 0 16px;word-break:break-all;}
+  .v-card .v-name{color:var(--gold);font-size:16px;letter-spacing:.1em;margin-bottom:8px;}
+  .v-card .v-line{color:var(--text-dim);font-size:12px;line-height:2;}
+  .v-card .v-tip{margin-top:16px;border-top:1px dashed var(--line-soft);padding-top:12px;color:var(--gold);font-size:12px;}
+  .code-box{font-family:monospace;font-size:13px;white-space:pre-wrap;background:rgba(7,10,18,.8);border:1px solid var(--line-soft);border-radius:10px;padding:10px;margin:8px 0;color:var(--gold);}
+  .user-av{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-deep));color:#14121a;font-weight:700;flex:none;}
+  .json-detail{display:none;background:rgba(7,10,18,.85);padding:8px;border-radius:8px;font-size:11px;color:var(--text-dim);white-space:pre-wrap;}
+  .kv{font-size:13px;line-height:2;}
+  .kv b{color:var(--gold);font-weight:400;}
+  .small-note{color:var(--text-dim);font-size:12px;line-height:1.9;}
+  .oitem{display:flex;gap:8px;align-items:center;margin-bottom:6px;flex-wrap:wrap;}
+  .oitem label{color:var(--gold);font-size:12px;white-space:nowrap;}
+  .oitem input{flex:1;min-width:200px;margin:0;}
+
+  /* —— 弹窗 —— */
+  .ygModal{position:fixed;inset:0;z-index:999;background:rgba(3,5,10,.74);display:flex;align-items:center;justify-content:center;padding:18px;animation:fadeIn .22s ease both;}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  .ygCard{background:#0d1424;border:1px solid var(--line);border-radius:18px;max-width:min(660px,94vw);width:100%;max-height:84vh;overflow:auto;padding:20px 22px;box-shadow:0 22px 60px rgba(0,0,0,.55);animation:popIn .22s ease both;}
+  @keyframes popIn{from{opacity:0;transform:scale(.96) translateY(8px);}to{opacity:1;transform:none;}}
+  .ygCard h3{font-family:var(--serif);font-size:17px;letter-spacing:.18em;color:var(--gold);font-weight:400;margin-bottom:12px;}
+  .ygCard .btn-row{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:14px;}
+  .hint{color:var(--text-dim);font-size:12px;line-height:1.9;}
 </style>
 </head>
 <body>
@@ -40,103 +126,305 @@
 </div></header>
 
 <main><div class="adm">
-  <h2 style="text-align:center;">予光 · 管理后台</h2>
 
-  <div class="adm-card doc-block" id="admGate">
-    <p style="text-align:center;color:var(--text-dim);font-size:13px;" id="admTip">正在校验登录状态…</p>
-  </div>
-
-  <div id="admMain" style="display:none;">
-    <div class="bar">
-      <span class="who" id="admWho"></span>
-      <select id="admTable" style="width:auto;">
-        <option value="orders">订单 orders</option>
-        <option value="messages">留言/投稿 messages</option>
-        <option value="gallery">光集 gallery</option>
-        <option value="products">商品 products</option>
-        <option value="crystals">晶石 crystals</option>
-        <option value="records">验真 records</option>
-        <option value="subscribers">订阅 subscribers</option>
-        <option value="users">用户 users</option>
-        <option value="settings">配置 settings</option>
-        <option value="app_data">配置项 app_data</option>
-        <option value="wheel_spins">转盘 wheel_spins</option>
-        <option value="ai_usage">AI用量 ai_usage</option>
-        <option value="mailboxes">站内信 mailboxes</option>
-      </select>
-      <button class="btn-gold" id="admRefresh" type="button">刷新</button>
-      <input id="admSearch" placeholder="搜索本表…" style="width:auto;min-width:170px;margin:0;padding:8px 10px;">
-      <button class="btn-ghost" id="admExport" type="button" style="font-size:13px;padding:8px 18px;">导出 CSV</button>
-      <button class="btn-ghost" style="font-size:13px;padding:8px 18px;" id="admLogout" type="button">退出</button>
-      <input id="admResetAcc" placeholder="用户邮箱(重置密码)" style="width:auto;min-width:200px;margin:0;padding:8px 10px;">
-      <button class="btn-ghost" style="font-size:13px;padding:8px 14px;" id="admResetBtn" type="button">重置该用户密码</button>
-    </div>
-    <div class="msg" id="admMsg"></div>
-    <div style="overflow-x:auto;"><table class="tbl" id="admRows"></table></div>
-    <div id="admSettings" style="display:none;margin-top:20px;">
-      <h2 style="font-size:18px;">配置编辑</h2>
-      <textarea id="admMail" style="min-height:80px;font-family:monospace;"></textarea>
-      <textarea id="admAi" style="min-height:80px;font-family:monospace;"></textarea>
-      <div style="margin-top:10px;"><b style="color:var(--gold);font-weight:400;">home_banners（主页展示条数组：title/text/image/link）</b></div>
-      <textarea id="admHome" style="min-height:120px;font-family:monospace;"></textarea>
-      <button class="btn-gold" id="admSaveCfg" type="button">保存配置</button>
-    </div>
-  <div style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
-    <button class="btn-ghost adm-tool-btn" data-t="crystal" type="button" style="font-size:13px;padding:8px 16px;">💎 新增晶石</button>
-    <button class="btn-ghost adm-tool-btn" data-t="product" type="button" style="font-size:13px;padding:8px 16px;">🛍️ 新增商品</button>
-    <button class="btn-ghost adm-tool-btn" data-t="gallery" type="button" style="font-size:13px;padding:8px 16px;">🖼️ 上架光集</button>
-    <button class="btn-ghost adm-tool-btn" data-t="record" type="button" style="font-size:13px;padding:8px 16px;">🔑 生成验真码</button>
-    <button class="btn-ghost adm-tool-btn" data-t="broadcast" type="button" style="font-size:13px;padding:8px 16px;">📨 群发站内信</button>
-    <button class="btn-ghost adm-tool-btn" data-t="notice" type="button" style="font-size:13px;padding:8px 16px;">📢 活动通知</button>
+  <!-- ========== 鉴权门 ========== -->
+  <div class="adm-card doc-block" id="admGate" style="display:none;">
+    <h2 style="font-family:var(--serif);letter-spacing:.24em;color:var(--gold);font-size:19px;margin-bottom:8px;">予光 · 管理后台</h2>
+    <p id="admTip">正在校验…</p>
   </div>
 
-  <div class="adm-tool adm-tool-product doc-block" style="display:none;margin-top:12px;">
-    <input id="prSlug" placeholder="slug(唯一，如 sisi-liguang)"><input id="prName" placeholder="名称(必填)">
-    <select id="prSeries" style="width:auto;"><option value="east">east 东方线</option><option value="west">west 西方线</option><option value="union">union 合盘线</option><option value="destiny">destiny 命运线</option></select>
-    <input id="prSub" placeholder="副标题（如：本命火 · 离卦）"><input id="prMain" placeholder="主石"><input id="prAux" placeholder="配石">
-    <input id="prMetal" placeholder="材质/金属"><input id="prChain" placeholder="链型"><input id="prGlyph" placeholder="符文/刻字">
-    <div style="display:flex;gap:8px;"><input id="prPrice" placeholder="价格(元)" style="flex:1;"><input id="prSort" placeholder="排序" style="flex:1;max-width:90px;"></div>
-    <input id="prImg" placeholder="图片路径（客户图片/xx.jpg 或 img/customers/xx.jpg）"><input id="prQuote" placeholder="文案金句">
-    <div class="msg" id="prMsg"></div>
-    <button class="btn-gold" id="prSave" type="button">保存商品</button>
-  </div>
-  <div class="adm-tool adm-tool-gallery doc-block" style="display:none;margin-top:12px;">
-    <input id="galName" placeholder="作品名(必填)"><input id="galImg" placeholder="图片路径（客户图片/xx.jpg 或 img/customers/xx.jpg）">
-    <input id="galTag" placeholder="标签（如：东方线 · 示例）"><input id="galStory" placeholder="故事/备注">
-    <div class="msg" id="galMsg"></div>
-    <button class="btn-gold" id="galSave" type="button">上架到光集</button>
-  </div>
-  <div class="adm-tool adm-tool-crystal doc-block" style="display:none;margin-top:12px;">
-    <input id="crName" placeholder="名称(必填)"><input id="crKind" placeholder="归属"><input id="crElement" placeholder="五行/星体">
-    <input id="crMeaning" placeholder="意象/含义">
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <input id="crPrice" placeholder="价格(元)" style="flex:1;min-width:100px;"><input id="crStock" placeholder="库存" style="flex:1;min-width:80px;">
-      <input id="crSize" placeholder="尺寸mm" style="flex:1;min-width:90px;"><input id="crShape" placeholder="形状" style="flex:1;min-width:90px;"><input id="crColor" placeholder="色值" style="flex:1;min-width:100px;">
-    </div>
-    <input id="crCare" placeholder="养护提示"><input id="crImg" placeholder="图片路径(客户图片/xx.jpg 或URL)">
-    <div class="msg" id="crMsg"></div>
-    <button class="btn-gold" id="crSave" type="button">保存晶石</button>
-  </div>
-  <div class="adm-tool adm-tool-record doc-block" style="display:none;margin-top:12px;">
-    <input id="recName" placeholder="作品名"><input id="recNote" placeholder="备注(选填)"><input id="recImg" placeholder="图片文件名(选填,逗号分隔)">
-    <input id="recQty" type="number" min="1" max="50" placeholder="数量 1-50" style="width:130px;">
-    <div class="msg" id="recMsg"></div>
-    <button class="btn-gold" id="recGen" type="button">生成验真码</button>
-    <div id="recOut" style="font-family:monospace;font-size:12px;color:var(--gold);white-space:pre-wrap;margin-top:8px;"></div>
-  </div>
+  <div id="admShell" style="display:none;">
 
-  <div class="adm-tool adm-tool-broadcast doc-block" style="display:none;margin-top:12px;">
-    <input id="bcTitle" placeholder="标题（如：新品上架 / 活动公告）">
-    <textarea id="bcBody" style="min-height:70px;" placeholder="内容（发给全部注册用户的站内信）"></textarea>
-    <div class="msg" id="bcMsg"></div>
-    <button class="btn-gold" id="bcSend" type="button">群发站内信</button>
-  </div>
-  <div class="adm-tool adm-tool-notice doc-block" style="display:none;margin-top:12px;">
-    <textarea id="noticeTxt" style="min-height:70px;" placeholder="通知内容，留空则关闭"></textarea>
-    <div class="msg" id="noticeMsg"></div>
-    <button class="btn-gold" id="noticeSave" type="button">保存活动通知</button>
-  </div>
+    <!-- ========== 首页 · 功能卡片网格 ========== -->
+    <section id="admHome" class="admSec on">
+      <div class="adm-title">予光 · <span class="dot">管</span>理后台</div>
+      <div class="adm-sub">YU GUANG ADMIN · 把光给你，我，就是光</div>
+      <div class="bar" style="justify-content:center;">
+        <span class="who" id="hWho"></span>
+        <span class="small-note" style="text-align:center;">登录账号即后台身份 · 退出请到前台账号页</span>
+      </div>
+      <div class="card-grid" id="homeGrid">
+        <button class="card" type="button" data-sec="secOrders">
+          <span class="g">📋</span><h3><em>待处理订单</em></h3>
+          <p>新单处理 · 生成防伪码 · 完成发货<br>合并/拆分 · 批量操作 · 物流单号</p>
+        </button>
+        <button class="card" type="button" data-sec="secSingle">
+          <span class="g">🧾</span><h3><em>单个官方码</em></h3>
+          <p>手工建档一枚防伪码<br>生成官方验证卡并导出图片</p>
+        </button>
+        <button class="card" type="button" data-sec="secBatch">
+          <span class="g">📦</span><h3><em>批量生成</em></h3>
+          <p>按数量 1–50 批量生成防伪码<br>唯一码自动入库，一次可复制全部</p>
+        </button>
+        <button class="card" type="button" data-sec="secUsers">
+          <span class="g">👥</span><h3><em>用户管理</em></h3>
+          <p>账号列表 · 查看订单 / 代录加单<br>重置密码 · 站内信 · 角色 / 群发</p>
+        </button>
+        <button class="card" type="button" data-sec="secMail">
+          <span class="g">📧</span><h3><em>邮件设置</em></h3>
+          <p>下单/发货/重置密码等通知的<br>收件邮箱与 SMTP 发信配置</p>
+        </button>
+        <button class="card" type="button" data-sec="secDb">
+          <span class="g">🗂️</span><h3><em>数据浏览</em></h3>
+          <p>13 张表通用浏览 · 搜索<br>行查看 · JSON 行编辑 · 删除</p>
+        </button>
+        <button class="card" type="button" data-sec="secTools">
+          <span class="g">⚡</span><h3><em>快捷工具</em></h3>
+          <p>新增晶石 · 新增商品<br>上架光集 · 活动通知</p>
+        </button>
+      </div>
+      <div class="home-foot">白桦规格 · 分区式管理后台 · 予光暗金视觉 v2</div>
+    </section>
 
+    <!-- ========== A. 待处理订单 ========== -->
+    <section class="admSec" id="secOrders">
+      <div class="sec-top">
+        <button class="back-btn" type="button" data-act="back">← 返回</button>
+        <h2><span>📋</span> 待处理订单</h2>
+        <span class="sp"></span>
+        <button class="btn-sm" type="button" data-act="oRefresh" id="oRefresh">🔄 刷新</button>
+      </div>
+      <div class="doc-pad">
+        <div class="bar">
+          <input id="oSearch" placeholder="🔍 订单号 / 手机 / 账号 / 产品 / 备注" style="min-width:220px;margin:0;">
+          <button class="btn-line" id="oMode" type="button">📋 全部</button>
+          <button class="btn-line" id="oSelAll" type="button">☑️ 全选</button>
+          <button class="btn-line" id="oBatchDone" type="button">✅ 批量完成</button>
+          <button class="btn-line" id="oBatchDel" type="button">🗑️ 批量删除</button>
+          <button class="btn-line" id="oMerge" type="button">🧩 合并选中</button>
+          <button class="btn-line" id="oRefresh2" type="button">🔄</button>
+        </div>
+        <div class="msg" id="oMsg"></div>
+        <div class="small-note" id="oCount" style="margin-bottom:8px;"></div>
+        <div class="wrap-scroll"><div id="oBody"></div></div>
+      </div>
+    </section>
+
+    <!-- ========== B. 单个官方码 ========== -->
+    <section class="admSec" id="secSingle">
+      <div class="sec-top">
+        <button class="back-btn" type="button" data-act="back">← 返回</button>
+        <h2><span>🧾</span> 单个官方码生成</h2><span class="sp"></span>
+      </div>
+      <div class="doc-pad">
+        <div class="grid-2">
+          <div>
+            <label class="f-label">产品名称 *</label>
+            <input id="sName" placeholder="如：巳蛇 · 离光（本命火 · 离卦）" style="width:100%;">
+            <label class="f-label">专属编号（验证码，可改；留空自动生成唯一码）</label>
+            <input id="sCode" placeholder="YG-YYMMDD-XXXXXX" style="width:100%;">
+          </div>
+          <div>
+            <label class="f-label">寄语（选填）</label>
+            <textarea id="sMsg" style="min-height:74px;" placeholder="印在验证卡上的光语…"></textarea>
+          </div>
+        </div>
+        <label class="f-label">图片文件名（选填，多个逗号分隔）</label>
+        <input id="sImgs" placeholder="如：img/customers/xx.jpg, img/customers/yy.jpg" style="width:100%;">
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:8px;">
+          <button class="btn-gold" id="sGen" type="button">✨ 生成官方码</button>
+          <span class="msg" id="sGenMsg"></span>
+        </div>
+      </div>
+      <div id="sCardArea"></div>
+    </section>
+
+    <!-- ========== C. 批量生成 ========== -->
+    <section class="admSec" id="secBatch">
+      <div class="sec-top">
+        <button class="back-btn" type="button" data-act="back">← 返回</button>
+        <h2><span>📦</span> 批量生成</h2><span class="sp"></span>
+      </div>
+      <div class="doc-pad">
+        <div class="grid-2">
+          <div>
+            <label class="f-label">产品名称 *</label>
+            <input id="bName" placeholder="同一批作品的产品名" style="width:100%;">
+            <label class="f-label">数量（1–50）</label>
+            <input id="bQty" type="number" min="1" max="50" value="5" style="width:130px;">
+          </div>
+          <div>
+            <label class="f-label">寄语（选填，随码入库）</label>
+            <textarea id="bMsg" style="min-height:74px;" placeholder="光语 / 批次备注…"></textarea>
+          </div>
+        </div>
+        <label class="f-label">图片文件名（选填，多个逗号分隔）</label>
+        <input id="bImgs" placeholder="如：img/customers/xx.jpg" style="width:100%;">
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:8px;">
+          <button class="btn-gold" id="bGo" type="button">📦 批量生成（自动入库）</button>
+          <span class="msg" id="bGenMsg"></span>
+        </div>
+        <div id="bOutArea"></div>
+      </div>
+    </section>
+
+    <!-- ========== D. 用户管理 ========== -->
+    <section class="admSec" id="secUsers">
+      <div class="sec-top">
+        <button class="back-btn" type="button" data-act="back">← 返回</button>
+        <h2><span>👥</span> 用户管理</h2>
+        <span class="sp"></span>
+        <button class="btn-line" id="uBroadcast" type="button">📢 群发站内信</button>
+        <button class="btn-sm" id="uRefresh" type="button">🔄 刷新</button>
+      </div>
+      <div class="doc-pad">
+        <div class="bar">
+          <input id="uSearch" placeholder="🔍 账号 / 昵称 / 邮箱 / 手机" style="min-width:230px;margin:0;">
+          <button class="btn-line" id="uClear" type="button">✕ 清空</button>
+          <span class="msg" id="uMsg" style="margin-left:6px;"></span>
+        </div>
+        <div class="wrap-scroll"><div id="uBody"></div></div>
+        <div id="uDetailBox" style="display:none;margin-top:16px;"></div>
+      </div>
+    </section>
+
+    <!-- ========== E. 邮件设置 ========== -->
+    <section class="admSec" id="secMail">
+      <div class="sec-top">
+        <button class="back-btn" type="button" data-act="back">← 返回</button>
+        <h2><span>📧</span> 邮件设置</h2>
+        <span class="sp"></span>
+        <button class="btn-sm" id="mRefresh" type="button">🔄 重新读取</button>
+      </div>
+      <div class="doc-pad">
+        <label class="f-label">📮 通知收件邮箱（每行一个，或逗号分隔）→ 存为 settings.mail.to</label>
+        <textarea id="mTo" style="min-height:96px;" placeholder="admin@example.com&#10;boss@example.com"></textarea>
+        <div class="small-note">下单 / 发货 / 重置密码 / 密码申请等通知都会发往这些收件邮箱（email-send / account-api 从 settings 表 key=mail 读取）。</div>
+        <label class="f-label">🧩 其余邮件配置（JSON，键名：smtp_user / smtp_pass / smtp_host / smtp_port）</label>
+        <textarea id="mJson" style="min-height:130px;font-family:monospace;" placeholder='{"smtp_user":"you@qq.com","smtp_pass":"授权码","smtp_host":"smtp.qq.com","smtp_port":465}'></textarea>
+        <div class="hint">提示：保存时仅「收件邮箱」会按行拆分写入 <b style="color:var(--gold);">to</b>，JSON 框中的其余键原样保留合并。若 settings 尚无 mail 键将自动新建。</div>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:6px;">
+          <button class="btn-gold" id="mSave" type="button">💾 保存邮件配置</button>
+          <span class="msg" id="mMsg"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== F. 数据浏览（通用表工具） ========== -->
+    <section class="admSec" id="secDb">
+      <div class="sec-top">
+        <button class="back-btn" type="button" data-act="back">← 返回</button>
+        <h2><span>🗂️</span> 数据浏览</h2>
+        <span class="sp"></span>
+        <button class="btn-sm" id="dRefresh" type="button">🔄 刷新</button>
+      </div>
+      <div class="doc-pad">
+        <div class="bar">
+          <select id="dTable" style="width:auto;">
+            <option value="orders">订单 orders</option>
+            <option value="messages">留言 messages</option>
+            <option value="gallery">光集 gallery</option>
+            <option value="products">商品 products</option>
+            <option value="crystals">晶石 crystals</option>
+            <option value="records">验真 records</option>
+            <option value="subscribers">订阅 subscribers</option>
+            <option value="settings">配置 settings</option>
+            <option value="app_data">配置项 app_data</option>
+            <option value="users">用户 users</option>
+            <option value="wheel_spins">转盘 wheel_spins</option>
+            <option value="ai_usage">AI用量 ai_usage</option>
+            <option value="mailboxes">站内信 mailboxes</option>
+          </select>
+          <input id="dSearch" placeholder="🔍 搜索本表…" style="min-width:170px;margin:0;">
+          <span class="msg" id="dMsg"></span>
+        </div>
+        <div id="dSettings" style="display:none;margin:8px 0 14px;" class="doc-pad">
+          <div style="font-size:13px;color:var(--gold);letter-spacing:.1em;margin-bottom:6px;">⚙️ settings 常用键（JSON，保存后立即生效）</div>
+          <label class="f-label">mail（发信 SMTP + 收件邮箱，供 email-send/account-api 读取）</label>
+          <textarea id="dMailCfg" style="min-height:90px;font-family:monospace;"></textarea>
+          <label class="f-label">ai（AI 光语助手配置）</label>
+          <textarea id="dAiCfg" style="min-height:80px;font-family:monospace;"></textarea>
+          <label class="f-label">home_banners（主页展示条数组：title/text/image/link）</label>
+          <textarea id="dHomeCfg" style="min-height:100px;font-family:monospace;"></textarea>
+          <button class="btn-gold" id="dCfgSave" type="button">保存配置</button>
+        </div>
+        <div class="wrap-scroll"><table class="tbl" id="dRows"></table></div>
+      </div>
+    </section>
+
+    <!-- ========== G. 快捷工具 ========== -->
+    <section class="admSec" id="secTools">
+      <div class="sec-top">
+        <button class="back-btn" type="button" data-act="back">← 返回</button>
+        <h2><span>⚡</span> 快捷工具</h2><span class="sp"></span>
+      </div>
+      <div class="doc-pad">
+        <div class="tool-head">
+          <button class="btn-line" type="button" data-tool="toolCrystal">💎 新增晶石</button>
+          <button class="btn-line" type="button" data-tool="toolProduct">🛍️ 新增商品</button>
+          <button class="btn-line" type="button" data-tool="toolGallery">🖼️ 上架光集</button>
+          <button class="btn-line" type="button" data-tool="toolNotice">📢 活动通知</button>
+        </div>
+
+        <div class="adm-tool doc-pad" id="toolCrystal">
+          <div style="font-size:13px;color:var(--gold);letter-spacing:.1em;margin-bottom:8px;">💎 新增晶石（名称必填）</div>
+          <div class="grid-2">
+            <div>
+              <label class="f-label">名称 *</label><input id="tCrName" placeholder="如：红纹石">
+              <label class="f-label">归属（五行/星体/星座，如：火 · 巳蛇）</label><input id="tCrKind" placeholder="归属">
+              <label class="f-label">五行/元素（水木火土金 / sun / moon…）</label><input id="tCrElement" placeholder="如：火">
+              <label class="f-label">含义 / 意象</label><input id="tCrMeaning" placeholder="传统意象…">
+            </div>
+            <div>
+              <label class="f-label">养护提示</label><input id="tCrCare" placeholder="养护提示">
+              <label class="f-label">色值</label><input id="tCrColor" placeholder="#C9575B">
+              <label class="f-label">图片路径</label><input id="tCrImg" placeholder="img/… 或 客户图片/…">
+              <label class="f-label">排序（数字）</label><input id="tCrSort" placeholder="如：9" type="number">
+            </div>
+          </div>
+          <div class="msg" id="tCrMsg"></div>
+          <button class="btn-gold" id="tCrSave" type="button">保存晶石</button>
+        </div>
+
+        <div class="adm-tool doc-pad" id="toolProduct">
+          <div style="font-size:13px;color:var(--gold);letter-spacing:.1em;margin-bottom:8px;">🛍️ 新增商品（slug 与名称必填）</div>
+          <div class="grid-2">
+            <div>
+              <label class="f-label">slug（唯一，如 sisi-liguang）*</label><input id="tPrSlug" placeholder="slug">
+              <label class="f-label">名称 *</label><input id="tPrName" placeholder="名称">
+              <label class="f-label">系列</label>
+              <select id="tPrSeries" style="width:100%;"><option value="east">east 东方线</option><option value="west">west 西方线</option><option value="union">union 合盘线</option><option value="destiny">destiny 命运线</option></select>
+              <label class="f-label">副标题</label><input id="tPrSub" placeholder="如：本命火 · 离卦">
+              <label class="f-label">主石 / 配石</label>
+              <div style="display:flex;gap:8px;"><input id="tPrMain" placeholder="主石" style="flex:1;"><input id="tPrAux" placeholder="配石" style="flex:1;"></div>
+              <label class="f-label">材质 / 链型 / 符文</label>
+              <div style="display:flex;gap:8px;"><input id="tPrMetal" placeholder="材质" style="flex:1;"><input id="tPrChain" placeholder="链型" style="flex:1;"><input id="tPrGlyph" placeholder="符文" style="flex:1;"></div>
+            </div>
+            <div>
+              <label class="f-label">价格(元) / 排序</label>
+              <div style="display:flex;gap:8px;"><input id="tPrPrice" placeholder="699" style="flex:1;"><input id="tPrSort" placeholder="排序" style="flex:1;"></div>
+              <label class="f-label">图片路径</label><input id="tPrImg" placeholder="客户图片/xx.jpg 或 img/customers/xx.jpg">
+              <label class="f-label">文案金句</label><textarea id="tPrQuote" style="min-height:64px;" placeholder="quote…"></textarea>
+            </div>
+          </div>
+          <div class="msg" id="tPrMsg"></div>
+          <button class="btn-gold" id="tPrSave" type="button">保存商品</button>
+        </div>
+
+        <div class="adm-tool doc-pad" id="toolGallery">
+          <div style="font-size:13px;color:var(--gold);letter-spacing:.1em;margin-bottom:8px;">🖼️ 上架光集（作品名必填；需 approved=true 才对外展示）</div>
+          <div class="grid-2">
+            <div>
+              <label class="f-label">作品名 *</label><input id="tGalName" placeholder="作品名">
+              <label class="f-label">图片路径</label><input id="tGalImg" placeholder="img/customers/xx.jpg">
+            </div>
+            <div>
+              <label class="f-label">标签</label><input id="tGalTag" placeholder="如：东方线 · 巳蛇">
+              <label class="f-label">故事 / 备注</label><textarea id="tGalStory" style="min-height:64px;"></textarea>
+            </div>
+          </div>
+          <div class="msg" id="tGalMsg"></div>
+          <button class="btn-gold" id="tGalSave" type="button">上架到光集</button>
+        </div>
+
+        <div class="adm-tool doc-pad" id="toolNotice">
+          <div style="font-size:13px;color:var(--gold);letter-spacing:.1em;margin-bottom:8px;">📢 活动通知（首页横幅文案，留空则关闭）</div>
+          <textarea id="tNoticeTxt" style="min-height:80px;" placeholder="通知内容…"></textarea>
+          <div class="msg" id="tNoticeMsg"></div>
+          <button class="btn-gold" id="tNoticeSave" type="button">保存活动通知</button>
+        </div>
+      </div>
+    </section>
   </div>
 </div></main>
 
@@ -146,41 +434,84 @@
 <script src="js/main.js?v=09032301"></script>
 <script>
 (function () {
+  'use strict';
+  /* ============================================================
+     予光 · 管理后台 v2（白桦规格 · 分区式）—— 内联自足脚本
+     鉴权：account-api op:'me'，x-sess=localStorage yg_token
+     数据：admin-api op list/insert/update/delete/broadcast
+     ============================================================ */
   var cfg = window.SUPABASE || {};
   var AAPI = cfg.url + '/functions/v1/account-api';
   var DAPI = cfg.url + '/functions/v1/admin-api';
   var token = localStorage.getItem('yg_token') || '';
-  var gate = document.getElementById('admGate');
-  var mainEl = document.getElementById('admMain');
-  var msg = document.getElementById('admMsg');
-  var rowsEl = document.getElementById('admRows');
-  var sel = document.getElementById('admTable');
+  var ME = { account: '', role: '', nickname: '' };
 
-  function api(base, body) {
-    return fetch(base, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-sess': token }, body: JSON.stringify(body) }).then(function (r) { return r.json(); });
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s === undefined || s === null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function num(v) { var n = Number(v); return isNaN(n) ? undefined : n; }
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function fmtTime(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return String(iso).replace('T', ' ').slice(0, 16);
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()) + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
   }
-  function esc(s) { return String(s === undefined || s === null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function parseArr(v) {
+    if (!v) return [];
+    if (Array.isArray(v)) return v;
+    try { var a = JSON.parse(v); return Array.isArray(a) ? a : []; } catch (e) { return []; }
+  }
+  function api(base, payload) {
+    return fetch(base, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-sess': token }, body: JSON.stringify(payload) })
+      .then(function (r) { return r.json().catch(function () { return { ok: false, error: 'HTTP ' + r.status }; }); });
+  }
+  function adm(payload) { return api(DAPI, payload); }
+  function acc(payload) { return api(AAPI, payload); }
+  function setMsg(id, txt, cls) { var el = $(id); if (!el) return; el.textContent = txt; el.className = 'msg' + (cls ? ' ' + cls : ''); }
 
+  /* ================= 分区切换 ================= */
+  function showHome() {
+    document.querySelectorAll('.admSec').forEach(function (s) { s.classList.remove('on'); });
+    var h = $('admHome'); if (h) h.classList.add('on');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function openAdminSection(name) {
+    var sec = $(name);
+    if (!sec) return;
+    document.querySelectorAll('.admSec').forEach(function (s) { s.classList.remove('on'); });
+    sec.classList.add('on');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (name === 'secOrders') loadOrders(true);
+    if (name === 'secUsers') loadUsers(true);
+    if (name === 'secMail') loadMailCfg(true);
+    if (name === 'secDb') loadDb(true);
+  }
+  function goBackAdmin() { showHome(); }
+
+  /* ================= 鉴权 ================= */
+  var admTries = 0;
+  function denyEnter() {
+    var tip = $('admTip');
+    if (tip) tip.textContent = '当前账号无管理权限，即将返回首页…';
+    setTimeout(function () { location.href = 'index.html'; }, 1300);
+  }
   function enter(account, role, nick) {
     localStorage.setItem('yg_account', account);
     localStorage.setItem('yg_role', role);
     if (nick) localStorage.setItem('yg_nick', nick);
-    gate.style.display = 'none';
-    mainEl.style.display = 'block';
-    document.getElementById('admWho').innerHTML = '👤 <b>' + account + '</b>（' + role + '）· 会话已保存';
-    load();
+    ME.account = account; ME.role = role; ME.nickname = nick || '';
+    var gate = $('admGate'); if (gate) gate.style.display = 'none';
+    var sh = $('admShell'); if (sh) sh.style.display = 'block';
+    var who = $('hWho');
+    if (who) who.innerHTML = '👤 管理员 <b>' + esc(account) + '</b>（' + esc(role === 'root' ? 'root · 终端' : role) + '）· ' + esc(nick || '');
+    $('admTip').textContent = '正在校验…';
     window.dispatchEvent(new Event('yg:login'));
-  }
-  var admTries = 0;
-  function denyEnter() {
-    var tip = document.getElementById('admTip');
-    if (tip) tip.textContent = '当前账号无管理权限，即将返回…';
-    setTimeout(function () { location.href = 'index.html'; }, 1200);
+    startPoller();
   }
   function tryEnter() {
     if (!token) { denyEnter(); return; }
-    api(AAPI, { op: 'me' }).then(function (r) {
-      if (r.ok && (r.role === 'admin' || r.role === 'root')) enter(r.account, r.role, r.nickname);
+    acc({ op: 'me' }).then(function (r) {
+      if (r && r.ok && (r.role === 'admin' || r.role === 'root')) enter(r.account, r.role, r.nickname);
       else denyEnter();
     }).catch(function () {
       admTries++;
@@ -188,303 +519,1222 @@
     });
   }
 
-  document.getElementById('admResetBtn').addEventListener('click', function () {
-    var ac = (document.getElementById('admResetAcc').value || '').trim();
-    if (!ac) { msg.textContent = '请输入用户邮箱'; return; }
-    if (!confirm('确认重置 ' + ac + ' 的密码？（临时密码将发送到其邮箱）')) return;
-    api(AAPI, { op: 'admin_reset', account: ac }).then(function (r) {
-      msg.textContent = r.ok ? '已重置，临时密码已发送' : (r.error || '失败');
-    }).catch(function () { msg.textContent = '网络错误'; });
-  });
-  document.getElementById('admLogout').addEventListener('click', function () {
-    api(AAPI, { op: 'logout' }).catch(function () {});
-    localStorage.removeItem('yg_token');
-    location.href = 'index.html';
-  });
-  document.getElementById('admRefresh').addEventListener('click', load);
-  var expBtn = document.getElementById('admExport');
-  if (expBtn) expBtn.addEventListener('click', function () {
-    var rows = window.__admRows || [];
-    if (!rows.length) { msg.textContent = '暂无可导出数据'; return; }
-    var keys = Object.keys(rows[0]);
-    var csv = [keys.join(',')];
-    rows.forEach(function (r) {
-      csv.push(keys.map(function (k) {
-        var v = r[k];
-        var s = typeof v === 'object' ? JSON.stringify(v) : String(v === undefined || v === null ? '' : v);
-        return '"' + String(s).replace(/"/g, '""') + '"';
-      }).join(','));
+  /* ============ 全局弹窗 ============ */
+  function openModal(html) {
+    var m = document.createElement('div');
+    m.className = 'ygModal';
+    m.innerHTML = '<div class="ygCard">' + html + '</div>';
+    document.body.appendChild(m);
+    return m;
+  }
+  function closeModal(m) { if (m && m.parentNode) m.parentNode.removeChild(m); }
+  function bindModalClose(m) {
+    m.addEventListener('click', function (e) { if (e.target === m) closeModal(m); });
+    var x = m.querySelector('[data-x]'); if (x) x.addEventListener('click', function () { closeModal(m); });
+  }
+
+  /* ============================================================
+     ① 待处理订单
+     ============================================================ */
+  var O = { all: [], showAll: false, q: '', sel: {}, editId: null, busy: false };
+  var PENDING = ['new', 'paid', 'making'];
+  var OSTAT = {
+    new: ['待确认', '#e3c47c'], paid: ['已确认', '#e3c47c'], making: ['制作中', '#e3c47c'],
+    shipped: ['已发货', '#8fb6e8'], done: ['已完成', '#93a0b5'], refund: ['退款/售后', '#ff8d7d']
+  };
+  function isPending(st) { return PENDING.indexOf(st) > -1; }
+  function isMergedRow(o) { return /YG_MERGE=/.test(o.note || ''); }
+  function stBadge(st, label) {
+    var d = OSTAT[st] || [st || '—', '#93a0b5'];
+    var c = d[1];
+    return '<span class="badge" style="color:' + c + ';border-color:' + c + '55;">' + esc(label || d[0]) + '</span>';
+  }
+  function orderItems(o) {
+    var arr = parseArr(o.items);
+    if (!arr.length) arr = [{ name: String(o.note || '').split('\n')[0].slice(0, 40) || '定制作品' }];
+    return arr;
+  }
+  function itemsSummary(o) {
+    var names = [];
+    orderItems(o).forEach(function (it) {
+      var nm = (it && (it.name || '')) || '定制作品';
+      if (it && it.code) nm += ' · ' + it.code;
+      names.push(nm);
     });
-    var blob = new Blob(['\ufeff' + csv.join('\n')], { type: 'text/csv;charset=utf-8' });
+    return names.length ? names.join('、') : '—';
+  }
+  function copyText(txt) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(function () { return true; }, function () { return fallbackCopy(txt); });
+    } else fallbackCopy(txt);
+  }
+  function fallbackCopy(txt) {
+    var ta = document.createElement('textarea');
+    ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  function uniqueCode(used) {
+    var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    var d = new Date();
+    var ymd = String(d.getFullYear()).slice(2) + pad2(d.getMonth() + 1) + pad2(d.getDate());
+    var c;
+    do {
+      c = '';
+      for (var i = 0; i < 6; i++) c += chars.charAt(Math.floor(Math.random() * chars.length));
+      c = 'YG-' + ymd + '-' + c;
+    } while (used && used[c]);
+    return c;
+  }
+  function ygOrderNo() {
+    var d = new Date();
+    var r = Math.floor(1000 + Math.random() * 9000);
+    return 'YG-' + String(d.getFullYear()).slice(2) + pad2(d.getMonth() + 1) + pad2(d.getDate()) + '-' + r;
+  }
+  function insertRecordGuarded(row) {
+    return new Promise(function (resolve, reject) {
+      var tries = 0;
+      function go() {
+        adm({ op: 'insert', table: 'records', row: row }).then(function (r) {
+          if (r.ok) { resolve(r); return; }
+          var m = String((r && r.error) || '');
+          if (tries < 6 && /duplicate|unique|already/i.test(m)) {
+            tries++; row.code = uniqueCode(); go();
+          } else reject(new Error(m || '记录入库失败'));
+        }).catch(function (e) { reject(e); });
+      }
+      go();
+    });
+  }
+  /* 为订单补齐防伪码：每项无 code 的作品各入一枚 records，随后写回订单 items */
+  function genCodesForOrder(o) {
+    var items = orderItems(o);
+    var jobs = [];
+    items.forEach(function (it, i) { if (!it.code) jobs.push({ i: i, name: (it.name || '定制作品').slice(0, 60) }); });
+    if (!jobs.length) return Promise.resolve(0);
+    var used = {};
+    jobs.forEach(function (j) { j.code = uniqueCode(used); used[j.code] = 1; });
+    var q = jobs.slice();
+    function next() {
+      if (!q.length) return Promise.resolve(0);
+      var batch = q.splice(0, 3);
+      var ps = batch.map(function (j) {
+        var info = {}; if (o.note) info.text = String(o.note).slice(0, 200);
+        return insertRecordGuarded({ code: j.code, product_ref: j.name, info: info, image_urls: '' }).then(function () { return j; });
+      });
+      return Promise.all(ps).then(function () { return next(); });
+    }
+    return next().then(function () {
+      var newItems = orderItems(o).map(function (it, idx) {
+        var j = null;
+        for (var k = 0; k < jobs.length; k++) if (jobs[k].i === idx) { j = jobs[k]; break; }
+        if (j) { it.code = j.code; }
+        return it;
+      });
+      return adm({ op: 'update', table: 'orders', id: o.id, set: { items: newItems } });
+    }).then(function (r) {
+      if (!r.ok) throw new Error(r.error || '订单写回失败');
+      return jobs.length;
+    });
+  }
+
+  function loadOrders(force) {
+    if (!force && O.busy) return;
+    O.busy = true;
+    adm({ op: 'list', table: 'orders', limit: 200 }).then(function (r) {
+      O.busy = false;
+      if (!r.ok) { setMsg('oMsg', '加载失败：' + (r.error || '（无管理员权限？）'), 'bad'); return; }
+      O.all = r.rows || [];
+      renderOrders();
+    }).catch(function () { O.busy = false; setMsg('oMsg', '网络错误', 'bad'); });
+  }
+
+  function oVisible(o) {
+    var q = O.q;
+    if (!q && !O.showAll) return isPending(o.status);
+    if (!q) return true;
+    var hay = [o.order_no, o.phone, o.account, o.note, o.amount, o.status].join(' ').toLowerCase();
+    var items = itemsSummary(o).toLowerCase();
+    return hay.indexOf(q) > -1 || items.indexOf(q) > -1;
+  }
+
+  function renderOrders() {
+    var rows = O.all.filter(oVisible);
+    var box = $('oBody');
+    $('oMode').textContent = O.showAll ? '🕐 待处理' : '📋 全部';
+    var pendN = O.all.filter(function (o) { return isPending(o.status); }).length;
+    $('oCount').innerHTML = O.q
+      ? '关键词「<b style="color:var(--gold)">' + esc(O.q) + '</b>」命中 ' + rows.length + ' 条（搜索时含已发货）'
+      : '待处理 <b style="color:var(--gold)">' + pendN + '</b> 单 · 共 ' + O.all.length + ' 单（每 20s 自动刷新）';
+    if (!rows.length) {
+      box.innerHTML = '<div style="padding:26px;text-align:center;color:var(--text-dim);font-size:13px;">' + (O.q ? '（无匹配订单）' : '✨ 暂无待处理订单') + '</div>';
+      var em = $('oMsg');
+      if (em) {
+        if (O.lastMsg) { em.textContent = O.lastMsg; em.className = 'msg' + (O.lastBad || ''); O.lastMsg = null; O.lastBad = ''; }
+        else { em.textContent = ''; em.className = 'msg'; }
+      }
+      return;
+    }
+    var h = '<table class="tbl"><tr><th style="width:30px;"></th><th>订单号 / 时间</th><th>手机</th><th>账号</th><th>内容摘要</th><th>金额</th><th>状态</th><th>操作</th></tr>';
+    rows.forEach(function (o, idx) {
+      var id = o.id;
+      var pend = isPending(o.status);
+      var merged = isMergedRow(o);
+      var checked = O.sel[String(id)] ? ' checked' : '';
+      h += '<tr' + (merged ? ' style="background:rgba(227,196,124,.05);"' : '') + '>' +
+        '<td>' + (pend ? '<input type="checkbox" class="oChk" data-id="' + id + '"' + checked + '>' : '<span class="dim">—</span>') + '</td>' +
+        '<td><div style="color:var(--gold);font-size:12px;">' + esc(o.order_no || '') + '</div><div class="dim" style="font-size:11px;">' + esc(fmtTime(o.created_at)) + '</div></td>' +
+        '<td>' + esc(o.phone || '') + '</td>' +
+        '<td>' + esc(o.account || '') + '</td>' +
+        '<td style="max-width:300px;">' + esc(itemsSummary(o)) + '</td>' +
+        '<td>¥' + esc(o.amount === undefined || o.amount === null ? '—' : o.amount) + '</td>' +
+        '<td>' + (merged ? stBadge(o.status, '已合并') : stBadge(o.status)) + '</td>' +
+        '<td style="white-space:nowrap;">' + oActions(o) + '</td></tr>';
+      if (String(O.editId) === String(id)) h += oEditRow(o);
+    });
+    h += '</table>';
+    box.innerHTML = h;
+    bindOrderRows();
+    var m = $('oMsg');
+    if (m) {
+      if (O.lastMsg) { m.textContent = O.lastMsg; m.className = 'msg' + (O.lastBad || ''); O.lastMsg = null; O.lastBad = ''; }
+      else { m.textContent = ''; m.className = 'msg'; }
+    }
+  }
+  function oEditRow(o) {
+    var items = orderItems(o);
+    var h = '<tr class="row-edit"><td colspan="8">';
+    h += '<div style="font-size:12px;color:var(--gold);letter-spacing:.1em;margin-bottom:6px;">💾 保存修改（编辑产品名与备注，code/价格等自动保留）</div>';
+    items.forEach(function (it, i) {
+      h += '<div class="oitem"><label>产品 ' + (i + 1) + '</label><input data-ename="' + i + '" value="' + esc(it.name || '') + '" placeholder="产品名"></div>';
+    });
+    h += '<label class="f-label">备注 note</label><textarea data-enote style="min-height:52px;">' + esc(o.note || '') + '</textarea>';
+    h += '<div style="margin-top:8px;"><button class="btn-sm" data-act="oEditSave">💾 保存</button><button class="btn-sm" data-act="oEditCancel">取消</button></div>';
+    h += '</td></tr>';
+    return h;
+  }
+  function oActions(o) {
+    var st = o.status;
+    var b = '';
+    if (isPending(st)) {
+      b += '<button class="btn-sm" data-act="oEdit" data-id="' + o.id + '">💾 保存修改</button>';
+      b += '<button class="btn-sm" data-act="oCode" data-id="' + o.id + '">🧾 生成防伪码</button>';
+      b += '<button class="btn-sm" data-act="oFinish" data-id="' + o.id + '">✅ 完成订单</button>';
+      b += '<button class="btn-sm" data-act="oTrack" data-id="' + o.id + '">📦 运单号</button>';
+    }
+    if (st === 'shipped') b += '<button class="btn-sm" data-act="oRecall" data-id="' + o.id + '">↩️ 撤回</button><button class="btn-sm" data-act="oTrack" data-id="' + o.id + '">📦 运单号</button>';
+    if (isMergedRow(o)) b += '<button class="btn-sm" data-act="oSplit" data-id="' + o.id + '" title="拆回原被合并单并删除本合并单">🧩 拆分此单</button>';
+    b += '<button class="btn-sm danger" data-act="oDel" data-id="' + o.id + '">🗑️ 删除</button>';
+    return b;
+  }
+  function findOrder(id) {
+    for (var i = 0; i < O.all.length; i++) if (String(O.all[i].id) === String(id)) return O.all[i];
+    return null;
+  }
+  function bindOrderRows() {
+    var box = $('oBody');
+    box.querySelectorAll('.oChk').forEach(function (c) {
+      c.addEventListener('change', function () {
+        var cid = String(c.getAttribute('data-id'));
+        if (c.checked) O.sel[cid] = 1; else delete O.sel[cid];
+        updateSelBtn();
+      });
+    });
+    box.querySelectorAll('[data-act="oEdit"]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var id = String(b.getAttribute('data-id'));
+        O.editId = String(O.editId) === id ? null : id;
+        renderOrders();
+      });
+    });
+    box.querySelectorAll('[data-act="oEditCancel"]').forEach(function (b) { b.addEventListener('click', function () { O.editId = null; renderOrders(); }); });
+    box.querySelectorAll('[data-act="oEditSave"]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var tr = b.closest('tr');
+        // 找到编辑行上方所属的订单主行
+        var allTrs = Array.prototype.slice.call(b.closest('table').querySelectorAll('tr'));
+        var myIdx = allTrs.indexOf(tr);
+        var o = null;
+        for (var i = myIdx - 1; i >= 0 && !o; i--) {
+          var firstAct = allTrs[i].querySelector('[data-act="oEdit"],[data-act="oFinish"],[data-act="oRecall"]');
+          if (firstAct) o = findOrder(firstAct.getAttribute('data-id'));
+        }
+        if (!o) { setMsg('oMsg', '未找到对应订单', 'bad'); return; }
+        var items = orderItems(o);
+        tr.querySelectorAll('input[data-ename]').forEach(function (inp) {
+          var i = Number(inp.getAttribute('data-ename'));
+          if (items[i]) items[i].name = inp.value.trim();
+        });
+        var noteEl = tr.querySelector('[data-enote]');
+        var note = noteEl ? noteEl.value : (o.note || '');
+        adm({ op: 'update', table: 'orders', id: o.id, set: { items: items, note: note } }).then(function (r) {
+          O.editId = null;
+          if (r.ok) { O.lastMsg = '已保存修改（单 ' + o.order_no + '）'; O.lastBad = ''; }
+          else { O.lastMsg = '保存失败：' + (r.error || ''); O.lastBad = ' bad'; }
+          loadOrders();
+        }).catch(function () { setMsg('oMsg', '网络错误', 'bad'); });
+      });
+    });
+    box.querySelectorAll('[data-act="oCode"]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var o = findOrder(b.getAttribute('data-id'));
+        if (!o) return;
+        setMsg('oMsg', '正在生成防伪码…');
+        genCodesForOrder(o).then(function (n) {
+          O.lastMsg = '已生成 ' + n + ' 枚官方码并写入订单（再次点击可为缺码项补码）；确认无误后可 ✅ 完成订单';
+          O.lastBad = '';
+          loadOrders();
+        }).catch(function (e) { setMsg('oMsg', '生成失败：' + (e.message || e), 'bad'); });
+      });
+    });
+    box.querySelectorAll('[data-act="oFinish"]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var o = findOrder(b.getAttribute('data-id'));
+        if (!o) return;
+        if (!confirm('完成订单「' + (o.order_no || o.id) + '」？\n将先为缺码项补齐官方码，再置为 已发货(shipped)。')) return;
+        setMsg('oMsg', '正在补齐防伪码并完成订单…');
+        genCodesForOrder(o).then(function () {
+          return adm({ op: 'update', table: 'orders', id: o.id, set: { status: 'shipped' } });
+        }).then(function (r) {
+          if (!r.ok) throw new Error(r.error || '状态更新失败');
+          O.lastMsg = '✅ 已发货（单 ' + o.order_no + '）';
+          O.lastBad = '';
+          loadOrders();
+        }).catch(function (e) { setMsg('oMsg', '失败：' + (e.message || e), 'bad'); });
+      });
+    });
+    box.querySelectorAll('[data-act="oTrack"]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var o = findOrder(b.getAttribute('data-id'));
+        if (!o) return;
+        openTrackModal(o);
+      });
+    });
+    box.querySelectorAll('[data-act="oRecall"]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var o = findOrder(b.getAttribute('data-id'));
+        if (!o) return;
+        if (!confirm('撤回订单「' + (o.order_no || o.id) + '」为 制作中(making)？')) return;
+        adm({ op: 'update', table: 'orders', id: o.id, set: { status: 'making' } }).then(function (r) {
+          if (r.ok) { O.lastMsg = '已撤回为待处理'; O.lastBad = ''; loadOrders(); }
+          else setMsg('oMsg', '失败：' + (r.error || ''), 'bad');
+        }).catch(function () { setMsg('oMsg', '网络错误', 'bad'); });
+      });
+    });
+    box.querySelectorAll('[data-act="oDel"]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var o = findOrder(b.getAttribute('data-id'));
+        if (!o) return;
+        if (!confirm('确认删除订单「' + (o.order_no || o.id) + '」？此操作不可撤销。')) return;
+        adm({ op: 'delete', table: 'orders', id: o.id }).then(function (r) {
+          delete O.sel[String(o.id)];
+          if (r.ok) { O.lastMsg = '已删除订单'; O.lastBad = ''; loadOrders(); }
+          else setMsg('oMsg', '失败：' + (r.error || ''), 'bad');
+        }).catch(function () { setMsg('oMsg', '网络错误', 'bad'); });
+      });
+    });
+    box.querySelectorAll('[data-act="oSplit"]').forEach(function (b) {
+      b.addEventListener('click', function () { splitMerged(b.getAttribute('data-id')); });
+    });
+  }
+  function updateSelBtn() {
+    var n = Object.keys(O.sel).length;
+    var btn = $('oSelAll');
+    if (btn) btn.textContent = n ? '☑️ 已选 ' + n + ' · 取消' : '☑️ 全选';
+  }
+  function splitMerged(id) {
+    var o = findOrder(id);
+    if (!o) return;
+    var m = /YG_MERGE=(\[[\s\S]*\])/.exec(o.note || '');
+    var kids = [];
+    try { if (m) kids = JSON.parse(m[1]); } catch (e) {}
+    if (!kids.length) { setMsg('oMsg', '该单缺少可逆合并信息，无法拆分', 'bad'); return; }
+    if (!confirm('拆分合并单「' + (o.order_no || o.id) + '」？将把 ' + kids.length + ' 个被合并单恢复原状态，并删除本合并单。')) return;
+    var ps = kids.map(function (k) {
+      var set = { status: k.status };
+      if (k.note !== undefined) set.note = k.note;
+      return adm({ op: 'update', table: 'orders', id: k.id, set: set });
+    });
+    ps.push(adm({ op: 'delete', table: 'orders', id: o.id }));
+    Promise.all(ps).then(function (rs) {
+      var bad = rs.filter(function (r) { return !r.ok; }).length;
+      O.lastMsg = bad ? ('拆分部分失败（' + bad + ' 项）' + (rs[rs.length - 1].error || '')) : ('✅ 已拆回 ' + kids.length + ' 单');
+      O.lastBad = bad ? ' bad' : '';
+      loadOrders();
+    }).catch(function () { setMsg('oMsg', '网络错误', 'bad'); });
+  }
+  function openTrackModal(o) {
+    var m = openModal(
+      '<h3>📦 填写运单号</h3>' +
+      '<div class="small-note" style="margin-bottom:8px;">订单：' + esc(o.order_no || o.id) + '（' + esc(o.account || '未绑定账号') + '）· 将追加「物流：…」到备注</div>' +
+      '<input id="tkInput" placeholder="如：SF1234567890" style="width:100%;">' +
+      '<div class="btn-row"><button class="btn-ghost" data-x type="button">取消</button><button class="btn-gold" data-ok type="button">📦 保存运单号</button></div>');
+    bindModalClose(m);
+    m.querySelector('[data-ok]').addEventListener('click', function () {
+      var v = (m.querySelector('#tkInput').value || '').trim();
+      if (!v) { setMsg('oMsg', '请输入运单号', 'bad'); return; }
+      var base = (o.note || '').split('\n').filter(function (ln) { return ln.indexOf('物流：') !== 0; });
+      base.push('物流：' + v);
+      adm({ op: 'update', table: 'orders', id: o.id, set: { note: base.join('\n').trim() } }).then(function (r) {
+        closeModal(m);
+        if (r.ok) { O.lastMsg = '已写入运单号'; O.lastBad = ''; loadOrders(); }
+        else setMsg('oMsg', '失败：' + (r.error || ''), 'bad');
+      }).catch(function () { setMsg('oMsg', '网络错误', 'bad'); });
+    });
+  }
+  function oSelCandidates() {
+    return O.all.filter(function (o) { return oVisible(o) && isPending(o.status) && !isMergedRow(o); });
+  }
+  function oSelRows() { return oSelCandidates().filter(function (o) { return O.sel[String(o.id)]; }); }
+  function oSelAllToggle() {
+    var rows = oSelCandidates();
+    var allSel = rows.length > 0 && rows.every(function (o) { return O.sel[String(o.id)]; });
+    rows.forEach(function (o) { if (allSel) delete O.sel[String(o.id)]; else O.sel[String(o.id)] = 1; });
+    updateSelBtn(); renderOrders();
+  }
+  function oBatchFinish() {
+    var targets = oSelRows();
+    if (!targets.length) { setMsg('oMsg', '请先勾选待处理订单', 'bad'); return; }
+    if (!confirm('批量完成 ' + targets.length + ' 单？将逐单补齐防伪码并置为已发货。')) return;
+    var i = 0; var done = 0;
+    setMsg('oMsg', '批量完成中 0/' + targets.length + ' …');
+    function step() {
+      if (i >= targets.length) {
+        O.lastMsg = '✅ 批量完成 ' + done + '/' + targets.length + ' 单';
+        O.lastBad = '';
+        loadOrders(); return;
+      }
+      var o = targets[i++];
+      genCodesForOrder(o).then(function () { return adm({ op: 'update', table: 'orders', id: o.id, set: { status: 'shipped' } }); })
+        .then(function (r) { if (r.ok) done++; setMsg('oMsg', '批量完成中 ' + i + '/' + targets.length + ' …'); step(); })
+        .catch(function () { setMsg('oMsg', '批量完成中 ' + i + '/' + targets.length + '（第 ' + i + ' 单失败跳过）…'); step(); });
+    }
+    step();
+  }
+  function oBatchDelete() {
+    var targets = oSelRows();
+    if (!targets.length) { setMsg('oMsg', '请先勾选订单', 'bad'); return; }
+    if (!confirm('确认删除勾选的 ' + targets.length + ' 个订单？')) return;
+    var i = 0; var done = 0;
+    function step() {
+      if (i >= targets.length) { O.lastMsg = '已删除 ' + done + '/' + targets.length + ' 单'; O.lastBad = ''; loadOrders(); return; }
+      var id = targets[i++].id;
+      adm({ op: 'delete', table: 'orders', id: id }).then(function (r) {
+        delete O.sel[String(id)];
+        if (r.ok) done++;
+        step();
+      }).catch(function () { step(); });
+    }
+    step();
+  }
+  function oMergeSelected() {
+    var kids = oSelRows();
+    if (kids.length < 2) { setMsg('oMsg', '合并需勾选 ≥2 个待处理订单', 'bad'); return; }
+    var newNo = ygOrderNo();
+    if (!confirm('将 ' + kids.length + ' 个订单合并为新单「' + newNo + '」？\n原单将标记为 已完成(已合并)，新单可继续处理，也可随时 🧩 拆分。')) return;
+    var items = [];
+    var amount = 0;
+    var account = '', phone = '';
+    kids.forEach(function (o) {
+      items = items.concat(orderItems(o));
+      amount += Number(o.amount) || 0;
+      if (!account && o.account) account = o.account;
+      if (!phone && o.phone) phone = o.phone;
+    });
+    var payload = kids.map(function (o) {
+      var oldNote = (o.note || '').replace(/\n（已并入[^\n]*）/g, '').replace(/YG_MERGE=[\s\S]*$/, '').trim();
+      return { id: o.id, order_no: o.order_no, status: o.status, note: oldNote };
+    });
+    var note = '合并自：' + kids.map(function (o) { return o.order_no; }).join('、') + '\nYG_MERGE=' + JSON.stringify(payload);
+    var row = { order_no: newNo, account: account, phone: phone, items: items, amount: amount, status: 'new', note: note };
+    adm({ op: 'insert', table: 'orders', row: row }).then(function (r) {
+      if (!r.ok) { setMsg('oMsg', '建合并单失败：' + (r.error || ''), 'bad'); return; }
+      var newId = r.row && (r.row.id !== undefined ? r.row.id : null);
+      var ups = kids.map(function (o) {
+        var suffix = '（已并入 ' + newNo + '）';
+        return adm({ op: 'update', table: 'orders', id: o.id, set: { status: 'done', note: ((o.note || '').trim() + '\n' + suffix).trim() } });
+      });
+      return Promise.all(ups).then(function (rs) {
+        O.sel = {};
+        var bad = rs.filter(function (x) { return !x.ok; }).length;
+        O.lastMsg = bad ? ('合并完成，但 ' + bad + ' 单标记失败（可手动处理）' + (newId !== null ? '；新单 id=' + newId : '')) : ('✅ 已合并为新单 ' + newNo + '，可对该单生成码/完成/拆分');
+        O.lastBad = bad ? ' bad' : '';
+        loadOrders();
+      });
+    }).catch(function () { setMsg('oMsg', '网络错误', 'bad'); });
+  }
+
+  /* ============================================================
+     ② 单个官方码
+     ============================================================ */
+  var lastCard = null;
+  function renderCard(rec) {
+    lastCard = rec;
+    var h = '<div class="doc-pad"><div style="font-size:13px;color:var(--gold);letter-spacing:.12em;margin-bottom:10px;">✅ 已入库 · 官方验证卡</div>';
+    h += '<div class="v-card">';
+    h += '<div class="v-brand">予 光 Y U G U A N G</div>';
+    h += '<div class="v-code">' + esc(rec.code) + '</div>';
+    h += '<div class="v-name">' + esc(rec.product_ref || '定制作品') + '</div>';
+    var info = rec.info || {};
+    if (typeof info === 'string') { try { info = JSON.parse(info); } catch (e) {} }
+    h += '<div class="v-line">' + esc(info.text || '') + '</div>';
+    h += '<div class="v-line">建档时间：' + esc(fmtTime(rec.created_at)) + '</div>';
+    h += '<div class="v-tip">验证页：输入该验证码即可查询建档信息（' + esc(location.protocol + '//' + location.host + '/verify.html') + '）</div>';
+    h += '</div>';
+    h += '<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">';
+    h += '<button class="btn-line" id="copyCardBtn" type="button">📋 复制码</button>';
+    h += '<button class="btn-line" id="exportCardBtn" type="button">🖼️ 导出为图片(JPG)</button>';
+    h += '<button class="btn-line" id="toDbBtn" type="button">🗄️ 去记录管理查看</button>';
+    h += '</div></div>';
+    $('sCardArea').innerHTML = h;
+    $('copyCardBtn').addEventListener('click', function () { copyText(rec.code); setMsg('sGenMsg', '已复制 ' + rec.code, 'ok'); });
+    $('exportCardBtn').addEventListener('click', exportCardJpg);
+    $('toDbBtn').addEventListener('click', function () { $('dTable').value = 'records'; goToDb(); });
+  }
+  function goToDb() { openAdminSection('secDb'); }
+  function exportCardJpg() {
+    if (!lastCard) return;
+    var rec = lastCard;
+    var W = 1080, H = 720;
+    var c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    var ctx = c.getContext('2d');
+    ctx.fillStyle = '#0c1220';
+    ctx.fillRect(0, 0, W, H);
+    var grd = ctx.createRadialGradient(W * 0.5, H * 0.2, 40, W * 0.5, H * 0.5, W * 0.7);
+    grd.addColorStop(0, 'rgba(227,196,124,0.16)'); grd.addColorStop(1, 'rgba(6,9,16,0)');
+    ctx.fillStyle = grd; ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = 'rgba(227,196,124,.55)'; ctx.lineWidth = 3;
+    ctx.strokeRect(36, 36, W - 72, H - 72);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#e3c47c';
+    ctx.font = '500 40px "Songti SC", serif';
+    ctx.fillText('予 光  Y U G U A N G', W / 2, 130);
+    ctx.fillStyle = '#f4efe6';
+    var code = rec.code || '';
+    var csize = 92;
+    ctx.font = '700 ' + csize + 'px "Courier New", monospace';
+    while (ctx.measureText(code).width > W - 180 && csize > 18) {
+      csize -= 6;
+      ctx.font = '700 ' + csize + 'px "Courier New", monospace';
+    }
+    ctx.fillText(code, W / 2, 300);
+    ctx.fillStyle = '#e3c47c';
+    ctx.font = '500 46px "Songti SC", serif';
+    ctx.fillText(String(rec.product_ref || '予光定制作品').slice(0, 24), W / 2, 410);
+    ctx.fillStyle = 'rgba(244,239,230,.85)';
+    ctx.font = '400 30px sans-serif';
+    var info = rec.info || {}; if (typeof info === 'string') { try { info = JSON.parse(info); } catch (e) { info = {}; } }
+    var text = String(info.text || '');
+    if (text) {
+      var words = text.slice(0, 60);
+      var lines = [];
+      while (words.length > 0) { lines.push(words.slice(0, 20)); words = words.slice(20); }
+      var ty = 470;
+      lines.slice(0, 3).forEach(function (ln) { ctx.fillText(ln, W / 2, ty); ty += 40; });
+    }
+    ctx.fillStyle = 'rgba(244,239,230,.55)';
+    ctx.font = '400 24px sans-serif';
+    var url = location.protocol + '//' + location.host + '/verify.html';
+    ctx.fillText('予光作品验真页：' + url, W / 2, H - 110);
+    ctx.fillText('建档时间：' + fmtTime(rec.created_at), W / 2, H - 70);
     var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = sel.value + '.csv';
+    a.download = '予光-验证卡-' + code + '.jpg';
+    a.href = c.toDataURL('image/jpeg', 0.92);
     a.click();
-    msg.textContent = '已导出 ' + rows.length + ' 条';
-  });
-
-  sel.addEventListener('change', function () {
-    document.getElementById('admSettings').style.display = sel.value === 'settings' ? 'block' : 'none';
-    load();
-  });
-
-  function load() {
-    var t = sel.value;
-    msg.textContent = '加载中…';
-    api(DAPI, { op: 'list', table: t }).then(function (r) {
-      if (!r.ok) { msg.textContent = '加载失败：' + (r.error || '（无管理员权限？）'); return; }
-      msg.textContent = t + ' 共 ' + (r.rows ? r.rows.length : 0) + ' 条';
-      allRows = r.rows || [];
-      window.__admRows = allRows;
-      if (t === 'settings') { loadSettings(allRows); return; }
-      var q = (admSearch && admSearch.value || '').trim().toLowerCase();
-      var rows = q ? allRows.filter(function (x) { return JSON.stringify(x).toLowerCase().indexOf(q) > -1; }) : allRows;
-      window.__admRows = rows;
-      msg.textContent = t + ' 共 ' + rows.length + ' 条';
-      renderRows(t, rows);
-    }).catch(function () { msg.textContent = '网络错误'; });
+    setMsg('sGenMsg', '已导出 JPG（可长按/保存）', 'ok');
+  }
+  function sGenSubmit() {
+    var name = ($('sName').value || '').trim();
+    if (!name) { setMsg('sGenMsg', '请填写产品名称', 'bad'); return; }
+    var used = {};
+    var code = ($('sCode').value || '').trim();
+    if (!code) code = uniqueCode(used);
+    if (!/^YG-[0-9]{6}-[0-9A-Z]{6}$/.test(code) && !confirm('专属编号格式与官方格式（YG-YYMMDD-XXXXXX）不同，仍要使用「' + code + '」吗？')) {
+      $('sCode').value = uniqueCode(used); return;
+    }
+    var note = ($('sMsg').value || '').trim();
+    var imgs = ($('sImgs').value || '').trim();
+    var info = {}; if (note) info.text = note;
+    setMsg('sGenMsg', '正在生成…');
+    insertRecordGuarded({ code: code, product_ref: name, info: info, image_urls: imgs }).then(function () {
+      $('sCode').value = '';
+      var row = { code: code, product_ref: name, info: info, image_urls: imgs, created_at: new Date().toISOString() };
+      setMsg('sGenMsg', '已生成并入库：' + code, 'ok');
+      renderCard(row);
+    }).catch(function (e) {
+      setMsg('sGenMsg', '生成失败：' + (e.message || e), 'bad');
+    });
   }
 
-  function loadSettings(rows) {
-    rowsEl.innerHTML = '';
-    document.getElementById('admSettings').style.display = 'block';
-    function pick(k) { for (var i = 0; i < rows.length; i++) if (rows[i].key === k) return rows[i]; return null; }
-    var mail = pick('mail'), ai = pick('ai');
-    document.getElementById('admMail').value = mail ? JSON.stringify(mail.value, null, 2) : '{}';
-    document.getElementById('admAi').value = ai ? JSON.stringify(ai.value, null, 2) : '{}';
-    document.getElementById('admHome').value = (function () { var o = pick('home_banners'); return o ? JSON.stringify(o.value, null, 2) : '[]'; })();
-    document.getElementById('admSaveCfg').onclick = function () {
-      function upd(k, v) { try { return api(DAPI, { op: 'update', table: 'settings', id: k, set: { value: JSON.parse(v) } }); } catch (e) { msg.textContent = k + ' JSON 格式错误'; return null; } }
-      Promise.all([upd('mail', document.getElementById('admMail').value), upd('ai', document.getElementById('admAi').value), upd('home_banners', document.getElementById('admHome').value)]).then(function () { msg.textContent = '配置已保存'; });
-    };
+  /* ============================================================
+     ③ 批量生成
+     ============================================================ */
+  function bGenSubmit() {
+    var name = ($('bName').value || '').trim();
+    if (!name) { setMsg('bGenMsg', '请填写产品名称', 'bad'); return; }
+    var qty = Math.min(50, Math.max(1, num($('bQty').value) || 1));
+    var note = ($('bMsg').value || '').trim();
+    var imgs = ($('bImgs').value || '').trim();
+    var info = {}; if (note) info.text = note;
+    var codes = [];
+    var used = {};
+    for (var i = 0; i < qty; i++) { codes.push(uniqueCode(used)); used[codes[i]] = 1; }
+    setMsg('bGenMsg', '开始入库 0/' + qty + ' …');
+    var jobs = codes.map(function (c) { return { code: c, row: { code: c, product_ref: name, info: info, image_urls: imgs } }; });
+    var q = jobs.slice(); var done = 0; var failed = 0;
+    function next() {
+      if (!q.length) {
+        var outArea = $('bOutArea');
+        outArea.innerHTML = '<div class="msg ' + (failed ? 'bad' : 'ok') + '">' + (failed ? '完成，失败 ' + failed + ' 枚（下方为成功码）' : '✅ 全部 ' + qty + ' 枚已入库') + '</div>' +
+          '<label class="f-label">本次生成的验证码（复制发给客户 / 打印贴卡）</label>' +
+          '<textarea class="code-box" readonly style="min-height:' + Math.max(90, Math.min(300, codes.length * 22 + 30)) + 'px;">' + esc(codes.join('\n')) + '</textarea>' +
+          '<div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn-line" data-bcopy type="button">📋 复制全部码</button>' +
+          '<button class="btn-line" data-bdb type="button">🗄️ 在数据浏览中查看 records</button></div>';
+        outArea.querySelector('[data-bcopy]').addEventListener('click', function () { copyText(codes.join('\n')); setMsg('bGenMsg', '已复制 ' + codes.length + ' 枚验证码', 'ok'); });
+        outArea.querySelector('[data-bdb]').addEventListener('click', function () { $('dTable').value = 'records'; goToDb(); });
+        return;
+      }
+      var batch = q.splice(0, 5);
+      Promise.all(batch.map(function (j) {
+        return insertRecordGuarded(j.row).then(function () { j.code = j.row.code; done++; setMsg('bGenMsg', '入库中 ' + (done + failed) + '/' + qty + ' …'); })
+          .catch(function () { failed++; j.code = ''; });
+      })).then(next);
+    }
+    next();
   }
 
-  var STATUS = { orders: ['new','paid','making','shipped','done','refund'], messages: ['new','read','done'] };
+  /* ============================================================
+     ④ 用户管理
+     ============================================================ */
+  var U = { all: [], q: '', active: null };
+  function uRoleBadge(role) {
+    if (role === 'root') return '<span class="badge" style="color:#e3c47c;border-color:#e3c47c66;">终端 ROOT</span>';
+    if (role === 'admin') return '<span class="badge" style="color:#8fb6e8;border-color:#8fb6e866;">管理员</span>';
+    return '<span class="badge" style="color:#93a0b5;border-color:#93a0b566;">用户</span>';
+  }
+  function loadUsers(force) {
+    if (!force && U.busy) return;
+    U.busy = true;
+    adm({ op: 'list', table: 'users', limit: 200 }).then(function (r) {
+      U.busy = false;
+      if (!r.ok) { setMsg('uMsg', '加载失败：' + (r.error || ''), 'bad'); return; }
+      U.all = r.rows || [];
+      renderUsers();
+    }).catch(function () { U.busy = false; setMsg('uMsg', '网络错误', 'bad'); });
+  }
+  function uVisible(u) {
+    if (!U.q) return true;
+    var hay = [u.account, u.nickname, u.email, u.phone, u.role].join(' ').toLowerCase();
+    return hay.indexOf(U.q) > -1;
+  }
+  function renderUsers() {
+    var rows = U.all.filter(uVisible);
+    if (!rows.length) {
+      $('uBody').innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-dim);font-size:13px;">' + (U.q ? '（无匹配账号）' : '（暂无用户）') + '</div>';
+      uFlushMsg(U.all.length ? ('共 ' + U.all.length + ' 个账号 · 显示 0（无匹配）') : '');
+      return;
+    }
+    var h = '<table class="tbl"><tr><th>账号</th><th>昵称</th><th>邮箱</th><th>手机</th><th>角色</th><th>注册时间</th><th>操作</th></tr>';
+    rows.forEach(function (u) {
+      h += '<tr' + (U.active && String(U.active.id) === String(u.id) ? ' style="background:rgba(227,196,124,.06);"' : '') + '>' +
+        '<td><div style="display:flex;align-items:center;gap:8px;"><span class="user-av">' + esc(((u.nickname || u.account || '光').trim().charAt(0))) + '</span><div><div>' + esc(u.account || '') + '</div>' +
+        (u.account === ME.account ? '<div class="dim" style="font-size:11px;">（当前会话）</div>' : '') + '</div></div></td>' +
+        '<td>' + esc(u.nickname || '') + '</td>' +
+        '<td>' + esc(u.email || '') + '</td>' +
+        '<td>' + esc(u.phone || '') + '</td>' +
+        '<td>' + uRoleBadge(u.role) + '</td>' +
+        '<td class="dim">' + esc(fmtTime(u.created_at)) + '</td>' +
+        '<td style="white-space:nowrap;"><button class="btn-sm" data-uview="' + u.id + '">' + (U.active && String(U.active.id) === String(u.id) ? '收起详情' : '查看详情') + '</button></td></tr>';
+    });
+    h += '</table>';
+    $('uBody').innerHTML = h;
+    $('uBody').querySelectorAll('[data-uview]').forEach(function (b) {
+      b.addEventListener('click', function () { toggleUserDetail(Number(b.getAttribute('data-uview'))); });
+    });
+    uFlushMsg('共 ' + U.all.length + ' 个账号 · 显示 ' + rows.length);
+  }
+  function uFlushMsg(fallback) {
+    var m = $('uMsg');
+    if (!m) return;
+    if (U.lastMsg) { m.textContent = U.lastMsg; m.className = 'msg' + (U.lastBad || ''); U.lastMsg = null; U.lastBad = ''; }
+    else if (fallback) { m.textContent = fallback; m.className = 'msg'; }
+    else { m.textContent = ''; m.className = 'msg'; }
+  }
+  function toggleUserDetail(id) {
+    if (U.active && String(U.active.id) === String(id)) { U.active = null; $('uDetailBox').style.display = 'none'; renderUsers(); return; }
+    for (var i = 0; i < U.all.length; i++) if (String(U.all[i].id) === String(id)) U.active = U.all[i];
+    if (!U.active) return;
+    renderUserDetail();
+    renderUsers();
+  }
+  function renderUserDetail() {
+    var u = U.active;
+    var box = $('uDetailBox');
+    box.style.display = 'block';
+    var isRoot = u.role === 'root';
+    var isAdmin = u.role === 'admin';
+    var myRoot = ME.role === 'root';
+    var canManage = !isRoot && (myRoot || !isAdmin);
+    var h = '<div class="doc-pad">';
+    h += '<div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">';
+    h += '<span class="user-av" style="width:44px;height:44px;font-size:20px;">' + esc(((u.nickname || u.account || '光').trim().charAt(0))) + '</span>';
+    h += '<div><div style="font-size:16px;color:var(--moon);letter-spacing:.06em;">' + esc(u.account || '') + ' ' + uRoleBadge(u.role) + '</div>' +
+      '<div class="small-note">昵称：' + esc(u.nickname || '—') + ' · 邮箱：' + esc(u.email || '—') + ' · 手机：' + esc(u.phone || '—') + ' · 注册：' + esc(fmtTime(u.created_at)) + '</div></div>';
+    h += '<span class="sp" style="flex:1;"></span>';
+    h += '<button class="btn-sm" data-uclose type="button">✕ 收起</button></div>';
+    if (isRoot) {
+      h += '<div class="small-note" style="color:var(--gold);">🔐 终端(root)账号由服务端保护，不可修改角色、删除或重置，仅作后台入口保留。</div>';
+    } else {
+      h += '<div style="display:flex;gap:8px;flex-wrap:wrap;">';
+      h += '<button class="btn-line" data-uact="orders">📋 查看订单</button>';
+      h += '<button class="btn-line" data-uact="addorder">➕ 增加订单</button>';
+      h += '<button class="btn-line" data-uact="resetpw">🔑 重置密码</button>';
+      h += '<button class="btn-line" data-uact="mail">💬 发消息</button>';
+      if (canManage) {
+        h += '<button class="btn-line" data-uact="role">' + (isAdmin ? '👑 取消管理员' : '👑 设为管理员') + '</button>';
+        h += '<button class="btn-line danger" data-uact="del" style="color:#ff8d7d;border-color:#ff8d7d55;">🗑️ 删除账号</button>';
+      } else {
+        h += '<span class="small-note" style="align-self:center;">（管理员账号仅 root 终端可操作）</span>';
+      }
+      h += '</div>';
+    }
+    h += '<div id="uUserOrders" style="margin-top:12px;display:none;"></div>';
+    h += '</div>';
+    box.innerHTML = h;
+    box.querySelector('[data-uclose]').addEventListener('click', function () { U.active = null; box.style.display = 'none'; renderUsers(); });
+    box.querySelectorAll('[data-uact]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var act = b.getAttribute('data-uact');
+        if (act === 'orders') loadUserOrders(u);
+        if (act === 'addorder') openUserOrderModal(u);
+        if (act === 'resetpw') resetUserPwd(u);
+        if (act === 'mail') openUserMailModal(u);
+        if (act === 'role') toggleUserRole(u);
+        if (act === 'del') deleteUserAcc(u);
+      });
+    });
+  }
+  function loadUserOrders(u) {
+    var area = $('uUserOrders');
+    area.style.display = 'block';
+    area.innerHTML = '<div style="color:var(--text-dim);font-size:13px;">订单加载中…</div>';
+    adm({ op: 'list', table: 'orders', limit: 200 }).then(function (r) {
+      if (!r.ok) { area.innerHTML = '<div class="small-note">加载失败：' + esc(r.error || '') + '</div>'; return; }
+      var mine = (r.rows || []).filter(function (o) { return o.account === u.account; });
+      if (!mine.length) { area.innerHTML = '<div class="small-note">该账号暂无订单（可 ➕ 增加订单）。</div>'; return; }
+      var h = '<div style="border-top:1px dashed var(--line-soft);padding-top:10px;"><div style="font-size:12px;color:var(--gold);letter-spacing:.1em;margin-bottom:6px;">📋 该账号订单 ' + mine.length + ' 单</div>';
+      mine.forEach(function (o) {
+        h += '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;border:1px solid var(--line-soft);border-radius:10px;padding:8px 10px;margin-bottom:6px;font-size:12px;">' +
+          '<div style="color:var(--gold);">' + esc(o.order_no || o.id) + '</div>' + stBadge(o.status) +
+          '<span class="dim">¥' + esc(o.amount === null || o.amount === undefined ? '—' : o.amount) + '</span>' +
+          '<span class="dim" style="flex:1;min-width:140px;">' + esc(itemsSummary(o)) + '</span>' +
+          '<button class="btn-sm" data-uodel="' + o.id + '">🗑️ 删除该单</button></div>';
+      });
+      h += '</div>';
+      area.innerHTML = h;
+      area.querySelectorAll('[data-uodel]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          if (!confirm('确认删除该订单？')) return;
+          adm({ op: 'delete', table: 'orders', id: Number(b.getAttribute('data-uodel')) }).then(function (r) {
+            if (r.ok) loadUserOrders(u); else setMsg('uMsg', '删除失败：' + (r.error || ''), 'bad');
+          }).catch(function () { setMsg('uMsg', '网络错误', 'bad'); });
+        });
+      });
+    }).catch(function () { area.innerHTML = '<div class="small-note">网络错误</div>'; });
+  }
+  function openUserOrderModal(u) {
+    var m = openModal(
+      '<h3>➕ 为 ' + esc(u.account) + ' 增加订单（管理员代录）</h3>' +
+      '<div class="small-note" style="margin-bottom:8px;">流程：先生成官方码入库 → 建一条已发货订单并写入该码。</div>' +
+      '<label class="f-label">产品名 *</label><input id="uoName" placeholder="如：巳蛇 · 离光（红纹石）" style="width:100%;">' +
+      '<label class="f-label">金额（元，选填）</label><input id="uoAmount" type="number" placeholder="如 699" style="width:100%;">' +
+      '<label class="f-label">图片文件名（选填，逗号分隔）</label><input id="uoImg" placeholder="img/customers/xx.jpg" style="width:100%;">' +
+      '<label class="f-label">寄语 / 备注（选填，随码入库）</label><textarea id="uoMsg" style="min-height:56px;"></textarea>' +
+      '<div class="btn-row"><button class="btn-ghost" data-x type="button">取消</button><button class="btn-gold" data-ok type="button">✨ 生成码并加单</button></div>');
+    bindModalClose(m);
+    m.querySelector('[data-ok]').addEventListener('click', function () {
+      var name = (m.querySelector('#uoName').value || '').trim();
+      if (!name) { setMsg('uMsg', '请填写产品名', 'bad'); return; }
+      var amount = num(m.querySelector('#uoAmount').value);
+      var img = (m.querySelector('#uoImg').value || '').trim();
+      var note = (m.querySelector('#uoMsg').value || '').trim();
+      var info = { text: note || '管理员代录' };
+      var no = ygOrderNo();
+      setMsg('uMsg', '正在生成码并建单…');
+      insertRecordGuarded({ code: uniqueCode(), product_ref: name, info: info, image_urls: img }).then(function (rr) {
+        var rec = rr.row || {};
+        var code = rec.code || uniqueCode();
+        var items = [{ name: name, code: code }];
+        if (amount !== undefined) items[0].price = amount;
+        var row = { order_no: no, account: u.account, phone: u.phone || '', items: items, amount: (amount === undefined ? 0 : amount), status: 'shipped', note: '管理员代录' + (note ? '\n' + note : '') };
+        return adm({ op: 'insert', table: 'orders', row: row }).then(function (r) {
+          closeModal(m);
+          if (r.ok) {
+            U.lastMsg = '✅ 已为 ' + u.account + ' 加单：' + no + '（防伪码 ' + code + '）';
+            U.lastBad = '';
+            renderUsers();
+            loadUserOrders(u);
+          } else throw new Error(r.error || '建单失败');
+        });
+      }).catch(function (e) { setMsg('uMsg', '加单失败：' + (e.message || e), 'bad'); });
+    });
+  }
+  function resetUserPwd(u) {
+    if (!confirm('重置 ' + u.account + ' 的密码？系统将生成临时密码并发往其邮箱与站内信。')) return;
+    acc({ op: 'admin_reset', account: u.account }).then(function (r) {
+      if (r.ok) { U.lastMsg = '✅ 已重置 ' + u.account + '，临时密码已发送'; U.lastBad = ''; renderUsers(); }
+      else setMsg('uMsg', '重置失败：' + (r.error || ''), 'bad');
+    }).catch(function () { setMsg('uMsg', '网络错误', 'bad'); });
+  }
+  function openUserMailModal(u) {
+    var m = openModal(
+      '<h3>💬 发站内信给 ' + esc(u.account) + '</h3>' +
+      '<label class="f-label">标题</label><input id="umTitle" placeholder="如：您的订单已发货" style="width:100%;">' +
+      '<label class="f-label">正文</label><textarea id="umBody" style="min-height:90px;"></textarea>' +
+      '<div class="btn-row"><button class="btn-ghost" data-x type="button">取消</button><button class="btn-gold" data-ok type="button">📨 发送</button></div>');
+    bindModalClose(m);
+    m.querySelector('[data-ok]').addEventListener('click', function () {
+      var title = (m.querySelector('#umTitle').value || '').trim();
+      var body = (m.querySelector('#umBody').value || '').trim();
+      if (!title && !body) { setMsg('uMsg', '标题与正文至少填一项', 'bad'); return; }
+      adm({ op: 'insert', table: 'mailboxes', row: { account: u.account, kind: 'important', title: title || '予光通知', body: body } }).then(function (r) {
+        closeModal(m);
+        if (r.ok) { U.lastMsg = '✅ 已发送站内信给 ' + u.account; U.lastBad = ''; renderUsers(); }
+        else setMsg('uMsg', '发送失败：' + (r.error || ''), 'bad');
+      }).catch(function () { setMsg('uMsg', '网络错误', 'bad'); });
+    });
+  }
+  function toggleUserRole(u) {
+    var next = u.role === 'admin' ? 'user' : 'admin';
+    if (!confirm('确认将 ' + u.account + ' 的账号角色从 ' + u.role + ' 改为 ' + next + ' ？（root 与管理员账号受服务端守卫保护）')) return;
+    adm({ op: 'update', table: 'users', id: u.id, set: { role: next } }).then(function (r) {
+      if (r.ok) { U.lastMsg = '✅ 已更新角色为 ' + next; U.lastBad = ''; loadUsers(true); }
+      else setMsg('uMsg', '更新失败：' + (r.error || ''), 'bad');
+    }).catch(function () { setMsg('uMsg', '网络错误', 'bad'); });
+  }
+  function deleteUserAcc(u) {
+    if (u.account === ME.account) { setMsg('uMsg', '不能删除当前登录的管理员账号', 'bad'); return; }
+    if (!confirm('确认删除账号 ' + u.account + '？删除后其关联订单仍保留，但该账号将无法登录。')) return;
+    adm({ op: 'delete', table: 'users', id: u.id }).then(function (r) {
+      if (r.ok) {
+        U.active = null; $('uDetailBox').style.display = 'none';
+        U.lastMsg = '✅ 已删除账号 ' + u.account; U.lastBad = '';
+        loadUsers(true);
+      } else setMsg('uMsg', '删除失败：' + (r.error || ''), 'bad');
+    }).catch(function () { setMsg('uMsg', '网络错误', 'bad'); });
+  }
+  function openBroadcastModal() {
+    var m = openModal(
+      '<h3>📢 群发站内信</h3>' +
+      '<div class="small-note" style="margin-bottom:8px;">以 kind=notice 发送到全部注册用户的信箱（admin-api op:broadcast）。</div>' +
+      '<label class="f-label">标题</label><input id="bcTitle" placeholder="如：新品上架 / 活动公告" style="width:100%;">' +
+      '<label class="f-label">正文</label><textarea id="bcBody" style="min-height:100px;"></textarea>' +
+      '<div class="btn-row"><button class="btn-ghost" data-x type="button">取消</button><button class="btn-gold" data-ok type="button">📨 群发</button></div>');
+    bindModalClose(m);
+    m.querySelector('[data-ok]').addEventListener('click', function () {
+      var title = (m.querySelector('#bcTitle').value || '').trim();
+      var body = (m.querySelector('#bcBody').value || '').trim();
+      if (!title && !body) { setMsg('uMsg', '标题与正文至少填一项', 'bad'); return; }
+      if (!confirm('确认向全部注册用户群发站内信？')) return;
+      adm({ op: 'broadcast', title: title, body: body }).then(function (r) {
+        closeModal(m);
+        if (r.ok) { U.lastMsg = '✅ 已发送 ' + (r.sent || 0) + ' / ' + (r.users || 0) + ' 个用户信箱'; U.lastBad = ''; renderUsers(); }
+        else setMsg('uMsg', '群发失败：' + (r.error || ''), 'bad');
+      }).catch(function () { setMsg('uMsg', '网络错误', 'bad'); });
+    });
+  }
 
-  function renderRows(t, rows) {
-    if (!rows.length) { rowsEl.innerHTML = '<tr><td style="color:var(--text-dim);">（暂无数据）</td></tr>'; return; }
+  /* ============================================================
+     ⑤ 邮件设置（settings.mail）
+     ============================================================ */
+  var MAIL_EXISTS = false;
+  function loadMailCfg(force) {
+    adm({ op: 'list', table: 'settings', limit: 200 }).then(function (r) {
+      if (!r.ok) { setMsg('mMsg', '读取失败：' + (r.error || ''), 'bad'); return; }
+      var row = null;
+      (r.rows || []).forEach(function (x) { if (x.key === 'mail') row = x; });
+      MAIL_EXISTS = row !== null;
+      var v = null;
+      if (row && row.value) {
+        v = (typeof row.value === 'string') ? (function () { try { return JSON.parse(row.value.replace(/^"(.*)"$/, '$1')); } catch (e) { return null; } })() : row.value;
+      }
+      if (!v) v = { smtp_user: '', smtp_pass: '', smtp_host: 'smtp.qq.com', smtp_port: 465, to: [] };
+      var toArr = Array.isArray(v.to) ? v.to : [];
+      $('mTo').value = toArr.join('\n');
+      var rest = {};
+      Object.keys(v).forEach(function (k) { if (k !== 'to') rest[k] = v[k]; });
+      $('mJson').value = JSON.stringify(rest, null, 2);
+      setMsg('mMsg', '已读取 settings.mail（收件邮箱 ' + toArr.length + ' 个）', 'ok');
+    }).catch(function () { setMsg('mMsg', '网络错误', 'bad'); });
+  }
+  function mailSave() {
+    var toList = ($('mTo').value || '').split(/[,，;\n\r]+/).map(function (s) { return s.trim(); }).filter(Boolean);
+    var rest;
+    try { rest = JSON.parse($('mJson').value || '{}'); } catch (e) { setMsg('mMsg', '邮件配置 JSON 格式错误：' + e.message, 'bad'); return; }
+    if (!rest || typeof rest !== 'object' || Array.isArray(rest)) { setMsg('mMsg', '邮件配置需为 JSON 对象', 'bad'); return; }
+    var value = {};
+    Object.keys(rest).forEach(function (k) { value[k] = rest[k]; });
+    value.to = toList;
+    setMsg('mMsg', '保存中…');
+    // admin-api 的 update 对不存在键也会返回 ok，故以「已存在→update，不存在→insert」区分
+    var put = MAIL_EXISTS
+      ? adm({ op: 'update', table: 'settings', id: 'mail', set: { value: value } })
+      : adm({ op: 'insert', table: 'settings', row: { key: 'mail', value: value } });
+    put.then(function (r) {
+      if (r.ok) {
+        MAIL_EXISTS = true;
+        setMsg('mMsg', MAIL_EXISTS ? ('✅ 已保存：通知收件邮箱 ' + toList.length + ' 个 → settings.mail.to；SMTP 等其余键已合并保留') : '保存完成', 'ok');
+      } else {
+        // 兜底：与预期相反时互换操作
+        var fb = MAIL_EXISTS
+          ? adm({ op: 'insert', table: 'settings', row: { key: 'mail', value: value } })
+          : adm({ op: 'update', table: 'settings', id: 'mail', set: { value: value } });
+        fb.then(function (r2) {
+          if (r2.ok) { MAIL_EXISTS = true; setMsg('mMsg', '✅ 已保存 settings.mail', 'ok'); }
+          else setMsg('mMsg', '保存失败：' + ((r2 && r2.error) || (r.error || '')), 'bad');
+        }).catch(function () { setMsg('mMsg', '网络错误', 'bad'); });
+      }
+    }).catch(function () { setMsg('mMsg', '网络错误', 'bad'); });
+  }
+
+  /* ============================================================
+     ⑥ 数据浏览（通用表工具，沿用原逻辑）
+     ============================================================ */
+  var DB = { rows: [], t: 'orders' };
+  var dSTATUS = { orders: ['new', 'paid', 'making', 'shipped', 'done', 'refund'], messages: ['new', 'read', 'done'] };
+  function dbCurrent() { return (DB.t === 'settings') ? $('dSettings') : null; }
+  function loadDb(force) {
+    if (DB.busy && !force) return;
+    DB.busy = true;
+    var t = $('dTable').value;
+    DB.t = t;
+    adm({ op: 'list', table: t, limit: 200 }).then(function (r) {
+      DB.busy = false;
+      if (!r.ok) { setMsg('dMsg', '加载失败：' + (r.error || '（无管理员权限？）'), 'bad'); return; }
+      DB.rows = r.rows || [];
+      var settingsBox = $('dSettings');
+      if (t === 'settings') { settingsBox.style.display = 'block'; dbLoadSettings(DB.rows); }
+      else settingsBox.style.display = 'none';
+      dbRenderRows();
+    }).catch(function () { DB.busy = false; setMsg('dMsg', '网络错误', 'bad'); });
+  }
+  function dbSearch() { dbRenderRows(); }
+  function dbFiltered() {
+    var q = ($('dSearch').value || '').trim().toLowerCase();
+    var rows = q ? DB.rows.filter(function (x) { return JSON.stringify(x).toLowerCase().indexOf(q) > -1; }) : DB.rows.slice();
+    return rows;
+  }
+  function dbRenderRows() {
+    var rows = dbFiltered();
+    var t = DB.t;
+    var msgEl = $('dMsg');
+    var table = $('dRows');
+    if (t !== 'settings' && msgEl) {
+      msgEl.textContent = t + ' 共 ' + rows.length + ' 条' + (($('dSearch').value || '').trim() ? '（过滤）' : '');
+      msgEl.className = 'msg';
+    }
+    if (!rows.length) { table.innerHTML = '<tr><td style="color:var(--text-dim);">（暂无数据）</td></tr>'; return; }
     var head = Object.keys(rows[0]);
-    var html = '<tr><th>操作</th>';
-    head.slice(0, 7).forEach(function (k) { html += '<th>' + esc(k) + '</th>'; });
-    html += '<th>详情</th></tr>';
+    var h = '<tr><th>操作</th>';
+    head.slice(0, 7).forEach(function (k) { h += '<th>' + esc(k) + '</th>'; });
+    h += '<th>详情</th></tr>';
     rows.forEach(function (row, idx) {
       var id = row.id !== undefined ? row.id : row.key;
-      html += '<tr><td style="white-space:nowrap;">';
-      if (t === 'orders' || t === 'messages') {
-        html += '<select class="btn-sm" data-act="status" data-t="' + t + '" data-id="' + esc(id) + '">';
-        (STATUS[t] || []).forEach(function (s) { html += '<option value="' + s + '"' + (row.status === s ? ' selected' : '') + '>' + s + '</option>'; });
-        html += '</select> ';
+      var isRootUser = t === 'users' && row.role === 'root';
+      var isAdminUser = t === 'users' && row.role === 'admin';
+      h += '<tr><td style="white-space:nowrap;">';
+      if ((t === 'orders' || t === 'messages')) {
+        h += '<select class="btn-sm" data-act="status" data-t="' + t + '" data-id="' + esc(id) + '" style="border-radius:8px;">';
+        (dSTATUS[t] || []).forEach(function (s) { h += '<option value="' + s + '"' + (row.status === s ? ' selected' : '') + '>' + s + '</option>'; });
+        h += '</select> ';
       }
       if (t === 'gallery') {
-        html += '<button class="btn-sm" data-act="tg" data-col="approved" data-id="' + esc(id) + '" data-v="' + (row.approved ? 'false' : 'true') + '">' + (row.approved ? '下架' : '上架') + '</button> ';
-        html += '<button class="btn-sm" data-act="tg" data-col="visible" data-id="' + esc(id) + '" data-v="' + (row.visible ? 'false' : 'true') + '">' + (row.visible ? '隐藏' : '显示') + '</button> ';
+        h += '<button class="btn-sm" data-act="tg" data-col="approved" data-id="' + esc(id) + '" data-v="' + (row.approved ? 'false' : 'true') + '">' + (row.approved ? '下架(approved)' : '授权(approved)') + '</button> ';
+        h += '<button class="btn-sm" data-act="tg" data-col="visible" data-id="' + esc(id) + '" data-v="' + (row.visible ? 'false' : 'true') + '">' + (row.visible ? '隐藏' : '显示') + '</button> ';
       }
       if (t === 'users') {
-        if (row.role === 'root') { html += '<span style="color:var(--gold);font-size:12px;">终端</span> '; }
-        else { html += '<button class="btn-sm" data-act="role" data-id="' + esc(id) + '" data-v="' + (row.role === 'admin' ? 'user' : 'admin') + '">' + (row.role === 'admin' ? '降为user' : '设为admin') + '</button> '; }
+        if (row.role === 'root') h += '<span class="badge" style="color:#e3c47c;border-color:#e3c47c55;">终端</span> ';
+        else if (ME.role !== 'root' && isAdminUser) h += '<span style="color:var(--text-dim);font-size:11px;">仅终端可管理</span> ';
+        else h += '<button class="btn-sm" data-act="role" data-id="' + esc(id) + '" data-v="' + (row.role === 'admin' ? 'user' : 'admin') + '">' + (row.role === 'admin' ? '降为user' : '设为admin') + '</button> ';
       }
-      var isRootUser = t === 'users' && row.role === 'root';
-      if (!isRootUser) html += '<button class="btn-sm" data-act="edit" data-t="' + t + '" data-id="' + esc(id) + '">编辑</button> ';
-      html += '<button class="btn-sm" data-act="view" data-i="' + idx + '">JSON</button> ';
-      html += '<button class="btn-sm" data-act="del" data-t="' + t + '" data-id="' + esc(id) + '" style="' + (isRootUser ? 'display:none;' : '') + '">删除</button>' + (isRootUser ? '<span style="color:var(--text-dim);font-size:11px;">受保护</span>' : '') + '</td>';
+      if (!isRootUser && !(ME.role !== 'root' && isAdminUser)) h += '<button class="btn-sm" data-act="edit" data-t="' + t + '" data-id="' + esc(id) + '">编辑</button> ';
+      h += '<button class="btn-sm" data-act="view" data-i="' + idx + '">JSON</button> ';
+      if (!isRootUser && !(ME.role !== 'root' && isAdminUser)) h += '<button class="btn-sm danger" data-act="del" data-t="' + t + '" data-id="' + esc(id) + '">删除</button>';
+      else if (isRootUser) h += '<span style="color:var(--text-dim);font-size:11px;">受保护</span>';
+      h += '</td>';
       head.slice(0, 7).forEach(function (k) {
         var v = row[k];
-        html += '<td>' + esc(typeof v === 'object' ? JSON.stringify(v) : String(v === undefined || v === null ? '' : v)).slice(0, 60) + '</td>';
+        h += '<td>' + esc(typeof v === 'object' ? JSON.stringify(v) : String(v === undefined || v === null ? '' : v)).slice(0, 60) + '</td>';
       });
-      html += '<td><div class="json-detail" data-detail="' + idx + '">' + esc(JSON.stringify(row, null, 2)) + '</div></td></tr>';
+      h += '<td><div class="json-detail" data-detail="' + idx + '">' + esc(JSON.stringify(row, null, 2)) + '</div></td></tr>';
     });
-    rowsEl.innerHTML = html;
-    rowsEl.querySelectorAll('[data-act="edit"]').forEach(function (b) {
-      b.addEventListener('click', function () {
-        var idx = Number(b.getAttribute('data-i'));
-        openEdit(window.__admRows[idx], b.getAttribute('data-t'));
-      });
-    });
-    rowsEl.querySelectorAll('[data-act="view"]').forEach(function (b) {
-      b.addEventListener('click', function () {
-        var d = rowsEl.querySelector('[data-detail="' + b.getAttribute('data-i') + '"]');
-        d.style.display = d.style.display === 'block' ? 'none' : 'block';
-      });
-    });
-    rowsEl.querySelectorAll('[data-act="del"]').forEach(function (b) {
-      b.addEventListener('click', function () {
-        if (!confirm('确认删除？')) return;
-        api(DAPI, { op: 'delete', table: b.getAttribute('data-t'), id: b.getAttribute('data-id') }).then(function (r) { msg.textContent = r.ok ? '已删除' : '失败：' + (r.error || ''); load(); });
-      });
-    });
-    rowsEl.querySelectorAll('[data-act="status"]').forEach(function (b) {
-      b.addEventListener('change', function () {
-        api(DAPI, { op: 'update', table: b.getAttribute('data-t'), id: b.getAttribute('data-id'), set: { status: b.value } }).then(function (r) { msg.textContent = r.ok ? '已更新' : '失败'; });
-      });
-    });
-    rowsEl.querySelectorAll('[data-act="tg"]').forEach(function (b) {
-      b.addEventListener('click', function () {
-        var set = {}; set[b.getAttribute('data-col')] = b.getAttribute('data-v') === 'true';
-        api(DAPI, { op: 'update', table: 'gallery', id: b.getAttribute('data-id'), set: set }).then(function (r) { msg.textContent = r.ok ? '已更新' : '失败'; load(); });
-      });
-    });
-    rowsEl.querySelectorAll('[data-act="role"]').forEach(function (b) {
-      b.addEventListener('click', function () {
-        if (!confirm('更改该用户角色？')) return;
-        api(DAPI, { op: 'update', table: 'users', id: b.getAttribute('data-id'), set: { role: b.getAttribute('data-v') } }).then(function (r) { msg.textContent = r.ok ? '已更新' : '失败'; load(); });
-      });
-    });
+    table.innerHTML = h;
+    bindDbRows();
   }
-
-
-
-  document.getElementById('bcSend').addEventListener('click', function () {
-    var title = (document.getElementById('bcTitle').value || '').trim();
-    var body = document.getElementById('bcBody').value;
-    if (!title && !body) { document.getElementById('bcMsg').textContent = '标题或内容至少填一项'; return; }
-    if (!confirm('确认群发站内信给全部注册用户？')) return;
-    api(DAPI, { op: 'broadcast', title: title, body: body }).then(function (r) {
-      document.getElementById('bcMsg').textContent = r.ok ? ('已发送 ' + (r.sent || 0) + ' / ' + (r.users || 0) + ' 个用户信箱') : ('失败：' + (r.error || ''));
-    }).catch(function () { document.getElementById('bcMsg').textContent = '网络错误'; });
-  });
-
-
-  document.getElementById('prSave').addEventListener('click', function () {
-    var name = (document.getElementById('prName').value || '').trim();
-    var slug = (document.getElementById('prSlug').value || '').trim();
-    if (!name || !slug) { document.getElementById('prMsg').textContent = '名称与 slug 必填'; return; }
-    var row = { slug: slug, name: name, series: document.getElementById('prSeries').value || 'east', visible: true };
-    [['prSub','sub'],['prMain','main_stone'],['prAux','aux_stone'],['prMetal','metal'],['prChain','chain'],['prGlyph','glyph'],['prImg','image_url'],['prQuote','quote']].forEach(function (p) {
-      var v = (document.getElementById(p[0]).value || '').trim();
-      if (v) row[p[1]] = v;
+  function bindDbRows() {
+    var table = $('dRows');
+    table.querySelectorAll('[data-act="edit"]').forEach(function (b) {
+      b.addEventListener('click', function () { dbOpenEdit(b.getAttribute('data-t'), b.getAttribute('data-id')); });
     });
-    var price = num(document.getElementById('prPrice').value);
-    if (price !== undefined) row.price_yuan = price;
-    var sort = num(document.getElementById('prSort').value);
-    if (sort !== undefined) row.sort = sort;
-    api(DAPI, { op: 'insert', table: 'products', row: row }).then(function (r) {
-      var el = document.getElementById('prMsg');
-      if (r.ok) { el.textContent = '已保存'; }
-      else { el.textContent = String(r.error || '失败') + (String(r.error||'').indexOf('duplicate') > -1 ? '（slug 已存在）' : ''); }
-    }).catch(function () { document.getElementById('prMsg').textContent = '网络错误'; });
-  });
-  document.getElementById('galSave').addEventListener('click', function () {
-    var name = (document.getElementById('galName').value || '').trim();
-    if (!name) { document.getElementById('galMsg').textContent = '作品名必填'; return; }
-    var row = { name: name, visible: true, approved: false };
-    [['galImg','image_url'],['galTag','tag'],['galStory','story']].forEach(function (p) {
-      var v = (document.getElementById(p[0]).value || '').trim();
-      if (v) row[p[1]] = v;
-    });
-    api(DAPI, { op: 'insert', table: 'gallery', row: row }).then(function (r) {
-      document.getElementById('galMsg').textContent = r.ok ? '已上架（需在前台审核区置 approved=true 才对外展示）' : ('失败：' + (r.error || ''));
-    }).catch(function () { document.getElementById('galMsg').textContent = '网络错误'; });
-  });
-
-  // ===== 搜索与行编辑 =====
-  var allRows = [];
-  var admSearch = document.getElementById('admSearch');
-  if (admSearch) admSearch.addEventListener('input', function () {
-    var t = sel.value;
-    if (t === 'settings') return;
-    var q = (admSearch.value || '').trim().toLowerCase();
-    var rows = q ? allRows.filter(function (r) { return JSON.stringify(r).toLowerCase().indexOf(q) > -1; }) : allRows;
-    window.__admRows = rows;
-    msg.textContent = t + ' 共 ' + rows.length + ' 条（过滤）';
-    renderRows(t, rows);
-  });
-  var editBox = null;
-  function openEdit(row, t) {
-    if (!editBox) {
-      editBox = document.createElement('div');
-      editBox.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:99;';
-      var card = document.createElement('div');
-      card.style.cssText = 'width:min(640px,92vw);max-height:82vh;overflow:auto;background:#0d1220;border:1px solid var(--line);border-radius:14px;padding:18px;';
-      card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><b style="color:var(--gold);font-weight:400;">编辑行（JSON）</b><button type="button" id="admeClose" style="background:none;border:none;color:var(--moon);font-size:16px;cursor:pointer;">✕</button></div>' +
-        '<textarea id="admeTxt" style="min-height:300px;font-family:monospace;font-size:12px;"></textarea>' +
-        '<div style="margin-top:10px;display:flex;gap:10px;justify-content:flex-end;"><button type="button" class="btn-ghost" id="admeCancel" style="font-size:13px;padding:8px 16px;">取消</button><button type="button" class="btn-gold" id="admeSave" style="font-size:13px;padding:8px 16px;">保存修改</button></div>';
-      editBox.appendChild(card);
-      document.body.appendChild(editBox);
-      editBox.addEventListener('click', function (e) { if (e.target === editBox) closeEdit(); });
-      card.querySelector('#admeClose').addEventListener('click', closeEdit);
-      card.querySelector('#admeCancel').addEventListener('click', closeEdit);
-      card.querySelector('#admeSave').addEventListener('click', function () {
-        var t2 = editBox.getAttribute('data-t');
-        var id2 = editBox.getAttribute('data-id');
-        var txt = card.querySelector('#admeTxt').value;
-        var obj;
-        try { obj = JSON.parse(txt); } catch (e) { msg.textContent = 'JSON 格式错误'; return; }
-        delete obj.id; delete obj.key; delete obj.created_at;
-        api(DAPI, { op: 'update', table: t2, id: id2, set: obj }).then(function (r) {
-          msg.textContent = r.ok ? '已保存' : ('失败：' + (r.error || ''));
-          if (r.ok) { closeEdit(); load(); }
-        }).catch(function () { msg.textContent = '网络错误'; });
+    table.querySelectorAll('[data-act="view"]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var d = table.querySelector('[data-detail="' + b.getAttribute('data-i') + '"]');
+        if (d) d.style.display = d.style.display === 'block' ? 'none' : 'block';
       });
-    }
-    editBox.setAttribute('data-t', t);
-    editBox.setAttribute('data-id', row.id !== undefined ? row.id : row.key);
-    editBox.querySelector('#admeTxt').value = JSON.stringify(row, null, 2);
-    editBox.style.display = 'flex';
-  }
-  function closeEdit() { if (editBox) editBox.style.display = 'none'; }
-
-  // ===== 快捷工具 =====
-  document.querySelectorAll('.adm-tool-btn').forEach(function (b) {
-    b.addEventListener('click', function () {
-      var t = b.getAttribute('data-t');
-      document.querySelectorAll('.adm-tool').forEach(function (x) { x.style.display = 'none'; });
-      var el = document.querySelector('.adm-tool-' + t);
-      if (el) el.style.display = 'block';
     });
-  });
-  function num(v) { var n = Number(v); return isNaN(n) ? undefined : n; }
-  document.getElementById('crSave').addEventListener('click', function () {
-    var name = (document.getElementById('crName').value || '').trim();
-    if (!name) { document.getElementById('crMsg').textContent = '名称不能为空'; return; }
-    var row = { name: name, visible: true };
-    ['crKind', 'crElement', 'crMeaning', 'crCare', 'crImg', 'crColor'].forEach(function (id) {
-      var v = (document.getElementById(id).value || '').trim();
-      var key = id === 'crKind' ? 'kind' : id === 'crElement' ? 'element' : id === 'crMeaning' ? 'meaning' : id === 'crCare' ? 'care_tip' : id === 'crImg' ? 'image_url' : 'color_hex';
-      if (v) row[key] = v;
-    });
-    ['crPrice', 'crStock', 'crSize'].forEach(function (id) {
-      var v = num(document.getElementById(id).value);
-      var key = id === 'crPrice' ? 'price' : id === 'crStock' ? 'stock_qty' : 'size_mm';
-      if (v !== undefined) row[key] = v;
-    });
-    api(DAPI, { op: 'insert', table: 'crystals', row: row }).then(function (r) {
-      document.getElementById('crMsg').textContent = r.ok ? '已保存' : (r.error || '失败');
-    }).catch(function () { document.getElementById('crMsg').textContent = '网络错误'; });
-  });
-  function ygCode() {
-    var d = new Date();
-    return 'YG-' + String(d.getFullYear()).slice(2) + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0') + '-' + String(Math.floor(1000 + Math.random() * 9000));
-  }
-  document.getElementById('recGen').addEventListener('click', function () {
-    var name = (document.getElementById('recName').value || '').trim();
-    if (!name) { document.getElementById('recMsg').textContent = '请填写作品名'; return; }
-    var qty = Math.min(50, Math.max(1, num(document.getElementById('recQty').value) || 1));
-    var note = (document.getElementById('recNote').value || '').trim();
-    var img = (document.getElementById('recImg').value || '').trim();
-    var codes = [], ps = [];
-    for (var i = 0; i < qty; i++) {
-      var code = ygCode(); codes.push(code);
-      ps.push(api(DAPI, { op: 'insert', table: 'records', row: { code: code, product_ref: name, info: note ? { text: note } : {}, image_urls: img } }));
-    }
-    Promise.all(ps).then(function () {
-      document.getElementById('recMsg').textContent = '已生成 ' + qty + ' 个';
-      document.getElementById('recOut').textContent = codes.join('\n');
-    }).catch(function () { document.getElementById('recMsg').textContent = '部分生成失败'; });
-  });
-  document.getElementById('noticeSave').addEventListener('click', function () {
-    var txt = document.getElementById('noticeTxt').value;
-    api(DAPI, { op: 'insert', table: 'app_data', row: { key: 'notice', value: txt || '' } }).then(function (r) {
-      if (!r.ok) {
-        api(DAPI, { op: 'update', table: 'app_data', id: 'notice', set: { value: txt || '' } }).then(function (r2) {
-          document.getElementById('noticeMsg').textContent = r2.ok ? '已更新' : (r2.error || '失败');
+    table.querySelectorAll('[data-act="del"]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (!confirm('确认删除该行？')) return;
+        adm({ op: 'delete', table: b.getAttribute('data-t'), id: b.getAttribute('data-id') }).then(function (r) {
+          if (r.ok) { dbSaveCfgMsg('已删除'); loadDb(); }
+          else setMsg('dMsg', '失败：' + (r.error || ''), 'bad');
         });
-      } else document.getElementById('noticeMsg').textContent = '已保存';
-    }).catch(function () { document.getElementById('noticeMsg').textContent = '网络错误'; });
-  });
+      });
+    });
+    table.querySelectorAll('[data-act="status"]').forEach(function (b) {
+      b.addEventListener('change', function () {
+        adm({ op: 'update', table: b.getAttribute('data-t'), id: b.getAttribute('data-id'), set: { status: b.value } }).then(function (r) {
+          if (r.ok) { setMsg('dMsg', '已更新状态', 'ok'); loadDb(); }
+          else setMsg('dMsg', '失败：' + (r.error || ''), 'bad');
+        });
+      });
+    });
+    table.querySelectorAll('[data-act="tg"]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var set = {};
+        set[b.getAttribute('data-col')] = b.getAttribute('data-v') === 'true';
+        adm({ op: 'update', table: 'gallery', id: b.getAttribute('data-id'), set: set }).then(function (r) {
+          if (r.ok) { setMsg('dMsg', '已更新'); loadDb(); }
+          else setMsg('dMsg', '失败：' + (r.error || ''), 'bad');
+        });
+      });
+    });
+    table.querySelectorAll('[data-act="role"]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (!confirm('更改该用户角色为 ' + b.getAttribute('data-v') + ' ？')) return;
+        adm({ op: 'update', table: 'users', id: b.getAttribute('data-id'), set: { role: b.getAttribute('data-v') } }).then(function (r) {
+          if (r.ok) { setMsg('dMsg', '已更新角色'); loadDb(); }
+          else setMsg('dMsg', '失败：' + (r.error || ''), 'bad');
+        });
+      });
+    });
+  }
+  function dbSaveCfgMsg(t) {
+    var el = $('dMsg');
+    if (el) { el.textContent = t; el.className = 'msg ok'; }
+  }
+  function dbLoadSettings(rows) {
+    function pick(k) { for (var i = 0; i < rows.length; i++) if (rows[i].key === k) return rows[i]; return null; }
+    function pretty(v) { return typeof v === 'string' ? v : JSON.stringify(v, null, 2); }
+    var mail = pick('mail'), ai = pick('ai'), hb = pick('home_banners');
+    $('dMailCfg').value = mail ? pretty(mail.value) : '{}';
+    $('dAiCfg').value = ai ? pretty(ai.value) : '{}';
+    $('dHomeCfg').value = hb ? pretty(hb.value) : '[]';
+  }
+  function dbOpenEdit(t, id) {
+    var row = null;
+    for (var i = 0; i < DB.rows.length; i++) {
+      var r = DB.rows[i];
+      var rid = r.id !== undefined ? r.id : r.key;
+      if (String(rid) === String(id)) { row = r; break; }
+    }
+    if (!row) return;
+    var m = openModal(
+      '<h3>✏️ 编辑行（JSON）· ' + esc(t) + '</h3>' +
+      '<textarea id="dbJson" style="min-height:320px;font-family:monospace;font-size:12px;width:100%;"></textarea>' +
+      '<div class="hint">修改将按 update 提交；id/key/created_at 自动排除。</div>' +
+      '<div class="btn-row"><button class="btn-ghost" data-x type="button">取消</button><button class="btn-gold" data-ok type="button">保存修改</button></div>');
+    bindModalClose(m);
+    m.querySelector('#dbJson').value = JSON.stringify(row, null, 2);
+    m.querySelector('[data-ok]').addEventListener('click', function () {
+      var obj;
+      try { obj = JSON.parse(m.querySelector('#dbJson').value); } catch (e) { setMsg('dMsg', 'JSON 格式错误：' + e.message, 'bad'); return; }
+      delete obj.id; delete obj.key; delete obj.created_at; delete obj.updated_at;
+      adm({ op: 'update', table: t, id: id, set: obj }).then(function (r) {
+        closeModal(m);
+        if (r.ok) { dbSaveCfgMsg('已保存'); loadDb(); }
+        else setMsg('dMsg', '失败：' + (r.error || ''), 'bad');
+      }).catch(function () { setMsg('dMsg', '网络错误', 'bad'); });
+    });
+  }
 
+  function dbCfgSave() {
+    var updates = [
+      { k: 'mail', el: $('dMailCfg'), dft: '{}' },
+      { k: 'ai', el: $('dAiCfg'), dft: '{}' },
+      { k: 'home_banners', el: $('dHomeCfg'), dft: '[]' }
+    ];
+    function cfgPut(k, v) {
+      // settings 键存在与否未知：先 insert（冲突再 update），避免 update 空匹配静默成功
+      return adm({ op: 'insert', table: 'settings', row: { key: k, value: v } }).then(function (r) {
+        if (r.ok) return r;
+        return adm({ op: 'update', table: 'settings', id: k, set: { value: v } });
+      });
+    }
+    var ps = [];
+    var badJson = false;
+    updates.forEach(function (u) {
+      var v;
+      try { v = JSON.parse(u.el.value || u.dft); } catch (e) { setMsg('dMsg', u.k + ' JSON 格式错误：' + e.message, 'bad'); badJson = true; return; }
+      ps.push(cfgPut(u.k, v));
+    });
+    if (badJson) return;
+    Promise.all(ps).then(function () {
+      dbSaveCfgMsg('配置已保存');
+      loadMailCfg(true);
+    }).catch(function () { setMsg('dMsg', '保存出错', 'bad'); });
+  }
+
+  /* ============================================================
+     ⑦ 快捷工具（新增晶石/商品/光集/活动通知）
+     ============================================================ */
+  function toolToggle(t) {
+    var el = $(t);
+    if (!el) return;
+    var open = el.classList.contains('open');
+    document.querySelectorAll('.adm-tool').forEach(function (x) { x.classList.remove('open'); });
+    if (!open) el.classList.add('open');
+  }
+  function tSaveCrystal() {
+    var name = ($('tCrName').value || '').trim();
+    if (!name) { setMsg('tCrMsg', '名称不能为空', 'bad'); return; }
+    var row = { name: name, visible: true };
+    var map = [['tCrKind', 'kind'], ['tCrElement', 'element'], ['tCrMeaning', 'meaning'], ['tCrCare', 'care_tip'], ['tCrColor', 'color_hex'], ['tCrImg', 'image_url']];
+    map.forEach(function (p) {
+      var v = ($(p[0]).value || '').trim();
+      if (v) row[p[1]] = v;
+    });
+    var sort = num($('tCrSort').value);
+    if (sort !== undefined) row.sort = sort;
+    setMsg('tCrMsg', '保存中…');
+    adm({ op: 'insert', table: 'crystals', row: row }).then(function (r) {
+      if (r.ok) { setMsg('tCrMsg', '✅ 已保存晶石「' + name + '」', 'ok'); clearCrystalForm(); }
+      else setMsg('tCrMsg', '失败：' + (r.error || ''), 'bad');
+    }).catch(function () { setMsg('tCrMsg', '网络错误', 'bad'); });
+  }
+  function clearCrystalForm() {
+    ['tCrName', 'tCrKind', 'tCrElement', 'tCrMeaning', 'tCrCare', 'tCrColor', 'tCrImg', 'tCrSort'].forEach(function (id) { $(id).value = ''; });
+  }
+  function tSaveProduct() {
+    var name = ($('tPrName').value || '').trim();
+    var slug = ($('tPrSlug').value || '').trim();
+    if (!name || !slug) { setMsg('tPrMsg', '名称与 slug 必填', 'bad'); return; }
+    var row = { slug: slug, name: name, series: $('tPrSeries').value || 'east', visible: true };
+    var map = [['tPrSub', 'sub'], ['tPrMain', 'main_stone'], ['tPrAux', 'aux_stone'], ['tPrMetal', 'metal'], ['tPrChain', 'chain'], ['tPrGlyph', 'glyph'], ['tPrImg', 'image_url'], ['tPrQuote', 'quote']];
+    map.forEach(function (p) {
+      var v = ($(p[0]).value || '').trim();
+      if (v) row[p[1]] = v;
+    });
+    var price = num($('tPrPrice').value);
+    if (price !== undefined) row.price_yuan = price;
+    var sort = num($('tPrSort').value);
+    if (sort !== undefined) row.sort = sort;
+    setMsg('tPrMsg', '保存中…');
+    adm({ op: 'insert', table: 'products', row: row }).then(function (r) {
+      if (r.ok) { setMsg('tPrMsg', '✅ 已保存商品「' + name + '」', 'ok'); clearProductForm(); }
+      else setMsg('tPrMsg', '失败：' + String(r.error || '') + (String(r.error || '').indexOf('duplicate') > -1 ? '（slug 已存在）' : ''), 'bad');
+    }).catch(function () { setMsg('tPrMsg', '网络错误', 'bad'); });
+  }
+  function clearProductForm() {
+    ['tPrSlug', 'tPrName', 'tPrSub', 'tPrMain', 'tPrAux', 'tPrMetal', 'tPrChain', 'tPrGlyph', 'tPrPrice', 'tPrSort', 'tPrImg', 'tPrQuote'].forEach(function (id) { $(id).value = ''; });
+  }
+  function tSaveGallery() {
+    var name = ($('tGalName').value || '').trim();
+    if (!name) { setMsg('tGalMsg', '作品名必填', 'bad'); return; }
+    var row = { name: name, visible: true, approved: false };
+    var map = [['tGalImg', 'image_url'], ['tGalTag', 'tag'], ['tGalStory', 'story']];
+    map.forEach(function (p) {
+      var v = ($(p[0]).value || '').trim();
+      if (v) row[p[1]] = v;
+    });
+    adm({ op: 'insert', table: 'gallery', row: row }).then(function (r) {
+      if (r.ok) { setMsg('tGalMsg', '✅ 已上架（需在数据浏览置 approved=true 才对外展示）', 'ok'); clearGalleryForm(); }
+      else setMsg('tGalMsg', '失败：' + (r.error || ''), 'bad');
+    }).catch(function () { setMsg('tGalMsg', '网络错误', 'bad'); });
+  }
+  function clearGalleryForm() {
+    ['tGalName', 'tGalImg', 'tGalTag', 'tGalStory'].forEach(function (id) { $(id).value = ''; });
+  }
+  function tSaveNotice() {
+    var txt = $('tNoticeTxt').value;
+    adm({ op: 'insert', table: 'app_data', row: { key: 'notice', value: txt || '' } }).then(function (r) {
+      if (!r.ok) {
+        adm({ op: 'update', table: 'app_data', id: 'notice', set: { value: txt || '' } }).then(function (r2) {
+          if (r2.ok) setMsg('tNoticeMsg', '✅ 活动通知已更新', 'ok');
+          else setMsg('tNoticeMsg', '失败：' + (r2.error || ''), 'bad');
+        });
+      } else setMsg('tNoticeMsg', '✅ 活动通知已保存', 'ok');
+    }).catch(function () { setMsg('tNoticeMsg', '网络错误', 'bad'); });
+  }
+
+  /* ================= 20s 轮询（分区在视野内时） ================= */
+  var pollTimer = null;
+  function startPoller() {
+    if (pollTimer) clearInterval(pollTimer);
+    pollTimer = setInterval(function () {
+      function isOn(id) { var el = $(id); return el && el.classList.contains('on'); }
+      var modalOpen = !!document.querySelector('.ygModal');
+      // 编辑行展开时暂停订单自动刷新，避免覆盖未保存输入
+      if (isOn('secOrders') && !modalOpen && !O.editId) loadOrders();
+      if (isOn('secDb') && !modalOpen) loadDb();
+      if (isOn('secUsers') && !modalOpen) loadUsers();
+    }, 20000);
+  }
+
+  /* ================= 静态绑定 ================= */
+  function bindStatic() {
+    document.querySelectorAll('[data-sec]').forEach(function (c) {
+      c.addEventListener('click', function () { openAdminSection(c.getAttribute('data-sec')); });
+    });
+    document.querySelectorAll('[data-act="back"]').forEach(function (b) { b.addEventListener('click', goBackAdmin); });
+    /* 订单 */
+    $('oSearch').addEventListener('input', function () { O.q = ($('oSearch').value || '').trim().toLowerCase(); renderOrders(); });
+    $('oMode').addEventListener('click', function () { O.showAll = !O.showAll; renderOrders(); });
+    $('oSelAll').addEventListener('click', oSelAllToggle);
+    $('oBatchDone').addEventListener('click', oBatchFinish);
+    $('oBatchDel').addEventListener('click', oBatchDelete);
+    $('oMerge').addEventListener('click', oMergeSelected);
+    [$('oRefresh'), $('oRefresh2')].forEach(function (b) { if (b) b.addEventListener('click', function () { loadOrders(true); }); });
+
+    /* 单码 / 批量 */
+    $('sGen').addEventListener('click', sGenSubmit);
+    $('bGo').addEventListener('click', bGenSubmit);
+    $('sCode').addEventListener('focus', function () { if (!$('sCode').value) $('sCode').value = uniqueCode(); });
+
+    /* 用户 */
+    $('uSearch').addEventListener('input', function () { U.q = ($('uSearch').value || '').trim().toLowerCase(); renderUsers(); });
+    $('uClear').addEventListener('click', function () { $('uSearch').value = ''; U.q = ''; renderUsers(); });
+    $('uBroadcast').addEventListener('click', openBroadcastModal);
+    $('uRefresh').addEventListener('click', function () { loadUsers(true); });
+
+    /* 邮件 */
+    $('mSave').addEventListener('click', mailSave);
+    $('mRefresh').addEventListener('click', function () { loadMailCfg(true); });
+
+    /* 数据浏览 */
+    $('dTable').addEventListener('change', function () { loadDb(true); });
+    $('dSearch').addEventListener('input', dbSearch);
+    $('dRefresh').addEventListener('click', function () { loadDb(true); });
+    $('dCfgSave').addEventListener('click', dbCfgSave);
+
+    /* 快捷工具 */
+    document.querySelectorAll('[data-tool]').forEach(function (b) {
+      b.addEventListener('click', function () { toolToggle(b.getAttribute('data-tool')); });
+    });
+    $('tCrSave').addEventListener('click', tSaveCrystal);
+    $('tPrSave').addEventListener('click', tSaveProduct);
+    $('tGalSave').addEventListener('click', tSaveGallery);
+    $('tNoticeSave').addEventListener('click', tSaveNotice);
+  }
+
+  bindStatic();
+  var gate = $('admGate');
+  if (gate) gate.style.display = 'block';
   tryEnter();
 })();
-
 </script>
 </body>
 </html>
