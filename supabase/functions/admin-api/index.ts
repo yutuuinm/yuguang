@@ -66,7 +66,8 @@ Deno.serve(async (req) => {
     }
     if (op === "list") {
       const limit = Math.min(Number(body.limit) || 100, 200);
-      const r = await fetch(base + "?select=*&order=id.desc&limit=" + limit, { headers: auth });
+      const ord = (table === "settings" || table === "app_data") ? "key.asc" : "id.desc";
+      const r = await fetch(base + "?select=*&order=" + ord + "&limit=" + limit, { headers: auth });
       return Response.json({ ok: r.ok, rows: await r.json().catch(() => []) }, { headers: corsHeaders });
     }
     if (op === "delete") {
