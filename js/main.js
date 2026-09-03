@@ -1092,3 +1092,19 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
   mask.addEventListener('click', function (e) { if (e.target === mask) close(); });
   mask.querySelectorAll('.lm-item').forEach(function (a) { a.addEventListener('click', close); });
 })();
+
+/* 顶部任意处 6 连点 → 后台（admin） */
+(function () {
+  var head = document.querySelector('header.nav');
+  if (!head) return;
+  var cnt = 0, timer = null;
+  head.addEventListener('click', function () {
+    cnt++;
+    clearTimeout(timer);
+    timer = setTimeout(function () { cnt = 0; }, 2600);
+    if (cnt >= 6) {
+      cnt = 0;
+      if ((localStorage.getItem('yg_role') || '') === 'admin') location.href = 'admin.html';
+    }
+  });
+})();
