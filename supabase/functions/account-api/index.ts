@@ -229,7 +229,7 @@ Deno.serve(async (req) => {
       return Response.json({ ok: true }, { headers: corsHeaders });
     }
     if (op === "admin_reset") {
-      if (u.role !== "admin") throw new Error("无管理员权限");
+      if ((u.role !== "admin" && u.role !== "root")) throw new Error("无管理员权限");
       const target = await findUser(norm(body.account));
       if (!target) throw new Error("该账号不存在");
       const tempPw = randHex(4).slice(0, 8);
