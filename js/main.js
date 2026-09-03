@@ -313,6 +313,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       ['studio.html', '定制工坊', '生肖 / 星座 / 合盘'],
       ['gallery.html', '光集', '她们与光的时刻'],
       ['atlas.html', '星图志', '生肖·八卦·星座'],
+      ['knowledge.html', '学堂', '晶石 · 养石 · 文化'],
       [pageHref('#playSec'), '互动', '拈签 · 答案之书']
     ] },
     { t: '探索', items: [
@@ -323,9 +324,9 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     { t: '服务', items: [
       ['studio.html', '开始定制', '立即生成设计卡'],
       ['verify.html', '作品验真', '防伪查询'],
-      ['account.html#orders', '我的订单', '登录后查看进度'],
+      ['account.html#orders', '我的订单', '登录后查看进度', 'member'],
       ['account.html#inbox', '信箱', '站内来信 · 仅登录', 'member'],
-      [pageHref('#contact'), '微信客服', '扫码添加 · 定制答疑'],
+      [pageHref('#contact'), '联系客服', '微信扫码 · 定制答疑'],
       ['account.html', '会员中心', '账号与资料']
     ] }
   ];
@@ -557,6 +558,103 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     $('pLight').textContent = a.quote + '　' + b.quote + '　两个人的光，合起来是一轮满月。各自佩戴时，你们都是完整的自己。';
     setStone(a.stone[1], b.stone[1]);
   }
+
+  /* ================= 小光定制：让 小光 帮你挑 ================= */
+  (function xgHelp() {
+    const btn = $('xgBtn');
+    const inp = $('xgNeed');
+    const res = $('xgRes');
+    if (!btn || !res) return;
+
+    let sugKeep = ''; // 最近一次的小光建议：提交定制意向时附到备注开头（不改原提交流程）
+
+    function escXg(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+
+    // 把当前谱系 + 用户补充拼成一句中文需求
+    function buildNeed() {
+      const act = document.querySelector('.tab-btn.active');
+      const p = (act && act.dataset.panel) || 'east';
+      const parts = [];
+      if (p === 'east') {
+        const z = $('eastZodiac') ? $('eastZodiac').value : '';
+        if (z) {
+          const info = ZODIAC[z];
+          parts.push('东方 · 生肖 ' + z + (info ? '（本命' + info.el + '行）' : ''));
+        }
+        const g = $('eastGua');
+        const gua = g ? GUAS[Number(g.value) || 0] : null;
+        if (gua) parts.push('心念方位卦象「' + gua[0] + '」——' + gua[2]);
+      } else if (p === 'west') {
+        const sun = $('westSun') ? $('westSun').value : '';
+        const moon = $('westMoon') ? $('westMoon').value : '';
+        const ris = $('westRising') ? String($('westRising').value).split(' · ')[0] : '';
+        if (sun) parts.push('西方 · 太阳星座 ' + sun + '（本我主石）');
+        if (moon) parts.push('月亮情绪质地 ' + moon);
+        if (ris) parts.push('上升给人的印象是 ' + ris);
+      } else {
+        const a = $('unionA') ? $('unionA').value : '';
+        const b = $('unionB') ? $('unionB').value : '';
+        if (a || b) parts.push('合盘双生 · 我是' + (a || '？') + '座，对方是' + (b || '？') + '座');
+      }
+      let need = parts.join('；');
+      if (!need) need = '还未选好谱系，先按上方任意一套来选';
+      const extra = inp ? String(inp.value).trim() : '';
+      if (extra) need += '。另外我想说：' + extra;
+      need += '。请为我挑一枚主石与一枚配石，并配一句光语。';
+      return need;
+    }
+
+    function showFail() {
+      res.hidden = false;
+      res.className = 'xg-res fail';
+      res.textContent = '小光走神了 ✦ 稍后再试，或直接告诉我们你的想法';
+    }
+
+    function askXg() {
+      if (!window.sbAI) { showFail(); return; }
+      btn.disabled = true;
+      btn.textContent = '小光正在看…';
+      res.hidden = false;
+      res.className = 'xg-res busy';
+      res.textContent = '小光正在星图与晶石间为你挑拣 ✦';
+      window.sbAI({ mode: 'stones', need: buildNeed() })
+        .then(function (r) {
+          if (r && r.ok) {
+            sugKeep = String(r.answer || '').trim();
+            res.className = 'xg-res';
+            res.innerHTML = '<div class="xg-card">' +
+              '<div class="xg-say">' + escXg(sugKeep) + '</div>' +
+              '<p class="xg-caveat">✦ 以上是文化意象参考，不构成任何承诺；最终设计以我们与你二次确认的为准。</p>' +
+            '</div>';
+          } else showFail();
+        })
+        .catch(showFail)
+        .then(function () {
+          btn.disabled = false;
+          btn.textContent = '让 小光 来看看';
+        });
+    }
+
+    btn.addEventListener('click', askXg);
+    if (inp) inp.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); askXg(); } });
+
+    // 提交定制意向时，把小光建议附到备注开头（仅展示，不改原提交流程）
+    const ordForm = root.querySelector('.sb-form[data-table="orders"]');
+    if (ordForm) {
+      ordForm.addEventListener('submit', function () {
+        if (!sugKeep) return;
+        const nt = ordForm.querySelector('[name="note"]');
+        if (!nt) return;
+        const cur = (nt.value || '').trim();
+        if (cur.indexOf('小光建议：') === 0) return;
+        nt.value = cur ? ('小光建议：' + sugKeep + '\n' + cur) : ('小光建议：' + sugKeep);
+      });
+    }
+  })();
 })();
 
 /* ---------- 光集渲染（客户作品库） ---------- */
@@ -881,31 +979,53 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
 })();
 
 /* ---------- AI 光语助手（悬浮对话 + 星图志选石；未加载配置时自动降级） ---------- */
-/* 机器人形象「微光小精灵 · 小光」：SVG 拟人圆脸 + 星光眼 + 微笑 + 头顶光圈（样式见 style.css 末尾） */
+/* 小光形象「温柔女孩子」：SVG 手绘风长发光女（柔和圆脸 / 细眉 / 垂眼浅笑 / 淡腮红），样式见 style.css 末尾 */
 (function initAi() {
   // 右下角悬浮助手
   if (window.sbAI && !document.getElementById('aiFab')) {
     var root = document.createElement('div');
     root.className = 'ai-widget';
     root.innerHTML =
-      '<button type="button" class="ai-fab" id="aiFab" aria-label="微光小精灵 · 予光助手">' +
+      '<button type="button" class="ai-fab" id="aiFab" aria-label="小光 · 予光助手">' +
         '<svg class="ai-face" viewBox="0 0 64 64" aria-hidden="true">' +
-          '<defs><radialGradient id="ygFaceG" cx="50%" cy="36%" r="78%">' +
-            '<stop offset="0%" stop-color="#fbf1dc"/><stop offset="55%" stop-color="#f4dcae"/><stop offset="100%" stop-color="#e6c187"/>' +
-          '</radialGradient></defs>' +
-          '<path class="halo" d="M23 15 A 9 9 0 0 1 41 15" stroke="#f7e2a8" stroke-width="2.6" fill="none" stroke-linecap="round"/>' +
-          '<circle cx="43.6" cy="10.6" r="1.1" fill="#fff" opacity="0.9"/>' +
-          '<circle cx="32" cy="33" r="20" fill="url(#ygFaceG)"/>' +
-          '<ellipse class="blush" cx="22.4" cy="37.4" rx="3" ry="1.7" fill="#ef9a86" opacity="0.4"/>' +
-          '<ellipse class="blush" cx="41.6" cy="37.4" rx="3" ry="1.7" fill="#ef9a86" opacity="0.4"/>' +
-          '<g class="eye eye-l"><path d="M25.5 26.6l.9 2.5 2.5.9-2.5.9-.9 2.5-.9-2.5-2.5-.9 2.5-.9z" fill="#5f3d18"/></g>' +
-          '<g class="eye eye-r"><path d="M38.5 26.6l.9 2.5 2.5.9-2.5.9-.9 2.5-.9-2.5-2.5-.9 2.5-.9z" fill="#5f3d18"/></g>' +
-          '<path class="smile" d="M26.4 38.6 Q32 43.2 37.6 38.6" stroke="#a06c33" stroke-width="1.7" fill="none" stroke-linecap="round"/>' +
+          '<defs>' +
+            '<radialGradient id="ygFaceG" cx="50%" cy="32%" r="90%">' +
+              '<stop offset="0%" stop-color="#fdf6e7"/><stop offset="55%" stop-color="#f7e3bf"/><stop offset="100%" stop-color="#eed09f"/>' +
+            '</radialGradient>' +
+            '<linearGradient id="ygHairG" x1="0.2" y1="0" x2="0.8" y2="1">' +
+              '<stop offset="0%" stop-color="#a8825a"/><stop offset="55%" stop-color="#7d5b38"/><stop offset="100%" stop-color="#5d4226"/>' +
+            '</linearGradient>' +
+          '</defs>' +
+          '<path d="M32 5.2 C20.7 5.2 13.3 12.5 12.6 23 C12 35.7 14.7 49 22.8 56.1 C26.7 59.3 29.2 60.4 32 60.4 C34.8 60.4 37.3 59.3 41.2 56.1 C49.3 49 52 35.7 51.4 23 C50.7 12.5 43.3 5.2 32 5.2 Z" fill="url(#ygHairG)"/>' +
+          '<ellipse cx="32" cy="32.4" rx="15.1" ry="13.8" fill="url(#ygFaceG)"/>' +
+          '<path d="M20.4 13.2 C25.8 9.2 33.6 8.8 39.8 12.3" stroke="#ecd09a" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.4"/>' +
+          '<path d="M19.8 27.7 C20.2 19.3 24.4 15.1 32 15.1 C39.6 15.1 43.8 19.3 44.2 27.7 Q38.6 25.1 35.2 23.9 Q33.5 23.5 32 23.5 Q30.5 23.5 28.8 23.9 Q25.4 25.1 19.8 27.7 Z" fill="url(#ygHairG)"/>' +
+          '<path class="brow brow-l" d="M22.9 30.3 Q25.2 28.8 27.6 30.1" stroke="#8a6a48" stroke-width="1.05" fill="none" stroke-linecap="round" opacity="0.7"/>' +
+          '<path class="brow brow-r" d="M36.4 30.1 Q38.8 28.8 41.1 30.3" stroke="#8a6a48" stroke-width="1.05" fill="none" stroke-linecap="round" opacity="0.7"/>' +
+          '<g class="eye eye-l">' +
+            '<path d="M22.9 35.2 Q25.2 32.6 27.5 35.1" stroke="#56391f" stroke-width="1.5" fill="none" stroke-linecap="round"/>' +
+            '<path d="M23.3 36 Q25.2 37.3 27.1 36" stroke="#56391f" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.4"/>' +
+            '<circle cx="24.9" cy="34.6" r="0.55" fill="#fff" opacity="0.85"/>' +
+          '</g>' +
+          '<g class="eye eye-r">' +
+            '<path d="M36.5 35.1 Q38.8 32.6 41.1 35.2" stroke="#56391f" stroke-width="1.5" fill="none" stroke-linecap="round"/>' +
+            '<path d="M36.9 36 Q38.8 37.3 40.7 36" stroke="#56391f" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.4"/>' +
+            '<circle cx="39.1" cy="34.6" r="0.55" fill="#fff" opacity="0.85"/>' +
+          '</g>' +
+          '<ellipse class="blush" cx="25.6" cy="39" rx="2.9" ry="1.6" fill="#f2a089" opacity="0.5"/>' +
+          '<ellipse class="blush" cx="38.4" cy="39" rx="2.9" ry="1.6" fill="#f2a089" opacity="0.5"/>' +
+          '<path d="M31.6 37.7 Q32 39 32.5 38.2" stroke="#c79a70" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.5"/>' +
+          '<path class="smile" d="M27.1 41.3 Q32 44.9 36.9 41.3" stroke="#b06a54" stroke-width="1.7" fill="none" stroke-linecap="round"/>' +
+          '<path class="lip-hi" d="M32.4 42.7 Q35.4 43.7 36.6 42.3" stroke="#f6cdbe" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.6"/>' +
+          '<path d="M17.6 27.2 C17 34.4 18.5 42 22.1 47.9 C22.9 49.1 24 49.7 25.1 49.5 C24.3 46.8 24.2 44.1 24.5 41.5 C24.7 36.9 23.5 31.6 17.6 27.2 Z" fill="url(#ygHairG)"/>' +
+          '<path d="M46.4 27.2 C47 34.4 45.5 42 41.9 47.9 C41.1 49.1 40 49.7 38.9 49.5 C39.7 46.8 39.8 44.1 39.5 41.5 C39.3 36.9 40.5 31.6 46.4 27.2 Z" fill="url(#ygHairG)"/>' +
+          '<path transform="translate(15.2 13.8) scale(1.5)" d="M0 -3 C0.55 -0.9 0.9 -0.55 3 0 C0.9 0.55 0.55 0.9 0 3 C-0.55 0.9 -0.9 0.55 -3 0 C-0.9 -0.55 -0.55 -0.9 0 -3 Z" fill="#ffe6ad" opacity="0.9"/>' +
+          '<path transform="translate(48.4 15.2) scale(1.05)" d="M0 -3 C0.55 -0.9 0.9 -0.55 3 0 C0.9 0.55 0.55 0.9 0 3 C-0.55 0.9 -0.9 0.55 -3 0 C-0.9 -0.55 -0.55 -0.9 0 -3 Z" fill="#fff" opacity="0.75"/>' +
         '</svg>' +
       '</button>' +
       '<div class="ai-panel" id="aiPanel">' +
         '<div class="ai-head">予光 · 小光<span class="ai-close" id="aiClose">✕</span></div>' +
-        '<div class="ai-body" id="aiBody"><p class="ai-tip">可问我：定制流程 · 光集故事 · 作品验真 ✦ 也可以只是聊聊。</p></div>' +
+        '<div class="ai-body" id="aiBody"><p class="ai-tip">可问我：定制流程 · 光集故事 · 作品验真 ✦ 也可以只是和我聊聊。</p></div>' +
         '<div class="ai-foot"><input id="aiInput" placeholder="跟小光说点什么…" autocomplete="off"><button type="button" id="aiSend">发送</button></div>' +
       '</div>';
     document.body.appendChild(root);
@@ -919,15 +1039,16 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     var open = false;
     var greeted = false;
     var HELLOS = [
-      '我在呢 ✦ 想聊聊你的光，还是帮你挑一枚？',
-      '你来啦 ✦ 夜这么深，光正好在等你。',
-      '嘘——我正帮你留意那束合适的光 ✦ 想从哪里说起？'
+      '我在呢，慢慢说就好 ✦ 今天想挑一枚怎样的光？',
+      '要不要一起挑一枚适合今天心情的光？',
+      '你来啦 ✦ 夜这么深，光正好在等你，想从哪里说起？',
+      '嗯，我在听 ✦ 无论是挑石头，还是只想待一会儿，都好。'
     ];
     var hiIdx = 0;
     var FALLBACKS = [
-      '嗯，这一问小光要再想想 ✦ 换个说法再问我一次？',
-      '小光被问住了 ✦ 别急，也可以点「微信客服」找真人聊聊。',
-      '这一题有点超纲啦 ✦ 先聊点别的，光一直都在。'
+      '嗯，这一问我还要再想想 ✦ 换一种说法告诉我，好么？',
+      '我一时没想明白 ✦ 别着急，也可以点「微信客服」找真人聊聊。',
+      '这一题有点超出我啦 ✦ 先聊点别的吧，光一直都在。'
     ];
     function addMsg(text, who) {
       var d = document.createElement('div');
@@ -973,14 +1094,14 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') ask(); });
   }
 
-  // 星图志「AI 帮你选石」
+  // 星图志「小光帮你选石」
   var needBtn = document.getElementById('aiStonesBtn');
   var needInp = document.getElementById('aiNeed');
   var needRes = document.getElementById('aiStonesRes');
   if (needBtn && needInp && needRes) {
     if (!window.sbAI) {
       needBtn.disabled = true;
-      needRes.textContent = '（离线版暂不可用，请访问线上版使用 AI）';
+      needRes.textContent = '（当前为离线版；联网后即可让小光帮你挑，也可以先逛逛星图志）';
       return;
     }
     needBtn.addEventListener('click', function () {
@@ -1025,10 +1146,6 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       chip.removeAttribute('data-logged');
       chip.title = '';
     }
-    refreshAdmin();
-  }
-  function refreshAdmin() { /* 后台入口已隐藏，由 logo 连点唤出 */
-    if (adminLink) adminLink.style.display = 'none';
   }
   window.addEventListener('yg:login', function () {
     account = localStorage.getItem('yg_account') || '';
@@ -1038,14 +1155,9 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
 
   var right = document.createElement('div');
   right.className = 'nav-user-wrap';
-  var adminLink = document.createElement('a');
-  adminLink.href = 'admin.html';
-  adminLink.textContent = '后台';
-  adminLink.style.cssText = 'color:var(--gold);font-size:13px;border:1px solid var(--line);border-radius:999px;padding:5px 14px;display:none;';
   var chip = document.createElement('a');
   chip.href = 'javascript:void(0)';
   chip.style.cssText = 'color:var(--gold);font-size:13px;display:inline-flex;align-items:center;';
-  right.appendChild(adminLink);
   right.appendChild(chip);
   var menu = document.createElement('div');
   menu.className = 'user-menu';
@@ -1214,17 +1326,6 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     ['yg_token', 'yg_account', 'yg_role', 'yg_nick'].forEach(function (k) { localStorage.removeItem(k); });
     location.reload();
   };
-  // 唤出后台：连按 6 个 8，或连点右上头像 6 次（仅 admin）
-  (function () {
-    var buf = '';
-    document.addEventListener('keyup', function (e) {
-      buf = (buf + e.key).slice(-6);
-      if (buf === '888888') { buf = ''; if (role === 'admin' || role === 'root') location.href = 'admin.html'; }
-    });
-    var avCnt = 0, avTimer = null;
-    chip.addEventListener('click', function (e) { e.stopPropagation(); });
-    chip.addEventListener('dblclick', function () { /* noop */ });
-  })();
   refreshChip();
   window.ygAccount = function () { return localStorage.getItem('yg_account') || ''; };
   /* 静默校验：会话过期则清除假登录态（无弹窗） */
@@ -1253,23 +1354,6 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   })();
 
 })();
-
-/* 顶部任意处 6 连点 → 后台（admin） */
-(function () {
-  var head = document.querySelector('header.nav');
-  if (!head) return;
-  var cnt = 0, timer = null;
-  head.addEventListener('click', function () {
-    cnt++;
-    clearTimeout(timer);
-    timer = setTimeout(function () { cnt = 0; }, 2600);
-    if (cnt >= 6) {
-      cnt = 0;
-      if (['admin','root'].indexOf(localStorage.getItem('yg_role') || '') >= 0) location.href = 'admin.html';
-    }
-  });
-})();
-
 
 /* 唤醒统一：先服务端校验 admin/root 再进后台 */
 (function () {
@@ -1379,52 +1463,6 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   }
 })();
 
-
-/* ========== 管理员头像菜单入口（仅 admin/root 可见，点击服务端校验后进入） ========== */
-(function () {
-  function entryClick() {
-    var cfg = window.SUPABASE || {};
-    var tk = localStorage.getItem('yg_token') || '';
-    if (!cfg.url || !tk) { location.href = 'account.html'; return; }
-    fetch(cfg.url + '/functions/v1/account-api', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-sess': tk },
-      body: JSON.stringify({ op: 'me' })
-    }).then(function (r) { return r.json(); }).then(function (j) {
-      if (j && j.ok && (j.role === 'admin' || j.role === 'root')) {
-        localStorage.setItem('yg_role', j.role);
-        localStorage.setItem('yg_account', j.account);
-        location.href = 'admin.html';
-      } else if (j && !j.ok && /未登录|过期/.test(String(j.error || ''))) {
-        ['yg_token', 'yg_account', 'yg_role', 'yg_nick'].forEach(function (k) { localStorage.removeItem(k); });
-        location.href = 'account.html';
-      }
-    }).catch(function () {});
-  }
-  function sync() {
-    var menu = document.querySelector('.user-menu');
-    if (!menu) return;
-    var role = localStorage.getItem('yg_role') || '';
-    var had = menu.querySelector('#mmAdmin');
-    if (role === 'admin' || role === 'root') {
-      if (!had) {
-        var a = document.createElement('a');
-        a.id = 'mmAdmin';
-        a.href = 'javascript:void(0)';
-        a.textContent = '🛠 管理后台';
-        menu.insertBefore(a, menu.firstChild);
-        a.addEventListener('click', function (e) { e.preventDefault(); entryClick(); });
-      }
-    } else if (had) had.remove();
-  }
-  window.addEventListener('yg:login', sync);
-  document.addEventListener('DOMContentLoaded', sync);
-  var tries = 0;
-  var iv = setInterval(function () {
-    if (document.querySelector('.user-menu')) { sync(); clearInterval(iv); }
-    else if (++tries > 20) clearInterval(iv);
-  }, 400);
-})();
 
 /* ============================================================
    B 组改造（前端侧）：首页光集化 / 微信设置 / 实时 ygLive / 小光名字统一
