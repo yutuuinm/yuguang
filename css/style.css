@@ -1329,20 +1329,44 @@ html { -webkit-tap-highlight-color: transparent; }
 .user-menu a:hover { background: rgba(227,196,124,.12); color: var(--gold); }
 .nav-inner, .nav-links, header.nav { position: relative; }
 
-/* 登录后右上板块（替代小菜单） */
-.nav-user-wrap { position: relative; }
+
+/* 登录后右上角：头像圆 + 向下展开板块（白桦/华为风格） */
+.nav-user-wrap { position: relative; display: inline-flex; }
+.chip-av {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+  color: #14121a; font-weight: 700; font-size: 15px;
+  box-shadow: 0 0 0 2px rgba(227,196,124,.25);
+}
 .user-menu.up-panel {
-  position: absolute; top: calc(100% + 10px); right: 0;
-  width: 210px; min-width: 0; z-index: 320;
-  background: linear-gradient(170deg, rgba(16,24,40,.99), rgba(7,10,18,.99));
-  border: 1px solid var(--line); border-radius: 14px;
-  padding: 8px; box-shadow: 0 18px 50px rgba(0,0,0,.6);
+  position: absolute; top: calc(100% + 12px); right: -6px;
+  min-width: 232px; z-index: 330;
+  background: linear-gradient(175deg, rgba(18,25,42,.99), rgba(7,10,18,.99));
+  border: 1px solid rgba(227,196,124,.28); border-radius: 14px;
+  padding: 7px; box-shadow: 0 18px 50px rgba(0,0,0,.65);
+  transform-origin: top right;
+  animation: updrop .16s ease-out;
 }
+.user-menu.up-panel::before {
+  content: ""; position: absolute; top: -7px; right: 14px;
+  width: 12px; height: 12px; transform: rotate(45deg);
+  background: rgba(18,25,42,.99); border-left: 1px solid rgba(227,196,124,.28);
+  border-top: 1px solid rgba(227,196,124,.28);
+}
+@keyframes updrop { from { opacity: 0; transform: scale(.94) translateY(-4px); } to { opacity: 1; transform: none; } }
 .user-menu.up-panel a {
-  display: flex; align-items: center; padding: 12px 12px; color: var(--moon);
-  font-size: 14px; border-radius: 10px; text-decoration: none;
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 12px; margin: 2px 0;
+  color: var(--moon) !important; text-decoration: none !important;
+  font-size: 14px; border-radius: 10px;
 }
-.user-menu.up-panel a:hover { background: rgba(227,196,124,.12); color: var(--gold); }
+.user-menu.up-panel a:hover { background: rgba(227,196,124,.13); color: var(--gold) !important; }
+.user-menu.up-panel a:visited { color: var(--moon) !important; }
 @media (max-width: 640px) {
-  .user-menu.up-panel { position: fixed; top: 64px; right: 10px; left: auto; width: 92vw; max-width: 92vw; }
+  .user-menu.up-panel {
+    position: fixed; top: 62px; right: 12px; left: auto;
+    width: min(320px, 92vw);
+  }
 }
+
