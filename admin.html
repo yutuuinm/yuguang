@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>予光 · 管理后台</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09040140">
+<link rel="stylesheet" href="css/style.css?v=09040206">
 <style>
   /* ============ 予光 · 管理后台（分区式） ============ */
   .adm{max-width:1180px;margin:0 auto;padding:132px 20px 90px;position:relative;z-index:5;}
@@ -171,7 +171,7 @@
 
   <div id="admShell" style="display:none;">
 
-    <!-- ========== 首页 · 主卡（8）+ 快捷工具总入口 ========== -->
+    <!-- ========== 首页 · 主卡（9）+ 快捷工具总入口 ========== -->
     <section id="admHome" class="admSec on">
       <div class="adm-title">予光 · <span class="dot">管</span>理后台</div>
       <div class="adm-sub">YU GUANG ADMIN · 把光给你，我，就是光</div>
@@ -209,6 +209,10 @@
         <button class="card" type="button" data-sec="secInbox" title="信箱管理：向全部注册用户或指定账号群发站内信，可选同时发邮件">
           <span class="g">📮</span><h3><em>信箱管理</em></h3>
           <p>站内信群发 · 全部用户 / 指定账号<br>可选同时发送到邮箱 · 进度统计</p>
+        </button>
+        <button class="card" type="button" data-sec="secArticles" title="学堂文章管理（articles）：新增 / 编辑 / 上下架，前台「学堂」页展示">
+          <span class="g">📖</span><h3><em>知识管理</em></h3>
+          <p>学堂文章 新增 / 编辑 / 上下架<br>生肖·八卦·星座·养石 文化小课</p>
         </button>
         <button class="card" type="button" data-sec="secSubMail" title="把订阅登记（subscribers.contact）中的邮箱逐个群发邮件">
           <span class="g">📧</span><h3><em>发送订阅邮件</em></h3>
@@ -428,6 +432,47 @@
         </div>
       </div>
       <div class="wrap-scroll"><div id="gaBody"></div></div>
+    </section>
+
+    <!-- ========== P2.5. 知识管理（学堂文章 articles → 前台 knowledge.html） ========== -->
+    <section class="admSec" id="secArticles">
+      <div class="sec-top">
+        <button class="back-btn" type="button" data-act="back">← 返回</button>
+        <h2><span>📖</span> 知识管理</h2><span class="sp"></span>
+        <button class="btn-sm" id="kwTopNew" type="button" title="新增一篇学堂文章（表单空态，滚动到顶部表单）">➕ 新增文章</button>
+        <button class="btn-sm" id="kwRefresh" type="button" title="重新读取 articles 表">🔄 刷新</button>
+      </div>
+      <div class="doc-pad">
+        <div class="bar">
+          <input id="kwSearch" placeholder="🔍 搜索标题 / 分类 / 摘要 / 正文" style="min-width:240px;margin:0;">
+          <span class="small-note" id="kwCount"></span>
+          <button class="btn-line" id="kwReset" type="button" title="清空表单，回到「新增」状态">↩️ 清空表单</button>
+        </div>
+        <div class="sec-note">数据表 articles，供前台「学堂」页（knowledge.html）读取：排序 sort 升序 + 新建 id 倒序；可见 visible=false 为「下架」，前台不展示。删除会先进入回收站暂存，可在回收站恢复。</div>
+        <div class="doc-pad" id="kwForm" style="margin-top:2px;">
+          <div style="font-size:13px;color:var(--gold);letter-spacing:.1em;margin-bottom:8px;"><span id="kwFormTitle">📖 新增文章</span>（标题必填）</div>
+          <div class="grid-2">
+            <div>
+              <label class="f-label">标题 *</label><input id="kwTitle" placeholder="如：巳蛇的本命五行与主石意象">
+              <label class="f-label">分类 category（前台按此筛选；空则默认「文化」）</label><input id="kwCat" placeholder="如：生肖 / 八卦 / 星座 / 星盘 / 晶石 / 养石">
+              <label class="f-label">封面文件名 cover（选填，存文件名）</label><input id="kwCover" placeholder="img/articles/xx.jpg">
+              <label class="f-label">摘要 summary（列表卡片展示）</label><input id="kwSummary" placeholder="一句话摘要…">
+            </div>
+            <div>
+              <label class="f-label">排序 sort（数字，小在前）</label><input id="kwSort" type="number" placeholder="如：1">
+              <label class="f-label" style="display:inline-flex;gap:6px;align-items:center;"><input type="checkbox" id="kwVisible" class="chk" checked> 上架可见 visible</label>
+              <label class="f-label">正文 content（回车分段；# / 【…】短行作小标题）</label>
+              <textarea id="kwContent" style="min-height:180px;" placeholder="正文…（每段之间空一行即可）"></textarea>
+            </div>
+          </div>
+          <div class="msg" id="kwMsg"></div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <button class="btn-gold" id="kwSave" type="button">💾 保存文章</button>
+            <button class="btn-line" id="kwCancel" type="button" style="display:none;">↩️ 取消编辑</button>
+          </div>
+        </div>
+        <div class="wrap-scroll"><div id="kwBody"></div></div>
+      </div>
     </section>
 
     <!-- ========== P3. 信箱管理（站内信群发：全部 / 指定账号） ========== -->
@@ -723,8 +768,8 @@
 
 <footer class="footer"><div class="wrap"><div class="disclaimer">© 予光 YUGUANG · 管理后台 · 仅供内部使用</div></div></footer>
 
-<script src="js/supabase-config.js?v=09040140"></script>
-<script src="js/main.js?v=09040140"></script>
+<script src="js/supabase-config.js?v=09040206"></script>
+<script src="js/main.js?v=09040206"></script>
 <script>
 (function () {
   'use strict';
@@ -798,6 +843,7 @@
     if (name === 'secAi') aiLoad();
     if (name === 'secProducts') loadProducts(true);
     if (name === 'secGallery') loadGallery(true);
+    if (name === 'secArticles') loadKws(true);
     if (name === 'secInbox') inboxOpen(true);
     if (name === 'secWx') wxLoad();
     if (name === 'secRecycle') loadRecycle();
@@ -2653,6 +2699,131 @@
   }
 
   /* ============================================================
+     ⑧.5 📖 学堂文章 secArticles（articles → 前台 knowledge.html）
+     ============================================================ */
+  var KW = { all: [], q: '', editId: null, busy: false };
+  function loadKws(force) {
+    if (!force && KW.busy) return;
+    KW.busy = true;
+    adm({ op: 'list', table: 'articles', limit: 200 }).then(function (r) {
+      KW.busy = false;
+      if (!r.ok) { setMsg('kwMsg', '加载失败：' + (r.error || ''), 'bad'); return; }
+      KW.all = (r.rows || []).slice().sort(function (a, b) {
+        var sa = Number(a.sort) || 0, sb = Number(b.sort) || 0;
+        if (sa !== sb) return sa - sb;
+        return (Number(b.id) || 0) - (Number(a.id) || 0);
+      });
+      renderKws();
+    }).catch(function () { KW.busy = false; setMsg('kwMsg', '网络错误', 'bad'); });
+  }
+  function kwFiltered() {
+    if (!KW.q) return KW.all.slice();
+    return KW.all.filter(function (x) {
+      return [x.title, x.category, x.summary, x.content].join(' ').toLowerCase().indexOf(KW.q) > -1;
+    });
+  }
+  function kwFind(id) {
+    for (var i = 0; i < KW.all.length; i++) if (String(KW.all[i].id) === String(id)) return KW.all[i];
+    return null;
+  }
+  function renderKws() {
+    var rows = kwFiltered();
+    var box = $('kwBody');
+    $('kwCount').textContent = '共 ' + KW.all.length + ' 篇' + (KW.q ? '（命中 ' + rows.length + '）' : '');
+    if (!rows.length) { box.innerHTML = '<div style="padding:22px;text-align:center;color:var(--text-dim);font-size:13px;">✦ ' + (KW.q ? '无匹配文章' : '暂无文章，点右上「➕ 新增文章」写第一篇学堂内容') + '</div>'; return; }
+    var h = '<table class="tbl"><tr><th>标题</th><th>分类</th><th>摘要</th><th>排序</th><th>可见</th><th>时间</th><th>操作</th></tr>';
+    rows.forEach(function (x) {
+      h += '<tr' + (KW.editId && String(KW.editId) === String(x.id) ? ' style="background:rgba(227,196,124,.07);"' : '') + '>' +
+        '<td>' + esc(x.title || '—') + '</td>' +
+        '<td>' + esc(x.category || '文化') + '</td>' +
+        '<td class="dim">' + esc(String(x.summary || '').slice(0, 60)) + (String(x.summary || '').length > 60 ? '…' : '') + '</td>' +
+        '<td>' + esc(x.sort === undefined || x.sort === null ? '—' : x.sort) + '</td>' +
+        '<td><span class="badge" style="color:' + (x.visible !== false ? '#9fd6a8' : 'var(--text-dim)') + ';border-color:' + (x.visible !== false ? '#9fd6a855' : 'var(--line)') + ';">' + (x.visible !== false ? '已显示' : '已隐藏') + '</span></td>' +
+        '<td style="white-space:nowrap;">' + esc(fmtTime(x.created_at)) + '</td>' +
+        '<td style="white-space:nowrap;">' +
+        '<button class="btn-sm" data-kwvis="' + x.id + '" data-v="' + (x.visible !== false ? 'false' : 'true') + '" title="切换上/下架（visible）">☑️ ' + (x.visible !== false ? '隐藏' : '显示') + '</button>' +
+        '<button class="btn-sm" data-kwedit="' + x.id + '" title="载入表单编辑该文章">✏️ 编辑</button>' +
+        '<button class="btn-sm danger" data-kwdel="' + x.id + '" title="删除该文章（进入回收站暂存）">🗑️ 删除</button></td></tr>';
+    });
+    h += '</table>';
+    box.innerHTML = h;
+    box.querySelectorAll('[data-kwedit]').forEach(function (b) { b.addEventListener('click', function () { kwEdit(b.getAttribute('data-kwedit')); }); });
+    box.querySelectorAll('[data-kwvis]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        adm({ op: 'update', table: 'articles', id: b.getAttribute('data-kwvis'), set: { visible: b.getAttribute('data-v') === 'true' } }).then(function (r) {
+          if (r.ok) { setMsg('kwMsg', '已更新上/下架状态', 'ok'); loadKws(true); }
+          else setMsg('kwMsg', '失败：' + (r.error || ''), 'bad');
+        }).catch(function () { setMsg('kwMsg', '网络错误', 'bad'); });
+      });
+    });
+    box.querySelectorAll('[data-kwdel]').forEach(function (b) {
+      b.addEventListener('click', function () { kwDel(b.getAttribute('data-kwdel')); });
+    });
+  }
+  function kwResetForm() {
+    KW.editId = null;
+    ['kwTitle', 'kwCat', 'kwCover', 'kwSummary', 'kwSort', 'kwContent'].forEach(function (id) { var el = $(id); if (el) el.value = ''; });
+    var v = $('kwVisible'); if (v) v.checked = true;
+    var t = $('kwFormTitle'); if (t) t.textContent = '📖 新增文章';
+    var c = $('kwCancel'); if (c) c.style.display = 'none';
+    var msg = $('kwMsg'); if (msg) { msg.textContent = ''; msg.className = 'msg'; }
+  }
+  function kwTopNew() {
+    kwResetForm();
+    var f = $('kwForm');
+    if (f) f.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    var ti = $('kwTitle'); if (ti) ti.focus();
+  }
+  function kwEdit(id) {
+    var x = kwFind(id);
+    if (!x) return;
+    KW.editId = id;
+    var map = { title: 'kwTitle', category: 'kwCat', cover: 'kwCover', summary: 'kwSummary', sort: 'kwSort', content: 'kwContent' };
+    Object.keys(map).forEach(function (k) {
+      var el = $(map[k]);
+      if (el) el.value = (x[k] === undefined || x[k] === null) ? '' : String(x[k]);
+    });
+    var v = $('kwVisible'); if (v) v.checked = x.visible !== false;
+    var t = $('kwFormTitle'); if (t) t.textContent = '✏️ 编辑文章（id ' + id + '）';
+    var c = $('kwCancel'); if (c) c.style.display = 'inline-flex';
+    var f = $('kwForm');
+    if (f) f.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setMsg('kwMsg', '正在编辑「' + x.title + '」…', 'ok');
+  }
+  function kwSave() {
+    var title = ($('kwTitle').value || '').trim();
+    if (!title) { setMsg('kwMsg', '标题不能为空', 'bad'); return; }
+    var row = { title: title, category: ($('kwCat').value || '').trim() || '文化', visible: $('kwVisible').checked !== false };
+    var map = [['kwCover', 'cover'], ['kwSummary', 'summary'], ['kwContent', 'content']];
+    map.forEach(function (p) { var v = ($(p[0]).value || '').trim(); if (v) row[p[1]] = v; });
+    var sort = num($('kwSort').value);
+    if (sort !== undefined) row.sort = sort;
+    var isEdit = KW.editId !== null;
+    setMsg('kwMsg', '保存中…');
+    var p = isEdit
+      ? adm({ op: 'update', table: 'articles', id: KW.editId, set: row })
+      : adm({ op: 'insert', table: 'articles', row: row });
+    p.then(function (r) {
+      if (!r.ok) { setMsg('kwMsg', (isEdit ? '更新' : '新增') + '失败：' + (r.error || ''), 'bad'); return; }
+      setMsg('kwMsg', '✅ 已' + (isEdit ? '更新' : '新增') + '文章「' + title + '」' + (row.visible !== false ? '' : '（已下架，前台暂不展示）'), 'ok');
+      kwResetForm();
+      loadKws(true);
+    }).catch(function () { setMsg('kwMsg', '网络错误', 'bad'); });
+  }
+  function kwDel(id) {
+    var x = kwFind(id);
+    if (!x) return;
+    if (!confirm('确认删除文章「' + x.title + '」？删除后进入回收站暂存，可在回收站恢复。')) return;
+    adm({ op: 'delete', table: 'articles', id: x.id }).then(function (r) {
+      if (r.ok) {
+        if (KW.editId && String(KW.editId) === String(x.id)) kwResetForm();
+        setMsg('kwMsg', '已删除「' + x.title + '」（进入回收站）', 'ok');
+        loadKws(true);
+      } else setMsg('kwMsg', '删除失败：' + (r.error || ''), 'bad');
+    }).catch(function () { setMsg('kwMsg', '网络错误', 'bad'); });
+  }
+
+  /* ============================================================
      ⑨ 🎁 转盘优惠 secWheel
      ============================================================ */
   function wdSumTxt() {
@@ -2848,6 +3019,7 @@
       if (isOn('secDb') && !modalOpen) loadDb();
       if (isOn('secUsers') && !modalOpen) loadUsers();
       if (isOn('secCrystal') && !modalOpen) loadCrystals();
+      if (isOn('secArticles') && !modalOpen) loadKws();
       if (isOn('secSubMail') && !modalOpen) loadSubscribers();
     }, 20000);
   }
@@ -2914,6 +3086,14 @@
     $('gaRefresh').addEventListener('click', function () { loadGallery(true); });
     $('gaSave').addEventListener('click', gaSave);
     $('gaCancel').addEventListener('click', gaResetForm);
+
+    /* 知识管理（学堂文章 articles） */
+    $('kwRefresh').addEventListener('click', function () { loadKws(true); });
+    $('kwSave').addEventListener('click', kwSave);
+    $('kwCancel').addEventListener('click', kwResetForm);
+    $('kwReset').addEventListener('click', kwResetForm);
+    $('kwTopNew').addEventListener('click', kwTopNew);
+    $('kwSearch').addEventListener('input', function () { KW.q = ($('kwSearch').value || '').trim().toLowerCase(); renderKws(); });
 
     /* 信箱管理 */
     $('ibRefresh').addEventListener('click', function () { inboxOpen(true); });
