@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
       if (target.role === "root") throw new Error("终端管理员账号不可修改或删除");
       if (user.role !== "root" && target.role !== "user") throw new Error("仅 root 可管理管理员账号");
     }
-    // 存档：记录一切管理员写操作
+    // 存档：记录一切管理员写操作（保留 5 天自动清理）
     async function log(action, target, note, payload) {
       try {
         await fetch(SB_URL + "/rest/v1/archives", {
@@ -84,6 +84,11 @@ Deno.serve(async (req) => {
             payload: payload || {}
           })
         });
+        // 超过 5 天的旧存档自动清除
+        const cut = new Date(Date.now() - 5 * 86400000).toISOString();
+        fetch(SB_URL + "/rest/v1/archives?created_at=lt." + encodeURIComponent(cut), {
+          method: "DELETE", headers: { ...auth, Prefer: "return=minimal" }
+        }).catch(() => {});
       } catch (_) { /* 存档失败不影响主流程 */ }
     }
     async function fetchRow(t, id) {
