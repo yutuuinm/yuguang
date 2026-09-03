@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>个人中心 · 予光</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09032130"?>
+<link rel="stylesheet" href="css/style.css?v=09032133"?>
 <style>
   .acc{max-width:620px;margin:0 auto;padding:110px 18px 80px;}
   .back{color:var(--gold);font-size:13px;text-decoration:none;}
@@ -154,12 +154,26 @@
     document.getElementById('acEmail').value = r.email || r.account;
     var ce = document.getElementById('curEmail'); if (ce) ce.textContent = r.email || r.account;
   }
+  function fallbackLocal() {
+    var acc = localStorage.getItem('yg_account') || '';
+    var nick = localStorage.getItem('yg_nick') || '';
+    if (acc) {
+      var s = (nick || acc).trim();
+      var avEl = document.getElementById('meAv');
+      if (avEl) avEl.textContent = s.charAt(0);
+      var n = document.getElementById('meName');
+      if (n) n.textContent = nick || acc;
+      var ac = document.getElementById('acAccount');
+      if (ac) ac.value = acc;
+    }
+  }
   function doMe(times) {
     if (!token) { msg('meInfo', '请先登录'); return; }
     api({ op: 'me' }).then(function (r) {
       if (!r.ok) {
         if ((times || 0) < 1) { setTimeout(function () { doMe((times || 0) + 1); }, 900); return; }
-        document.getElementById('meInfo').textContent = '登录状态失效，请返回右上角重新登录';
+        // 静默降级：用本地信息展示，不再提示“失效”
+        fallbackLocal();
         return;
       }
       fill(r);
