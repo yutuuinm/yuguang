@@ -847,9 +847,14 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
   }
   function refreshChip() {
     if (account) {
+      chip.classList.remove('cta');
       chip.textContent = avatarChar() + ' ' + (localStorage.getItem('yg_nick') || account);
       chip.setAttribute('data-logged', '1');
-    } else { chip.textContent = '登录 / 注册'; chip.removeAttribute('data-logged'); }
+    } else {
+      chip.classList.add('cta');
+      chip.textContent = '登录 / 注册';
+      chip.removeAttribute('data-logged');
+    }
     refreshAdmin();
   }
   function refreshAdmin() {
@@ -889,6 +894,7 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
     '<div class="err" id="lgErr"></div>' +
     '<button class="btn-gold" style="width:100%;" id="lgGo" type="button">登录</button>' +
     '<div style="margin-top:12px;text-align:center;color:var(--text-dim);font-size:12px;" id="lgHint">验证码由予光邮箱发送，10 分钟内有效</div>' +
+    '<div style="margin-top:10px;text-align:center;"><a href="javascript:void(0)" id="lgBack" style="color:var(--text-dim);font-size:12px;text-decoration:underline;">← 返回</a></div>' +
     '</div>';
   document.body.appendChild(mask);
   var emailEl = mask.querySelector('#lgEmail');
@@ -986,6 +992,9 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
   });
   mask.querySelector('.close-x').addEventListener('click', function () { mask.classList.remove('show'); });
   mask.addEventListener('click', function (e) { if (e.target === mask) mask.classList.remove('show'); });
+  var backEl = mask.querySelector('#lgBack');
+  if (backEl) backEl.addEventListener('click', function () { mask.classList.remove('show'); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') mask.classList.remove('show'); });
 
   var cd = 0;
   sendEl.addEventListener('click', function () {
