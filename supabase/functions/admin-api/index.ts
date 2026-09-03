@@ -1,11 +1,12 @@
 // ============================================================
-// 予光 · admin-api v2（后台数据接口）
-// 鉴权：x-sess 会员令牌 → 必须 role='admin'（即 fftt0227）
-// 用法：POST {op:'list'|'update'|'insert'|'delete', table, id?, set?, row?, limit?}
+// 予光 · admin-api v3（后台数据接口）
+// 鉴权：x-sess 会员令牌 → 必须 role='admin'/'root'
+// 用法：POST {op:'list'|'update'|'insert'|'delete'|'broadcast', table, id?, set?, row?, limit?, title?, body?}
 // 允许表：orders messages gallery products crystals records subscribers settings app_data
+//        users wheel_spins ai_usage recycle_bin mailboxes（users 含敏感字段仅管理员可读）
 // ============================================================
 
-const TABLES = ['orders','messages','gallery','products','crystals','records','subscribers','settings','app_data'];
+const TABLES = ['orders','messages','gallery','products','crystals','records','subscribers','settings','app_data','users','wheel_spins','ai_usage','recycle_bin','mailboxes'];
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "Content-Type, x-sess",
@@ -61,7 +62,8 @@ Deno.serve(async (req) => {
     }
     if (op === "delete") {
       if (!body.id) throw new Error("缺少 id");
-      await fetch(base + "?id=eq." + encodeURIComponent(body.id), { method: "DELETE", headers: auth });
+      const where = (table === "settings" || table === "app_data") ? "key=eq." + encodeURIComponent(body.id) : "id=eq." + encodeURIComponent(body.id);
+      await fetch(base + "?" + where, { method: "DELETE", headers: auth });
       return Response.json({ ok: true }, { headers: corsHeaders });
     }
     if (op === "insert") {
@@ -73,6 +75,22 @@ Deno.serve(async (req) => {
       const where = (table === "settings" || table === "app_data") ? "key=eq." + encodeURIComponent(body.id) : "id=eq." + encodeURIComponent(body.id);
       await fetch(base + "?" + where, { method: "PATCH", headers: auth, body: JSON.stringify(body.set || {}) });
       return Response.json({ ok: true }, { headers: corsHeaders });
+    }
+    if (op === "broadcast") {
+      // 群发站内信（kind=notice → 全部用户信箱）
+      const title = String(body.title || "").trim();
+      const bodyTxt = String(body.body || "").slice(0, 500);
+      if (!title && !bodyTxt) throw new Error("标题与内容不能都为空");
+      const ru = await fetch(SB_URL + "/rest/v1/users?select=account&limit=500", { headers: auth });
+      const users = (await ru.json()) || [];
+      let done = 0;
+      for (const u of users) {
+        if (!u.account) continue;
+        const ins = await fetch(SB_URL + "/rest/v1/mailboxes", { method: "POST", headers: { ...auth, Prefer: "return=minimal" },
+          body: JSON.stringify({ account: u.account, kind: "notice", title: title || "予光通知", body: bodyTxt }) });
+        if (ins.ok) done++;
+      }
+      return Response.json({ ok: true, sent: done, users: users.length }, { headers: corsHeaders });
     }
     return Response.json({ ok: false, error: "未知 op" }, { headers: corsHeaders });
   } catch (e) {
