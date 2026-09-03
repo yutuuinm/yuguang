@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
     }
     if (op === "update") {
       if (!body.id) throw new Error("缺少 id");
-      const where = table === "settings" ? "key=eq." + encodeURIComponent(body.id) : "id=eq." + encodeURIComponent(body.id);
+      const where = (table === "settings" || table === "app_data") ? "key=eq." + encodeURIComponent(body.id) : "id=eq." + encodeURIComponent(body.id);
       await fetch(base + "?" + where, { method: "PATCH", headers: auth, body: JSON.stringify(body.set || {}) });
       return Response.json({ ok: true }, { headers: corsHeaders });
     }
