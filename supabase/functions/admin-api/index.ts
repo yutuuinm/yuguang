@@ -177,21 +177,35 @@ Deno.serve(async (req) => {
       return Response.json({ ok: true, cleared: n }, { headers: corsHeaders });
     }
     if (op === "broadcast") {
-      // 群发站内信（kind=notice → 全部用户信箱）
+      // 信箱管理：站内信群发（kind=notice）+ 可选发邮件；可指定 accounts 目标
       const title = String(body.title || "").trim();
       const bodyTxt = String(body.body || "").slice(0, 500);
+      const toEmail = body.email === true || body.email === "true";
+      const only = Array.isArray(body.accounts) ? body.accounts.map((a) => String(a)).filter(Boolean) : null;
       if (!title && !bodyTxt) throw new Error("标题与内容不能都为空");
-      const ru = await fetch(SB_URL + "/rest/v1/users?select=account&limit=500", { headers: auth });
-      const users = (await ru.json()) || [];
-      let done = 0;
+      const ru = await fetch(SB_URL + "/rest/v1/users?select=account,email&limit=500", { headers: auth });
+      let users = (await ru.json()) || [];
+      if (only && only.length) users = users.filter((u) => only.indexOf(u.account) > -1);
+      let done = 0, mailed = 0;
       for (const u of users) {
         if (!u.account) continue;
         const ins = await fetch(SB_URL + "/rest/v1/mailboxes", { method: "POST", headers: { ...auth, Prefer: "return=minimal" },
           body: JSON.stringify({ account: u.account, kind: "notice", title: title || "予光通知", body: bodyTxt }) });
         if (ins.ok) done++;
+        if (toEmail && u.email) {
+          try {
+            const em = await fetch(SB_URL + "/functions/v1/email-send", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ kind: "notice", subject: title || "予光通知", fields: { 内容: bodyTxt }, to: [u.email] })
+            });
+            if (em.ok) mailed++;
+          } catch (_) { /* 单封失败不影响 */ }
+          await new Promise((res) => setTimeout(res, 200));
+        }
       }
-      log("broadcast", "mailboxes", "群发站内信「" + title + "」→ " + done + "/" + users.length);
-      return Response.json({ ok: true, sent: done, users: users.length }, { headers: corsHeaders });
+      log("broadcast", only ? ("accounts:" + only.length) : "mailboxes", "群发「" + title + "」信箱 " + done + "/" + users.length + (toEmail ? "，邮件 " + mailed : ""));
+      return Response.json({ ok: true, sent: done, users: users.length, mailed }, { headers: corsHeaders });
     }
     return Response.json({ ok: false, error: "未知 op" }, { headers: corsHeaders });
   } catch (e) {
