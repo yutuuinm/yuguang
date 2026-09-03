@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>予光 · 管理后台</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09032147"?>
+<link rel="stylesheet" href="css/style.css?v=09032151"?>
 <style>
   .adm{max-width:1000px;margin:0 auto;padding:120px 20px 80px;}
   .adm h2{font-family:var(--serif);letter-spacing:.2em;color:var(--gold);margin-bottom:6px;}
@@ -87,7 +87,7 @@
 <footer class="footer"><div class="wrap"><div class="disclaimer">© 予光 YUGUANG · 管理后台 · 仅供内部使用</div></div></footer>
 
 <script src="js/supabase-config.js?v=09032056"></script>
-<script src="js/main.js?v=09032147"></script>
+<script src="js/main.js?v=09032151"></script>
 <script>
 (function () {
   var cfg = window.SUPABASE || {};
@@ -119,7 +119,7 @@
   function tryEnter() {
     if (!token) return;
     api(AAPI, { op: 'me' }).then(function (r) {
-      if (r.ok && r.role === 'admin') enter(r.account, r.role, r.nickname);
+      if (r.ok && (r.role === 'admin' || r.role === 'root')) enter(r.account, r.role, r.nickname);
       else if (!r.ok) { token = ''; localStorage.removeItem('yg_token'); }
     }).catch(function () {});
   }
@@ -130,7 +130,7 @@
     if (!ac || !pw) { errEl.textContent = '请输入账号与密码'; return; }
     api(AAPI, { op: 'login', account: ac, password: pw }).then(function (r) {
       if (!r.ok) { errEl.textContent = r.error || '登录失败'; return; }
-      if (r.role !== 'admin') { errEl.textContent = '该账号无管理员权限'; return; }
+      if (r.role !== 'admin' && r.role !== 'root') { errEl.textContent = '该账号无管理员权限'; return; }
       token = r.token;
       localStorage.setItem('yg_token', token);
       enter(r.account, r.role, r.nickname);
