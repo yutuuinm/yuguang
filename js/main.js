@@ -1060,3 +1060,35 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
   refreshChip();
   window.ygAccount = function () { return localStorage.getItem('yg_account') || ''; };
 })();
+
+/* ---------- logo 点击：全部功能面板 ---------- */
+(function initLogoMenu2() {
+  var els = [].slice.call(document.querySelectorAll('.nav-logo, .nav-brand'));
+  if (!els.length) return;
+  var mask = document.createElement('div');
+  mask.className = 'logo-menu-mask';
+  mask.innerHTML =
+    '<div class="logo-menu">' +
+      '<h3>予光 · 全部功能</h3><div class="lm-grid">' +
+      '<a class="lm-item" href="index.html"><b>首页</b><small>光之始</small></a>' +
+      '<a class="lm-item" href="collections.html"><b>系列</b><small>四大产品线</small></a>' +
+      '<a class="lm-item" href="studio.html"><b>定制工坊</b><small>生成你的设计卡</small></a>' +
+      '<a class="lm-item" href="atlas.html"><b>星图志</b><small>生肖/八卦/星座/晶石</small></a>' +
+      '<a class="lm-item" href="gallery.html"><b>光集</b><small>客户作品</small></a>' +
+      '<a class="lm-item" href="play.html"><b>互动</b><small>拈签/答案书/转盘</small></a>' +
+      '<a class="lm-item" href="verify.html"><b>作品验真</b><small>防伪查询</small></a>' +
+      '<a class="lm-item" href="faq.html"><b>常见问题</b></a>' +
+      '<a class="lm-item" href="intro.html"><b>认识予光</b></a>' +
+      '<a class="lm-item" href="account.html"><b>会员中心</b></a>' +
+      '</div>' +
+      '<button class="btn-ghost lm-close" type="button">关 闭</button>' +
+    '</div>';
+  document.body.appendChild(mask);
+  function close() { mask.classList.remove('show'); }
+  els.forEach(function (el) {
+    el.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); mask.classList.add('show'); });
+  });
+  mask.querySelector('.lm-close').addEventListener('click', close);
+  mask.addEventListener('click', function (e) { if (e.target === mask) close(); });
+  mask.querySelectorAll('.lm-item').forEach(function (a) { a.addEventListener('click', close); });
+})();
