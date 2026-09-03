@@ -1022,8 +1022,6 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
     localStorage.setItem('yg_nick', r.nickname || '');
     refreshChip(); mask.classList.remove('show');
     window.dispatchEvent(new Event('yg:login'));
-    var sec = document.getElementById('myOrders');
-    if (sec) { sec.style.display = 'block'; var list = document.getElementById('ordersList'); if (list && !list.innerHTML) loadOrders(); }
   }
   function loadOrders() {
     var list = document.getElementById('ordersList');
@@ -1044,18 +1042,6 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
     }).catch(function () { list.innerHTML = '<p class="orders-empty">网络开小差了</p>'; });
   }
 
-  // 令牌失效自动清理本地登录态（避免“卡在已登录”）
-  if (token) {
-    api({ op: 'me' }).then(function (r) {
-      if (!r.ok) {
-        ['yg_token', 'yg_account', 'yg_role', 'yg_nick'].forEach(function (k) { localStorage.removeItem(k); });
-        token = ''; account = ''; role = 'user';
-        refreshChip();
-        var mc = document.querySelector('.login-modal-mask');
-        if (mc) mc.classList.remove('show');
-      }
-    }).catch(function () {});
-  }
   window.__yuguangLogout = function () {
     ['yg_token', 'yg_account', 'yg_role', 'yg_nick'].forEach(function (k) { localStorage.removeItem(k); });
     location.reload();
