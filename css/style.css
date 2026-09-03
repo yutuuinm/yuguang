@@ -2253,3 +2253,142 @@ textarea.buyNoteArea { padding: 10px 13px; }
   .buyWheelHead em { text-align: left; }
 }
 
+
+/* ============================================================
+   F2 组追加：导航 logo 贴左 / 小光定制卡片 / 小光形象润色
+   ============================================================ */
+
+/* ---------- 导航 logo 贴左（桌面 ≥960px）：距浏览器边缘约 10px 呼吸 ---------- */
+@media (min-width: 960px) {
+  .nav-inner { padding-left: 10px; }
+}
+
+/* ---------- 小光定制（studio 表单区，「让 小光 帮你挑」） ---------- */
+.xg-box {
+  border: 1px solid rgba(227, 196, 124, 0.32);
+  border-radius: 16px;
+  padding: 20px 20px 18px;
+  margin: 8px 0 6px;
+  background:
+    radial-gradient(120% 130% at 100% 0%, rgba(227, 196, 124, 0.12), transparent 55%),
+    linear-gradient(160deg, rgba(20, 27, 46, 0.96), rgba(11, 14, 23, 0.95));
+  box-shadow: 0 14px 42px rgba(0, 0, 0, 0.38);
+  animation: xgIn 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+.xg-tit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--serif);
+  font-size: 18px;
+  letter-spacing: 0.18em;
+  color: var(--gold);
+}
+.xg-tit::before { content: "✦"; font-size: 13px; animation: xgSpark 2.4s ease-in-out infinite; }
+.xg-tit b { color: var(--gold-deep); font-weight: 600; }
+.xg-lead {
+  color: var(--text-dim);
+  font-size: 13.5px;
+  line-height: 1.95;
+  margin: 10px 0 14px;
+  letter-spacing: 0.02em;
+}
+.xg-box textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(244, 239, 230, 0.16);
+  background: var(--night2);
+  color: var(--moon);
+  font-size: 14.5px;
+  font-family: var(--sans);
+  resize: vertical;
+  min-height: 62px;
+  line-height: 1.8;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.xg-box textarea:focus { border-color: var(--gold); box-shadow: 0 0 0 1px rgba(227, 196, 124, 0.25); }
+.xg-row { margin-top: 12px; display: flex; }
+.xg-btn { min-height: 44px; }
+.xg-btn:disabled { opacity: 0.62; cursor: wait; }
+.xg-res { margin-top: 14px; }
+.xg-res[hidden] { display: none; }
+.xg-res.busy {
+  color: var(--gold);
+  font-size: 13.5px;
+  line-height: 1.9;
+  text-align: center;
+  padding: 14px 10px;
+  border: 1px dashed rgba(227, 196, 124, 0.35);
+  border-radius: 12px;
+  background: rgba(227, 196, 124, 0.05);
+}
+.xg-res.fail {
+  color: #e8a08c;
+  font-size: 13.5px;
+  line-height: 1.9;
+  text-align: center;
+  padding: 14px 10px;
+  border: 1px dashed rgba(227, 196, 124, 0.4);
+  border-radius: 12px;
+  background: rgba(227, 196, 124, 0.05);
+}
+.xg-card {
+  border: 1px solid rgba(227, 196, 124, 0.42);
+  border-radius: 14px;
+  padding: 15px 16px 12px;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(143, 163, 217, 0.13), transparent 55%),
+    rgba(227, 196, 124, 0.055);
+  animation: xgIn 0.45s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+.xg-say {
+  color: var(--moon);
+  font-size: 14px;
+  line-height: 2;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.xg-caveat {
+  margin-top: 9px;
+  padding-top: 9px;
+  border-top: 1px dashed rgba(227, 196, 124, 0.3);
+  color: var(--text-dim);
+  font-size: 12px;
+  line-height: 1.9;
+}
+@keyframes xgIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes xgSpark {
+  0%, 100% { opacity: 0.45; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.35) rotate(18deg); }
+}
+@media (max-width: 640px) {
+  .xg-box { padding: 18px 14px 16px; }
+  .xg-btn { width: 100%; }
+}
+
+/* ---------- 小光形象润色：温柔女孩子 · 呼吸感（眨眼动画沿用既有 ygBlink） ---------- */
+.ai-fab {
+  background:
+    radial-gradient(circle at 50% 30%, rgba(255, 253, 246, 0.55), rgba(241, 222, 178, 0.28) 56%, rgba(227, 196, 124, 0.3));
+  border: 1px solid rgba(244, 239, 230, 0.45);
+}
+.ai-fab .ai-face {
+  transform-origin: 50% 50%;
+  animation: xgBreathe 3.8s ease-in-out infinite;
+  will-change: transform;
+}
+@keyframes xgBreathe {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-1.4px) scale(1.018); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ai-fab .ai-face,
+  .xg-tit::before,
+  .xg-box,
+  .xg-card { animation: none !important; }
+}
