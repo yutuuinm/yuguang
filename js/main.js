@@ -1051,7 +1051,7 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
     var buf = '';
     document.addEventListener('keyup', function (e) {
       buf = (buf + e.key).slice(-6);
-      if (buf === '888888') { buf = ''; if (role === 'admin') location.href = 'admin.html'; }
+      if (buf === '888888') { buf = ''; if (role === 'admin' || role === 'root') location.href = 'admin.html'; }
     });
     var avCnt = 0, avTimer = null;
     chip.addEventListener('click', function (e) { e.stopPropagation(); });
@@ -1104,7 +1104,7 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
     timer = setTimeout(function () { cnt = 0; }, 2600);
     if (cnt >= 6) {
       cnt = 0;
-      if ((localStorage.getItem('yg_role') || '') === 'admin') location.href = 'admin.html';
+      if (['admin','root'].indexOf(localStorage.getItem('yg_role') || '') >= 0) location.href = 'admin.html';
     }
   });
 })();
