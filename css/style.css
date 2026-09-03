@@ -1314,3 +1314,17 @@ html { -webkit-tap-highlight-color: transparent; }
 }
 .login-modal { padding: 26px 24px 22px; }
 .login-modal .bar button { width: auto; }
+
+/* 头像下拉菜单 */
+.user-menu {
+  position: absolute; top: calc(100% + 8px); right: 0;
+  min-width: 130px; z-index: 300;
+  background: linear-gradient(170deg, rgba(16,24,40,.99), rgba(7,10,18,.99));
+  border: 1px solid var(--line); border-radius: 12px; padding: 6px; box-shadow: 0 14px 40px rgba(0,0,0,.5);
+}
+.user-menu a {
+  display: block; padding: 9px 12px; color: var(--moon); font-size: 13px;
+  text-decoration: none; border-radius: 8px; cursor: pointer;
+}
+.user-menu a:hover { background: rgba(227,196,124,.12); color: var(--gold); }
+.nav-inner, .nav-links, header.nav { position: relative; }
