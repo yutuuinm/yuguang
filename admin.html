@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>予光 · 管理后台</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09032213"?>
+<link rel="stylesheet" href="css/style.css?v=09032217">
 <style>
   .adm{max-width:1000px;margin:0 auto;padding:120px 20px 80px;}
   .adm h2{font-family:var(--serif);letter-spacing:.2em;color:var(--gold);margin-bottom:6px;}
@@ -28,7 +28,7 @@
 <canvas id="stars"></canvas>
 
 <header class="nav" id="nav"><div class="nav-inner">
-  <img class="nav-logo" src="../予光.jpg" alt="予光 logo">
+  <img class="nav-logo" src="予光.jpg" alt="予光 logo">
   <a class="nav-brand" href="index.html">予光</a>
   <nav class="nav-links" id="navLinks">
     <a href="index.html">首页</a>
@@ -81,13 +81,42 @@
       <textarea id="admHome" style="min-height:120px;font-family:monospace;"></textarea>
       <button class="btn-gold" id="admSaveCfg" type="button">保存配置</button>
     </div>
+  <div style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
+    <button class="btn-ghost adm-tool-btn" data-t="crystal" type="button" style="font-size:13px;padding:8px 16px;">💎 新增晶石</button>
+    <button class="btn-ghost adm-tool-btn" data-t="record" type="button" style="font-size:13px;padding:8px 16px;">🔑 生成验真码</button>
+    <button class="btn-ghost adm-tool-btn" data-t="notice" type="button" style="font-size:13px;padding:8px 16px;">📢 活动通知</button>
+  </div>
+  <div class="adm-tool adm-tool-crystal doc-block" style="display:none;margin-top:12px;">
+    <input id="crName" placeholder="名称(必填)"><input id="crKind" placeholder="归属"><input id="crElement" placeholder="五行/星体">
+    <input id="crMeaning" placeholder="意象/含义">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <input id="crPrice" placeholder="价格(元)" style="flex:1;min-width:100px;"><input id="crStock" placeholder="库存" style="flex:1;min-width:80px;">
+      <input id="crSize" placeholder="尺寸mm" style="flex:1;min-width:90px;"><input id="crShape" placeholder="形状" style="flex:1;min-width:90px;"><input id="crColor" placeholder="色值" style="flex:1;min-width:100px;">
+    </div>
+    <input id="crCare" placeholder="养护提示"><input id="crImg" placeholder="图片路径(客户图片/xx.jpg 或URL)">
+    <div class="msg" id="crMsg"></div>
+    <button class="btn-gold" id="crSave" type="button">保存晶石</button>
+  </div>
+  <div class="adm-tool adm-tool-record doc-block" style="display:none;margin-top:12px;">
+    <input id="recName" placeholder="作品名"><input id="recNote" placeholder="备注(选填)"><input id="recImg" placeholder="图片文件名(选填,逗号分隔)">
+    <input id="recQty" type="number" min="1" max="50" placeholder="数量 1-50" style="width:130px;">
+    <div class="msg" id="recMsg"></div>
+    <button class="btn-gold" id="recGen" type="button">生成验真码</button>
+    <div id="recOut" style="font-family:monospace;font-size:12px;color:var(--gold);white-space:pre-wrap;margin-top:8px;"></div>
+  </div>
+  <div class="adm-tool adm-tool-notice doc-block" style="display:none;margin-top:12px;">
+    <textarea id="noticeTxt" style="min-height:70px;" placeholder="通知内容，留空则关闭"></textarea>
+    <div class="msg" id="noticeMsg"></div>
+    <button class="btn-gold" id="noticeSave" type="button">保存活动通知</button>
+  </div>
+
   </div>
 </div></main>
 
 <footer class="footer"><div class="wrap"><div class="disclaimer">© 予光 YUGUANG · 管理后台 · 仅供内部使用</div></div></footer>
 
-<script src="js/supabase-config.js?v=09032056"></script>
-<script src="js/main.js?v=09032213"></script>
+<script src="js/supabase-config.js?v=09032217"></script>
+<script src="js/main.js?v=09032217"></script>
 <script>
 (function () {
   var cfg = window.SUPABASE || {};
@@ -265,6 +294,65 @@
     });
   }
 
+  // ===== 快捷工具 =====
+  document.querySelectorAll('.adm-tool-btn').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var t = b.getAttribute('data-t');
+      document.querySelectorAll('.adm-tool').forEach(function (x) { x.style.display = 'none'; });
+      var el = document.querySelector('.adm-tool-' + t);
+      if (el) el.style.display = 'block';
+    });
+  });
+  function num(v) { var n = Number(v); return isNaN(n) ? undefined : n; }
+  document.getElementById('crSave').addEventListener('click', function () {
+    var name = (document.getElementById('crName').value || '').trim();
+    if (!name) { document.getElementById('crMsg').textContent = '名称不能为空'; return; }
+    var row = { name: name, visible: true };
+    ['crKind', 'crElement', 'crMeaning', 'crCare', 'crImg', 'crColor'].forEach(function (id) {
+      var v = (document.getElementById(id).value || '').trim();
+      var key = id === 'crKind' ? 'kind' : id === 'crElement' ? 'element' : id === 'crMeaning' ? 'meaning' : id === 'crCare' ? 'care_tip' : id === 'crImg' ? 'image_url' : 'color_hex';
+      if (v) row[key] = v;
+    });
+    ['crPrice', 'crStock', 'crSize'].forEach(function (id) {
+      var v = num(document.getElementById(id).value);
+      var key = id === 'crPrice' ? 'price' : id === 'crStock' ? 'stock_qty' : 'size_mm';
+      if (v !== undefined) row[key] = v;
+    });
+    api(DAPI, { op: 'insert', table: 'crystals', row: row }).then(function (r) {
+      document.getElementById('crMsg').textContent = r.ok ? '已保存' : (r.error || '失败');
+    }).catch(function () { document.getElementById('crMsg').textContent = '网络错误'; });
+  });
+  function ygCode() {
+    var d = new Date();
+    return 'YG-' + String(d.getFullYear()).slice(2) + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0') + '-' + String(Math.floor(1000 + Math.random() * 9000));
+  }
+  document.getElementById('recGen').addEventListener('click', function () {
+    var name = (document.getElementById('recName').value || '').trim();
+    if (!name) { document.getElementById('recMsg').textContent = '请填写作品名'; return; }
+    var qty = Math.min(50, Math.max(1, num(document.getElementById('recQty').value) || 1));
+    var note = (document.getElementById('recNote').value || '').trim();
+    var img = (document.getElementById('recImg').value || '').trim();
+    var codes = [], ps = [];
+    for (var i = 0; i < qty; i++) {
+      var code = ygCode(); codes.push(code);
+      ps.push(api(DAPI, { op: 'insert', table: 'records', row: { code: code, product_ref: name, info: note ? { text: note } : {}, image_urls: img } }));
+    }
+    Promise.all(ps).then(function () {
+      document.getElementById('recMsg').textContent = '已生成 ' + qty + ' 个';
+      document.getElementById('recOut').textContent = codes.join('\n');
+    }).catch(function () { document.getElementById('recMsg').textContent = '部分生成失败'; });
+  });
+  document.getElementById('noticeSave').addEventListener('click', function () {
+    var txt = document.getElementById('noticeTxt').value;
+    api(DAPI, { op: 'insert', table: 'app_data', row: { key: 'notice', value: txt || '' } }).then(function (r) {
+      if (!r.ok) {
+        api(DAPI, { op: 'update', table: 'app_data', id: 'notice', set: { value: txt || '' } }).then(function (r2) {
+          document.getElementById('noticeMsg').textContent = r2.ok ? '已更新' : (r2.error || '失败');
+        });
+      } else document.getElementById('noticeMsg').textContent = '已保存';
+    }).catch(function () { document.getElementById('noticeMsg').textContent = '网络错误'; });
+  });
+
   (function () {
     var n = 0;
     function loop() { tryEnter(); n++; if (n > 14) clearInterval(iv); }
@@ -272,6 +360,7 @@
     var iv = setInterval(loop, 1500);
   })();
 })();
+
 </script>
 </body>
 </html>
