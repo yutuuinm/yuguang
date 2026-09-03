@@ -270,23 +270,114 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   draw();
 })();
 
-/* ---------- 导航 ---------- */
+/* ---------- 导航 v2：桌面 logo+品牌+「☰ 功能」｜主导航均分｜手机左侧功能抽屉 ---------- */
 (function initNav() {
   const nav = $('nav');
-  const menuBtn = $('menuBtn');
+  if (!nav) return;
+  const inner = nav.querySelector('.nav-inner') || nav;
+  const brand = nav.querySelector('.nav-brand');
+  const logo = nav.querySelector('.nav-logo');
   const navLinks = $('navLinks');
   window.addEventListener('scroll', () => {
-    if (nav) nav.classList.toggle('scrolled', window.scrollY > 10);
+    nav.classList.toggle('scrolled', window.scrollY > 10);
   }, { passive: true });
-  if (menuBtn && navLinks) {
-    menuBtn.addEventListener('click', () => navLinks.classList.toggle('open'));
-    navLinks.querySelectorAll('a').forEach((a) =>
-      a.addEventListener('click', () => navLinks.classList.remove('open'))
-    );
+
+  // 1) 确保存在「☰ 功能」按钮（老页面由 JS 补建；index.html 已内置）
+  let fnBtn = $('navFnBtn');
+  if (!fnBtn) {
+    fnBtn = document.createElement('button');
+    fnBtn.type = 'button';
+    fnBtn.id = 'navFnBtn';
+    fnBtn.className = 'nav-fn';
+    fnBtn.setAttribute('aria-label', '打开全部功能');
+    fnBtn.setAttribute('aria-expanded', 'false');
+    fnBtn.innerHTML = '<span class="fn-ico" aria-hidden="true">☰</span><span class="fn-txt">功能</span>';
+    if (brand && brand.nextSibling) inner.insertBefore(fnBtn, brand.nextSibling);
+    else inner.insertBefore(fnBtn, inner.firstChild);
   }
+  // 旧版下拉菜单按钮已由新结构取代
+  const legacyMenu = $('menuBtn');
+  if (legacyMenu) legacyMenu.style.display = 'none';
+  if (navLinks) Array.prototype.forEach.call(navLinks.querySelectorAll('a'), (a) => a.classList.remove('open'));
+
+  // 2) 全部功能面板：桌面居中 / 手机 <960px 从左侧滑入的抽屉（CSS .fn-*）
+  const path = (location.pathname || '').split('/').pop();
+  const onHome = (path === '' || path === 'index.html');
+  const pageHref = (hash) => onHome ? hash : ('index.html' + hash);
+  const loggedIn = () => !!localStorage.getItem('yg_account');
+
+  const GROUPS = [
+    { t: '功能', items: [
+      ['index.html', '首页', '光之始'],
+      ['collections.html', '系列', '四大产品线'],
+      ['studio.html', '定制工坊', '生肖 / 星座 / 合盘'],
+      ['gallery.html', '光集', '她们与光的时刻'],
+      ['atlas.html', '星图志', '生肖·八卦·星座'],
+      [pageHref('#playSec'), '互动', '拈签 · 答案之书']
+    ] },
+    { t: '探索', items: [
+      ['story.html', '品牌故事', '予光为何而来'],
+      ['intro.html', '认识予光', '理念与体系'],
+      ['faq.html', '常见问题', '定制·物流·售后']
+    ] },
+    { t: '服务', items: [
+      ['studio.html', '开始定制', '立即生成设计卡'],
+      ['verify.html', '作品验真', '防伪查询'],
+      ['account.html#orders', '我的订单', '登录后查看进度'],
+      ['account.html#inbox', '信箱', '站内来信 · 仅登录', 'member'],
+      [pageHref('#contact'), '微信客服', '扫码添加 · 定制答疑'],
+      ['account.html', '会员中心', '账号与资料']
+    ] }
+  ];
+
+  if (!document.getElementById('fnMask')) {
+    const mask = document.createElement('div');
+    mask.className = 'fn-mask';
+    mask.id = 'fnMask';
+    mask.setAttribute('aria-hidden', 'true');
+    let html = '<aside class="fn-panel" role="dialog" aria-label="予光 · 全部功能"><div class="fn-head"><h3>予光 · 全部功能</h3><button class="fn-x" type="button" aria-label="关闭">✕</button></div><div class="fn-body">';
+    GROUPS.forEach((g) => {
+      const items = g.items.filter((it) => !(it[3] === 'member') || loggedIn());
+      if (!items.length) return;
+      html += '<div class="fn-group"><h4>' + g.t + '</h4>';
+      items.forEach((it) => {
+        html += '<a class="fn-item" href="' + it[0] + '"><b>' + it[1] + '</b><small>' + (it[2] || '') + '</small></a>';
+      });
+      html += '</div>';
+    });
+    html += '</div><div class="fn-note">予光 · 黑暗中总有光伴你前行 ✦ 更多服务请在登录后查看</div></aside>';
+    mask.innerHTML = html;
+    document.body.appendChild(mask);
+  }
+
+  const mask = document.getElementById('fnMask');
+  const openFn = () => {
+    mask.classList.add('show');
+    mask.setAttribute('aria-hidden', 'false');
+    fnBtn.setAttribute('aria-expanded', 'true');
+  };
+  const closeFn = () => {
+    mask.classList.remove('show');
+    mask.setAttribute('aria-hidden', 'true');
+    fnBtn.setAttribute('aria-expanded', 'false');
+  };
+  const toggleFn = () => { mask.classList.contains('show') ? closeFn() : openFn(); };
+
+  fnBtn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); toggleFn(); });
+  // logo / 品牌点击保留旧 logo-menu 语义：唤出全部功能
+  [logo, brand].forEach((el) => {
+    if (el) el.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); toggleFn(); });
+  });
+  const xBtn = mask.querySelector('.fn-x');
+  if (xBtn) xBtn.addEventListener('click', closeFn);
+  mask.addEventListener('click', (e) => { if (e.target === mask) closeFn(); });
+  mask.querySelectorAll('.fn-item').forEach((a) => a.addEventListener('click', closeFn));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeFn(); });
+  // 登录态变化（如用户区刷新）后关闭面板，避免过期条目
+  window.addEventListener('yg:login', closeFn);
 })();
 
-/* ---------- 滚动渐亮 ---------- */
+/* ---------- 滚动渐亮（同组卡片错落延迟） ---------- */
 (function initReveal() {
   const els = document.querySelectorAll('.reveal');
   if (!('IntersectionObserver' in window)) {
@@ -301,7 +392,17 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     },
     { threshold: 0.12 }
   );
-  els.forEach((el) => io.observe(el));
+  els.forEach((el) => {
+    if (el.classList.contains('visible')) return;
+    // 同组（同一父容器）内的 .reveal 按顺序错落渐显
+    const p = el.parentElement;
+    if (p && !el.style.transitionDelay) {
+      const sibs = Array.prototype.filter.call(p.children, (c) => c.classList && c.classList.contains('reveal'));
+      const i = sibs.indexOf(el);
+      if (i > 0) el.style.transitionDelay = Math.min(i, 6) * 70 + 'ms';
+    }
+    io.observe(el);
+  });
 })();
 
 /* ---------- 通用选项卡（产品页等） ---------- */
@@ -574,7 +675,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   }
 })();
 
-/* ---------- 互动：拈一签 · 答案之书 · 微光转盘 ---------- */
+/* ---------- 互动：拈一签 · 答案之书（转盘已从首页下线；其代码保留于此，无对应元素时自动跳过） ---------- */
 (function initPlay() {
   var qianBtn = document.getElementById('qianBtn');
   var qianRes = document.getElementById('qianRes');
@@ -685,27 +786,55 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   var grid = document.getElementById('dbProducts');
   if (!grid) return;
   var SERIES = { east: '东方线', west: '西方线', union: '合盘线', destiny: '本命' };
+  // HTML 转义（DB 内容写入模板前统一处理，防止引号/标签破坏结构与样式）
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
   function draw(rows) {
     if (!rows || !rows.length) {
       grid.innerHTML = '<p class="section-sub" style="margin:10px auto 0;">（暂无可展示商品；接入商品数据后此处自动陈列）</p>';
       return;
     }
-    grid.innerHTML = rows.map(function (p) {
+    grid.innerHTML = rows.map(function (p, i) {
       var src = window.sbImg ? window.sbImg(p.image_url) : (p.image_url || '');
-      return '<div class="g-card reveal">' +
+      var pr = Number(p.price_yuan);
+      var hasPrice = isFinite(pr) && pr > 0;
+      // 购买小按钮：带 data-buy 供 initBuy 委托打开下单弹窗；无定价商品不显示购买
+      var buyBtn = hasPrice
+        ? '<button class="buy-mini" type="button" data-buy data-buy-name="' + esc(p.name) +
+          '" data-buy-price="' + pr + '">🛒 购买</button>'
+        : '';
+      return '<div class="g-card reveal" style="transition-delay:' + Math.min(i, 6) * 70 + 'ms">' +
         '<div class="g-img">' +
-          '<img src="' + src + '" alt="' + p.name + '" loading="lazy" onerror="this.style.display=\'none\';">' +
+          '<img src="' + esc(src) + '" alt="' + esc(p.name) + '" loading="lazy" onerror="this.style.display=\'none\';">' +
           '<div class="ph">商品图占位</div>' +
         '</div>' +
         '<div class="g-cap">' +
-          '<div class="g-name">' + p.name + '</div>' +
-          '<span class="g-tag">' + (SERIES[p.series] || p.series || '') + '</span>' +
-          '<p class="g-story">' + (p.main_stone ? '主石：' + p.main_stone : '') + (p.price_yuan ? ' · ¥' + p.price_yuan + ' 起' : '') + '</p>' +
-          (p.quote ? '<div class="g-quote">' + p.quote + '</div>' : '') +
+          '<div class="g-name">' + esc(p.name) + '</div>' +
+          '<span class="g-tag">' + esc(SERIES[p.series] || p.series || '') + '</span>' +
+          '<p class="g-story">' + (p.main_stone ? esc('主石：' + p.main_stone) : '') + (hasPrice ? ' · ¥' + pr + ' 起' : '') + '</p>' +
+          (p.quote ? '<div class="g-quote">' + esc(p.quote) + '</div>' : '') +
         '</div>' +
-        '<div style="padding:0 18px 18px;"><a class="btn-ghost" style="width:100%;text-align:center;font-size:13px;padding:8px 0;" href="studio.html">去定制同款</a></div>' +
+        '<div class="g-foot">' +
+          buyBtn +
+          '<a class="btn-ghost" href="studio.html">去定制同款</a>' +
+        '</div>' +
       '</div>';
     }).join('');
+    // 异步注入的 .reveal 卡片需自行触发渐显（initReveal 只处理页面加载时的元素）
+    var dyn = grid.querySelectorAll('.reveal');
+    if (!('IntersectionObserver' in window)) {
+      Array.prototype.forEach.call(dyn, function (c) { c.classList.add('visible'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('visible'); io.unobserve(en.target); }
+      });
+    }, { threshold: 0.12 });
+    Array.prototype.forEach.call(dyn, function (c) { io.observe(c); });
   }
   if (!window.sb) { draw(null); return; }
   window.sb('products?select=*&visible=eq.true&order=sort.asc')
@@ -752,18 +881,32 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
 })();
 
 /* ---------- AI 光语助手（悬浮对话 + 星图志选石；未加载配置时自动降级） ---------- */
-/* 机器人形象「小光」：名字统一为 小光，圆形微光金渐变 + 星光点缀（样式见 style.css 末尾） */
+/* 机器人形象「微光小精灵 · 小光」：SVG 拟人圆脸 + 星光眼 + 微笑 + 头顶光圈（样式见 style.css 末尾） */
 (function initAi() {
   // 右下角悬浮助手
   if (window.sbAI && !document.getElementById('aiFab')) {
     var root = document.createElement('div');
     root.className = 'ai-widget';
     root.innerHTML =
-      '<button type="button" class="ai-fab" id="aiFab" aria-label="小光 · 予光助手">小光</button>' +
+      '<button type="button" class="ai-fab" id="aiFab" aria-label="微光小精灵 · 予光助手">' +
+        '<svg class="ai-face" viewBox="0 0 64 64" aria-hidden="true">' +
+          '<defs><radialGradient id="ygFaceG" cx="50%" cy="36%" r="78%">' +
+            '<stop offset="0%" stop-color="#fbf1dc"/><stop offset="55%" stop-color="#f4dcae"/><stop offset="100%" stop-color="#e6c187"/>' +
+          '</radialGradient></defs>' +
+          '<path class="halo" d="M23 15 A 9 9 0 0 1 41 15" stroke="#f7e2a8" stroke-width="2.6" fill="none" stroke-linecap="round"/>' +
+          '<circle cx="43.6" cy="10.6" r="1.1" fill="#fff" opacity="0.9"/>' +
+          '<circle cx="32" cy="33" r="20" fill="url(#ygFaceG)"/>' +
+          '<ellipse class="blush" cx="22.4" cy="37.4" rx="3" ry="1.7" fill="#ef9a86" opacity="0.4"/>' +
+          '<ellipse class="blush" cx="41.6" cy="37.4" rx="3" ry="1.7" fill="#ef9a86" opacity="0.4"/>' +
+          '<g class="eye eye-l"><path d="M25.5 26.6l.9 2.5 2.5.9-2.5.9-.9 2.5-.9-2.5-2.5-.9 2.5-.9z" fill="#5f3d18"/></g>' +
+          '<g class="eye eye-r"><path d="M38.5 26.6l.9 2.5 2.5.9-2.5.9-.9 2.5-.9-2.5-2.5-.9 2.5-.9z" fill="#5f3d18"/></g>' +
+          '<path class="smile" d="M26.4 38.6 Q32 43.2 37.6 38.6" stroke="#a06c33" stroke-width="1.7" fill="none" stroke-linecap="round"/>' +
+        '</svg>' +
+      '</button>' +
       '<div class="ai-panel" id="aiPanel">' +
         '<div class="ai-head">予光 · 小光<span class="ai-close" id="aiClose">✕</span></div>' +
-        '<div class="ai-body" id="aiBody"><p class="ai-tip">我是小光，予光的小向导 ✦ 问我定制流程、光集故事或作品验真，也可以只是想聊聊。文化意象仅供参考，不构成任何承诺。</p></div>' +
-        '<div class="ai-foot"><input id="aiInput" placeholder="输入你的问题…" autocomplete="off"><button type="button" id="aiSend">发送</button></div>' +
+        '<div class="ai-body" id="aiBody"><p class="ai-tip">可问我：定制流程 · 光集故事 · 作品验真 ✦ 也可以只是聊聊。</p></div>' +
+        '<div class="ai-foot"><input id="aiInput" placeholder="跟小光说点什么…" autocomplete="off"><button type="button" id="aiSend">发送</button></div>' +
       '</div>';
     document.body.appendChild(root);
     var panel = root.querySelector('#aiPanel');
@@ -775,6 +918,17 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     var history = [];
     var open = false;
     var greeted = false;
+    var HELLOS = [
+      '我在呢 ✦ 想聊聊你的光，还是帮你挑一枚？',
+      '你来啦 ✦ 夜这么深，光正好在等你。',
+      '嘘——我正帮你留意那束合适的光 ✦ 想从哪里说起？'
+    ];
+    var hiIdx = 0;
+    var FALLBACKS = [
+      '嗯，这一问小光要再想想 ✦ 换个说法再问我一次？',
+      '小光被问住了 ✦ 别急，也可以点「微信客服」找真人聊聊。',
+      '这一题有点超纲啦 ✦ 先聊点别的，光一直都在。'
+    ];
     function addMsg(text, who) {
       var d = document.createElement('div');
       d.className = 'ai-msg ' + who;
@@ -794,11 +948,11 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
         .then(function (r) {
           if (bodyEl.contains(wait)) bodyEl.removeChild(wait);
           if (r && r.ok) { history.push({ role: 'assistant', content: r.answer }); addMsg(r.answer, 'ai'); }
-          else addMsg('（小光暂时走神了，稍后再试；急事可加客服微信）', 'ai');
+          else addMsg(FALLBACKS[Math.floor(Math.random() * FALLBACKS.length)], 'ai');
         })
         .catch(function () {
           if (bodyEl.contains(wait)) bodyEl.removeChild(wait);
-          addMsg('（网络开了个小差，稍后再试）', 'ai');
+          addMsg('（网络打了个盹，小光也连不上线…稍后再试好吗？）', 'ai');
         });
     }
     fab.addEventListener('click', function () {
@@ -807,7 +961,8 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       if (open) {
         if (!greeted) {
           greeted = true;
-          var g = addMsg('你好，我是小光 ✦ 黑暗中总有光伴你前行，虽微弱，但足够照亮。', 'ai');
+          var g = addMsg(HELLOS[hiIdx % HELLOS.length], 'ai');
+          hiIdx++;
           g.className = 'ai-msg ai greet';
         }
         inp.focus();
@@ -1099,38 +1254,6 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
 
 })();
 
-/* ---------- logo 点击：全部功能面板 ---------- */
-(function initLogoMenu2() {
-  var els = [].slice.call(document.querySelectorAll('.nav-logo, .nav-brand'));
-  if (!els.length) return;
-  var mask = document.createElement('div');
-  mask.className = 'logo-menu-mask';
-  mask.innerHTML =
-    '<div class="logo-menu">' +
-      '<h3>予光 · 全部功能</h3><div class="lm-grid">' +
-      '<a class="lm-item" href="index.html"><b>首页</b><small>光之始</small></a>' +
-      '<a class="lm-item" href="collections.html"><b>系列</b><small>四大产品线</small></a>' +
-      '<a class="lm-item" href="studio.html"><b>定制工坊</b><small>生成你的设计卡</small></a>' +
-      '<a class="lm-item" href="atlas.html"><b>星图志</b><small>生肖/八卦/星座/晶石</small></a>' +
-      '<a class="lm-item" href="gallery.html"><b>光集</b><small>客户作品</small></a>' +
-      '<a class="lm-item" href="' + (location.pathname.indexOf('index.html') !== -1 ? '#playSec' : 'index.html#playSec') + '"><b>互动</b><small>拈签/答案书/转盘 · 并入首页</small></a>' +
-      '<a class="lm-item" href="verify.html"><b>作品验真</b><small>防伪查询</small></a>' +
-      '<a class="lm-item" href="faq.html"><b>常见问题</b></a>' +
-      '<a class="lm-item" href="intro.html"><b>认识予光</b></a>' +
-      '<a class="lm-item" href="account.html"><b>会员中心</b></a>' +
-      '</div>' +
-      '<button class="btn-ghost lm-close" type="button">关 闭</button>' +
-    '</div>';
-  document.body.appendChild(mask);
-  function close() { mask.classList.remove('show'); }
-  els.forEach(function (el) {
-    el.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); mask.classList.add('show'); });
-  });
-  mask.querySelector('.lm-close').addEventListener('click', close);
-  mask.addEventListener('click', function (e) { if (e.target === mask) close(); });
-  mask.querySelectorAll('.lm-item').forEach(function (a) { a.addEventListener('click', close); });
-})();
-
 /* 顶部任意处 6 连点 → 后台（admin） */
 (function () {
   var head = document.querySelector('header.nav');
@@ -1195,7 +1318,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   function nav(url) {
     if (leaving) return; leaving = true;
     document.body.classList.add('yg-exit');
-    setTimeout(function () { try { location.assign(url); } catch (e) { location.href = url; } }, 190);
+    setTimeout(function () { try { location.assign(url); } catch (e) { location.href = url; } }, 250);
   }
   window.ygNav = nav;
 
@@ -1234,7 +1357,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       }
       if (document.referrer && history.length > 1) history.back();
       else location.href = 'index.html';
-    }, 190);
+    }, 250);
   });
   document.body.appendChild(b);
 
@@ -1304,53 +1427,57 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
 })();
 
 /* ============================================================
-   B 组改造（前端侧）：微光时刻 DB / 微信设置 / 实时 ygLive / 小光名字统一
+   B 组改造（前端侧）：首页光集化 / 微信设置 / 实时 ygLive / 小光名字统一
    ============================================================ */
 
-/* ---------- 1. 微光时刻：gallery 数据库优先，无数据/失败保留静态兜底 ---------- */
-(function initHomeLights() {
-  var sec = document.getElementById('lights');
-  if (!sec || !window.sb) return;
-  var grid = sec.querySelector('.lights-grid');
-  if (!grid) return;
+/* ---------- 1. 光集 · 她们与光（首页 #galleryHome）：gallery 数据驱动 3 列卡片 ---------- */
+(function initHomeGallery() {
+  var grid = document.getElementById('ghGrid');
+  if (!grid) return; // 仅首页该区块存在
+  var EMPTY = '<p class="gh-empty reveal visible">光集正在点亮…稍后再来 ✦</p>';
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
-  window.sb('gallery?select=name,image_url,story,quote&visible=eq.true&approved=eq.true&order=id.desc&limit=3')
-    .then(function (rows) {
-      if (!rows || !rows.length) return; // 空 → 静态卡片保留
-      var cards = [];
-      rows.forEach(function (it) {
-        var src = (window.sbImg && it.image_url) ? window.sbImg(it.image_url) : '';
-        var text = String(it.story || '').trim() || String(it.quote || '').trim();
-        var imgBox = src
-          ? '<div class="light-img"><img src="' + esc(src) + '" alt="' + esc(it.name || '予光 · 光集作品') + '" loading="lazy" onerror="this.style.display=\'none\';"></div>'
-          : '';
-        var body = text ? '<p>' + esc(text) + '</p>' : '';
-        if (!imgBox && !body) return;
-        cards.push(
-          '<div class="light-card reveal">' + imgBox +
-          '<span class="quote-mark">“</span>' + body +
-          '<div class="who"><b>予光 · 光集</b></div></div>'
-        );
+  function showEmpty() {
+    if (grid.querySelector('.gh-card')) return;
+    grid.innerHTML = EMPTY;
+  }
+  function draw(rows) {
+    rows = rows || [];
+    if (!rows.length) { showEmpty(); return; }
+    var cards = rows.map(function (it, i) {
+      var src = (window.sbImg && it.image_url) ? window.sbImg(it.image_url) : '';
+      var text = String(it.story || '').trim() || String(it.quote || '').trim();
+      var imgHtml = src
+        ? '<div class="gh-img"><img src="' + esc(src) + '" alt="' + esc(it.name || '予光 · 光集作品') + '" loading="lazy" onerror="this.style.display=\'none\';"><div class="gh-ph">✦<br>图片暂未亮起</div></div>'
+        : '<div class="gh-img"><div class="gh-ph">✦<br>图片暂未亮起</div></div>';
+      var tag = it.tag ? '<span class="gh-tag">' + esc(it.tag) + '</span>' : '';
+      var body = text ? '<p class="gh-story">' + esc(text) + '</p>' : '';
+      return '<figure class="gh-card reveal" style="transition-delay:' + (Math.min(i, 6) * 70) + 'ms">' +
+        imgHtml +
+        '<figcaption class="gh-cap"><div class="gh-name">' + esc(it.name || '予光 · 光集') + '</div>' + tag + body +
+        '</figcaption></figure>';
+    });
+    grid.innerHTML = cards.join('');
+    // 卡片 reveal：进入视口才错落渐显
+    var dyn = grid.querySelectorAll('.gh-card.reveal');
+    if (!('IntersectionObserver' in window)) {
+      Array.prototype.forEach.call(dyn, function (c) { c.classList.add('visible'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('visible'); io.unobserve(en.target); }
       });
-      if (!cards.length) return;
-      // 静态兜底卡保留在 DOM，成功后仅隐藏
-      var statics = grid.querySelectorAll('.light-card');
-      Array.prototype.forEach.call(statics, function (c) { c.classList.add('light-hide'); });
-      grid.insertAdjacentHTML('beforeend', cards.join(''));
-      // 逐张错落渐显
-      var dyn = grid.querySelectorAll('.light-card.reveal:not(.light-hide)');
-      Array.prototype.forEach.call(dyn, function (c, i) { c.style.transitionDelay = (i * 90) + 'ms'; });
-      requestAnimationFrame(function () {
-        requestAnimationFrame(function () {
-          Array.prototype.forEach.call(dyn, function (c) { c.classList.add('visible'); });
-        });
-      });
-    })
-    .catch(function () { /* 失败 → 静态卡片保留 */ });
+    }, { threshold: 0.12 });
+    Array.prototype.forEach.call(dyn, function (c) { io.observe(c); });
+  }
+  if (!window.sb) { showEmpty(); return; }
+  window.sb('gallery?select=name,image_url,story,quote,tag&visible=eq.true&approved=eq.true&order=id.desc&limit=6')
+    .then(draw)
+    .catch(showEmpty);
 })();
 
 /* ---------- 2. 微信设置前台生效（app_data key='contact'；仅当存在时） ---------- */
@@ -1497,6 +1624,17 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   };
 })();
 
+/* ---------- 3.5 兼容历史深链：index.html#lights → 平滑定位到新的光集区块 ---------- */
+(function oldLightsCompat() {
+  if (location.hash !== '#lights') return;
+  var page = (location.pathname || '').split('/').pop();
+  if (page !== 'index.html' && page !== '') return;
+  setTimeout(function () {
+    var el = document.getElementById('galleryHome');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 80);
+})();
+
 /* ---------- 4. 机器人形象名字统一：页面既有「光语助手」文案运行时替换为「小光」 ---------- */
 (function unifyBotName() {
   function walk(n) {
@@ -1512,4 +1650,460 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     });
   }
   walk(document.body);
+})();
+
+/* ============================================================
+   购买 / 下单弹窗 + 微光转盘优惠（initBuy）
+   触发源：
+     · collections 页 DB 商品卡「🛒 购买」小按钮（initDbProducts 渲染，data-buy）
+     · product 详情页 #addCart（data-buy 属性，见 product.html）
+   弹窗与转盘全部为 JS 动态创建，转盘只出现在下单弹窗内，不在任何页面常驻。
+   下单：window.sb('orders', {method:'POST', body: JSON.stringify(...)})（沿用全站约定）
+   ============================================================ */
+(function initBuy() {
+  var DAY_KEY = 'yg_buy_wheel_day';            // 浏览器每日限次 key
+  var overlay = null;                          // 弹窗容器（懒建一次）
+  var isOpen = false;                          // 弹窗是否展开
+  var spinning = false;                        // 转盘转动中
+  var busy = false;                            // 订单提交中
+  var qty = 1;                                 // 数量
+  var discount = 0;                            // 本次订单已立减金额（¥）
+  var nameVal = '';                            // 当前商品名
+  var priceVal = 0;                            // 当前单价（元）
+  var cfgCache = null;                         // 转盘配置 {tiers, probs}
+  var cfgPromise = null;                       // 配置读取 Promise（惰性一次）
+  var lastDeg = 0;                             // 转盘累计旋转角度（会话内）
+  var WCOL = ['#e3c47c', '#c9575b', '#8fa3d9', '#6fa87f']; // 4 扇区配色
+
+  /* ---------- 小工具 ---------- */
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function account() {
+    var t = localStorage.getItem('yg_token');
+    var a = localStorage.getItem('yg_account');
+    return (t && a) ? a : '';
+  }
+  function toPrice(v) {
+    var n = Number(v);
+    return (isFinite(n) && n > 0) ? n : 0;
+  }
+  function yuan(n) {
+    n = Math.round((Number(n) || 0) * 100) / 100;
+    return '¥' + n;
+  }
+  function today() {
+    var d = new Date();
+    return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+  }
+  function acctDayKey() {
+    var a = account();
+    return a ? (DAY_KEY + '_' + a) : '';
+  }
+  function wheelUsed() {
+    var t = today();
+    if (localStorage.getItem(DAY_KEY) === t) return true;
+    var k = acctDayKey();
+    return !!(k && localStorage.getItem(k) === t);
+  }
+  function markWheelUsed() {
+    var t = today();
+    localStorage.setItem(DAY_KEY, t);
+    var k = acctDayKey();
+    if (k) localStorage.setItem(k, t);
+  }
+  function validContact(v) {
+    v = String(v || '').trim();
+    if (!v) return false;
+    if (v.indexOf('@') !== -1) return v.length >= 6;   // 宽松邮箱
+    var digits = v.replace(/\D/g, '');
+    return digits.length >= 6;                          // ≥6 位数字（手机/微信号）
+  }
+
+  /* ---------- 转盘配置：app_data key='wheel' → {min,max,probs} ---------- */
+  function defaultCfg() { return { tiers: [28, 48, 68, 88], probs: null }; }
+  function parseCfg(v) {
+    if (typeof v === 'string') { try { v = JSON.parse(v); } catch (e) { v = null; } }
+    if (!v || typeof v !== 'object') return null;
+    var min = Number(v.min), max = Number(v.max);
+    if (!isFinite(min) || !isFinite(max)) { min = 28; max = 88; }
+    if (max < min) { var sw = min; min = max; max = sw; }
+    if (min < 1) min = 1;
+    if (!(max > min)) max = min + 1;
+    var tiers = [];
+    for (var k = 0; k < 4; k++) tiers.push(Math.round(min + (max - min) * k / 3));
+    var probs = null;
+    var p = v.probs;
+    if (p && typeof p.length === 'number' && p.length >= 4) {
+      var arr = [], sum = 0, ok = true;
+      for (var j = 0; j < 4; j++) {
+        var x = Number(p[j]);
+        if (!isFinite(x) || x < 0) { ok = false; break; }
+        arr.push(x); sum += x;
+      }
+      if (ok && sum > 0 && Math.abs(sum - 100) <= 15) probs = arr; // 合计≈100 才加权
+    }
+    return { tiers: tiers, probs: probs };
+  }
+  function ensureCfg() {
+    if (cfgPromise) return cfgPromise;
+    cfgPromise = new Promise(function (resolve) {
+      function done(cfg) { cfgCache = cfg || defaultCfg(); resolve(cfgCache); }
+      if (!window.sb) { done(defaultCfg()); return; }
+      window.sb('app_data?select=value&key=eq.wheel')
+        .then(function (rows) {
+          var cfg = null;
+          if (rows && rows.length) cfg = parseCfg(rows[0] && rows[0].value);
+          done(cfg);                                   // 读取失败/无配置 → 默认均分 28/48/68/88
+        })
+        .catch(function () { done(null); });
+    });
+    return cfgPromise;
+  }
+  function pickIndex(cfg) {
+    if (cfg.probs) {
+      var p = cfg.probs, sum = 0, i;
+      for (i = 0; i < p.length; i++) sum += p[i];
+      var r = Math.random() * sum;
+      for (i = 0; i < p.length; i++) { r -= p[i]; if (r <= 0) return i; }
+      return p.length - 1;
+    }
+    return Math.floor(Math.random() * 4);
+  }
+  function discBg() {
+    var s = [];
+    for (var k = 0; k < 4; k++) s.push(WCOL[k] + ' ' + (k * 90) + 'deg ' + ((k + 1) * 90) + 'deg');
+    return 'conic-gradient(' + s.join(',') + ')';
+  }
+  /* 落盘：把扇区文本与位置画到盘面（文字始终朝上，与 CSS 断点同步半径） */
+  function paintWheel(cfg) {
+    if (!overlay) return;
+    var disc = overlay.querySelector('#buyWheelDisc');
+    if (disc) disc.style.background = discBg();
+    var size = (window.innerWidth || 640) <= 640 ? 150 : 180;   // 与 style.css 断点一致
+    var r = Math.round(size * 0.3);
+    var labels = overlay.querySelectorAll('.buyWheelLabel');
+    Array.prototype.forEach.call(labels, function (el, i) {
+      var a = i * 90 + 45;
+      el.style.transform = 'translate(-50%, -50%) rotate(' + a + 'deg) translateY(-' + r + 'px) rotate(-' + a + 'deg)';
+      el.textContent = (cfg && cfg.tiers && cfg.tiers[i] != null) ? '¥' + cfg.tiers[i] : '';
+    });
+  }
+
+  /* ---------- 金额/小计 ---------- */
+  function subTotal() { return Math.round(priceVal * qty * 100) / 100; }
+  function payTotal() {
+    var p = Math.round((subTotal() - discount) * 100) / 100;
+    return p < 1 ? 1 : p; // 低于 1 元按 1 元
+  }
+  function bump(el) {
+    if (!el) return;
+    el.classList.remove('bump');
+    void el.offsetWidth;
+    el.classList.add('bump');
+  }
+  function refreshAmount(pop) {
+    if (!overlay) return;
+    var subEl = overlay.querySelector('#buySub');
+    var offRow = overlay.querySelector('#buyOffRow');
+    var offEl = overlay.querySelector('#buyOff');
+    var payEl = overlay.querySelector('#buyPay');
+    if (subEl) subEl.textContent = yuan(subTotal());
+    if (offRow && offEl) {
+      if (discount > 0) {
+        offRow.style.display = '';
+        offEl.textContent = '−' + yuan(discount);
+      } else offRow.style.display = 'none';
+    }
+    if (payEl) payEl.textContent = yuan(payTotal());
+    if (pop) { if (offEl && discount > 0) bump(offEl); if (payEl) bump(payEl); }
+  }
+
+  /* ---------- 弹窗 HTML ---------- */
+  function formHtml() {
+    var acct = account();
+    var tip = acct
+      ? '将以账号 <b>' + esc(acct) + '</b> 提交 ✦ 订单可在会员中心查询'
+      : '暂未登录，也可微信联系客服下单';
+    return '' +
+      '<button class="buyX" type="button" aria-label="关闭下单弹窗">✕</button>' +
+      '<h3 class="buyTitle">确认这枚光</h3>' +
+      '<div class="buyProd">' +
+        '<div class="buyProdName">' + esc(nameVal) + '</div>' +
+        '<div class="buyProdPrice">' + yuan(priceVal) + ' <small>单价</small></div>' +
+      '</div>' +
+      '<div class="buyRow">' +
+        '<span class="buyLbl buyLblRow">数量</span>' +
+        '<div class="buyQty">' +
+          '<button class="buyStep" type="button" data-q="-1" aria-label="减少数量">−</button>' +
+          '<span class="buyQtyNum">1</span>' +
+          '<button class="buyStep" type="button" data-q="1" aria-label="增加数量">＋</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="buyAmt">' +
+        '<div class="buyAmtRow"><span>商品小计</span><b id="buySub"></b></div>' +
+        '<div class="buyAmtRow buyOff" id="buyOffRow" style="display:none;"><span>🎡 微光转盘立减</span><b id="buyOff"></b></div>' +
+        '<div class="buyAmtRow buyTotal"><span>应付</span><b id="buyPay"></b></div>' +
+      '</div>' +
+      '<label class="buyLbl" for="buyPhone">手机号（必填）</label>' +
+      '<input class="buyInput" id="buyPhone" type="text" autocomplete="tel" maxlength="80" placeholder="手机号（≥6 位数字）／微信号／邮箱">' +
+      '<label class="buyLbl" for="buyNote">备注（选填）</label>' +
+      '<textarea class="buyInput buyNoteArea" id="buyNote" rows="2" placeholder="送人生日、想要的光语、收货偏好等"></textarea>' +
+      wheelZoneHtml() +
+      '<div class="buyTip">' + tip + '</div>' +
+      '<div class="buyErr" id="buyErr"></div>' +
+      '<button class="buySubmit" id="buySubmit" type="button">提交订单</button>';
+  }
+  function wheelZoneHtml() {
+    var used = wheelUsed();
+    return '<div class="buyWheelZone">' +
+      '<div class="buyWheelHead"><span>🎡 微光转盘</span><em>转一下，本单立减一份小光礼 ✦ 每日一次</em></div>' +
+      '<div class="buyWheelWrap">' +
+        '<div class="buyWheel' + (used ? ' used' : '') + '">' +
+          '<div class="buyWheelDisc" id="buyWheelDisc">' +
+            '<span class="buyWheelLabel" data-i="0"></span>' +
+            '<span class="buyWheelLabel" data-i="1"></span>' +
+            '<span class="buyWheelLabel" data-i="2"></span>' +
+            '<span class="buyWheelLabel" data-i="3"></span>' +
+          '</div>' +
+          '<span class="buyWheelPin"></span>' +
+          '<button class="buyWheelHub" id="buyWheelHub" type="button" aria-label="转动微光转盘"' + (used ? ' disabled' : '') + '>🎡</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="buyWheelMsg" id="buyWheelMsg" role="status"></div>' +
+    '</div>';
+  }
+  function successHtml() {
+    return '' +
+      '<button class="buyX" type="button" aria-label="关闭">✕</button>' +
+      '<div class="buyOk">' +
+        '<div class="buyOkIco">✦</div>' +
+        '<h3 class="buyOkTitle">已收到</h3>' +
+        '<p class="buyOkTxt">已收到 ✦ 客服将在 1 个工作日内与您确认，订单号可在会员中心查询。</p>' +
+        '<button class="buyOkBtn" id="buyOkBtn" type="button">好的</button>' +
+      '</div>';
+  }
+
+  /* ---------- 弹窗容器 ---------- */
+  function ensureOverlay() {
+    if (overlay) return overlay;
+    overlay = document.createElement('div');
+    overlay.className = 'buyModal';
+    overlay.setAttribute('aria-hidden', 'true');
+    overlay.innerHTML = '<div class="buyCard"></div>';
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) closeBuy(true); // 点遮罩关闭
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && overlay.classList.contains('show')) closeBuy(true);
+    });
+    return overlay;
+  }
+  function showOverlay(on) {
+    var ov = ensureOverlay();
+    ov.classList.toggle('show', !!on);
+    ov.setAttribute('aria-hidden', on ? 'false' : 'true');
+    document.body.classList.toggle('buyLock', !!on);
+  }
+  function closeBuy(reset) {
+    if (!overlay) return;
+    isOpen = false;
+    spinning = false;
+    if (reset) { qty = 1; discount = 0; }
+    showOverlay(false);
+  }
+  function setWheelMsg(html) {
+    var m = overlay && overlay.querySelector('#buyWheelMsg');
+    if (!m) return;
+    m.innerHTML = html;
+  }
+  function pageInfo() {
+    var o = { name: '', price: 0 };
+    var n = document.querySelector('.p-name');
+    var p = document.querySelector('.p-price');
+    if (n) o.name = String(n.textContent || '').trim();
+    if (p) {
+      var m = String(p.textContent || '').match(/¥\s*(\d+(?:\.\d+)?)/);
+      if (m) o.price = parseFloat(m[1]);
+    }
+    return o;
+  }
+  function openBuy(opts) {
+    opts = opts || {};
+    var name = (opts.name != null && String(opts.name).trim()) ? String(opts.name).trim() : '';
+    var price = toPrice(opts.price);
+    if (!name || !price) {
+      var pg = pageInfo();
+      if (!name) name = pg.name;
+      if (!price) price = pg.price;
+    }
+    if (!name) name = '予光 · 定制款';
+    nameVal = name;
+    priceVal = price;
+    qty = 1; discount = 0; spinning = false; busy = false;
+
+    var card = ensureOverlay().querySelector('.buyCard');
+    card.innerHTML = formHtml();
+    wireForm(card);
+    refreshAmount(false);
+    paintWheel(defaultCfg());                       // 先按默认档位落字
+    ensureCfg().then(function (cfg) {               // 配置到达后刷新档位
+      if (isOpen) paintWheel(cfg);
+    });
+    var used = wheelUsed();
+    setWheelMsg(used
+      ? '今日已转过 ✦ 明日再来'
+      : '转一下，本单立减一份小光礼 ✦ 每日一次');
+    showOverlay(true);
+    isOpen = true;
+  }
+
+  /* ---------- 交互绑定（每次开窗重建后执行） ---------- */
+  function wireForm(card) {
+    var stepBtns = card.querySelectorAll('.buyStep');
+    Array.prototype.forEach.call(stepBtns, function (b) {
+      b.addEventListener('click', function () {
+        var d = Number(b.getAttribute('data-q')) || 0;
+        qty = Math.min(99, Math.max(1, qty + d));
+        var nEl = card.querySelector('.buyQtyNum');
+        if (nEl) nEl.textContent = qty;
+        refreshAmount(true);
+      });
+    });
+    var x = card.querySelector('.buyX');
+    if (x) x.addEventListener('click', function () { closeBuy(true); });
+    var hub = card.querySelector('#buyWheelHub');
+    if (hub) hub.addEventListener('click', spinWheel);
+    var sub = card.querySelector('#buySubmit');
+    if (sub) sub.addEventListener('click', submitOrder);
+  }
+
+  /* ---------- 转盘转动 ---------- */
+  function spinWheel() {
+    if (spinning || busy || !overlay || discount > 0) return;
+    var hub = overlay.querySelector('#buyWheelHub');
+    if (!hub || hub.disabled) return;
+    if (wheelUsed()) {
+      setWheelMsg('今日已转过 ✦ 明日再来');
+      hub.disabled = true;
+      return;
+    }
+    spinning = true;
+    hub.disabled = true;
+    setWheelMsg('微光转动中 ✦ 落定即见立减…');
+    ensureCfg().then(function (cfg) {
+      var idx = pickIndex(cfg);
+      var amt = cfg.tiers[idx];
+      // 落到扇区 i 中心正对顶部指针：所需角度增量 = (315 − 90i) − 当前余角
+      var delta = (315 - 90 * idx - (lastDeg % 360)) % 360;
+      if (delta < 0) delta += 360;
+      lastDeg += 360 * (4 + Math.floor(Math.random() * 3)) + delta;
+      var disc = overlay.querySelector('#buyWheelDisc');
+      if (disc) {
+        disc.style.transition = 'transform 4.2s cubic-bezier(.16, .84, .22, 1)';
+        disc.style.transform = 'rotate(' + lastDeg + 'deg)';
+      }
+      window.setTimeout(function () {
+        spinning = false;
+        if (!isOpen) return;                        // 中途关闭：不落账、不计次
+        discount = amt;
+        markWheelUsed();
+        tryRecordSpin(amt);
+        refreshAmount(true);
+        setWheelMsg('本单立减 <b>' + yuan(amt) + '</b> ✦ 已计入下方金额');
+        var h = overlay && overlay.querySelector('#buyWheelHub');
+        if (h) h.disabled = true;
+      }, 4300);
+    }).catch(function () {
+      spinning = false;
+      setWheelMsg('转盘开小差了，请再试一次 ✦');
+    });
+  }
+  function tryRecordSpin(amt) {
+    if (!window.sb) return;
+    var phoneEl = overlay && overlay.querySelector('#buyPhone');
+    var phone = phoneEl ? (phoneEl.value || '').trim() : '';
+    if (!phone) phone = account();
+    if (!phone) return;
+    try {
+      window.sb('wheel_spins', { method: 'POST', body: JSON.stringify({ phone: phone, prize: '立减¥' + amt }) })
+        .catch(function () { /* RLS/网络失败静默忽略 */ });
+    } catch (e) { /* 忽略 */ }
+  }
+
+  /* ---------- 提交订单 ---------- */
+  function submitOrder() {
+    if (!overlay || busy) return;
+    var phoneEl = overlay.querySelector('#buyPhone');
+    var noteEl = overlay.querySelector('#buyNote');
+    var errEl = overlay.querySelector('#buyErr');
+    var btn = overlay.querySelector('#buySubmit');
+    var phone = (phoneEl && phoneEl.value || '').trim();
+    var note = (noteEl && noteEl.value || '').trim();
+    if (errEl) errEl.textContent = '';
+    if (!validContact(phone)) {
+      if (errEl) errEl.textContent = '请填写有效的手机号（≥6 位数字）、微信号或邮箱';
+      if (phoneEl) phoneEl.focus();
+      return;
+    }
+    busy = true;
+    if (btn) { btn.disabled = true; btn.textContent = '提交中…'; }
+    var acct = account();
+    var items = [{
+      name: nameVal,
+      price: priceVal,
+      price_yuan: priceVal,
+      qty: qty,
+      amount: subTotal()
+    }];
+    var fullNote = note;
+    if (discount > 0) fullNote = (fullNote ? fullNote + '；' : '') + '微光转盘立减 ¥' + discount;
+    var body = { phone: phone, items: items, amount: payTotal(), note: fullNote, status: 'new' };
+    if (acct) body.account = acct;
+    if (!window.sb) {
+      if (errEl) errEl.textContent = '当前为离线版，无法在线下单，请微信联系客服 ✦';
+      busy = false;
+      if (btn) { btn.disabled = false; btn.textContent = '提交订单'; }
+      return;
+    }
+    window.sb('orders', { method: 'POST', body: JSON.stringify(body) })
+      .then(function () {
+        if (!isOpen) return;
+        if (window.notifyEmail) { try { window.notifyEmail('orders', body); } catch (e) {} }
+        var card = overlay.querySelector('.buyCard');
+        card.innerHTML = successHtml();
+        var x2 = card.querySelector('.buyX');
+        if (x2) x2.addEventListener('click', function () { closeBuy(true); });
+        var ok = card.querySelector('#buyOkBtn');
+        if (ok) ok.addEventListener('click', function () { closeBuy(true); });
+      })
+      .catch(function () {
+        if (errEl) errEl.textContent = '提交失败，请稍后再试，或微信联系客服下单 ✦';
+      })
+      .then(function () {
+        busy = false;
+        if (btn && overlay.contains(btn)) { btn.disabled = false; btn.textContent = '提交订单'; }
+      });
+  }
+
+  /* ---------- 委托：页面任意 [data-buy]（商品卡 / #addCart）→ 打开弹窗 ---------- */
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    var trig = (t && t.closest) ? t.closest('[data-buy]') : null;
+    if (!trig) return;
+    e.preventDefault();
+    e.stopPropagation();   // 防止卡片/页面的点击穿透
+    openBuy({
+      name: trig.getAttribute('data-buy-name') || '',
+      price: trig.getAttribute('data-buy-price') || ''
+    });
+  });
+
+  /* 对外 API：product.html / 其它页面可直接调用 ygOpenBuy({name, price}) */
+  window.ygOpenBuy = function (opts) {
+    openBuy((opts && typeof opts === 'object') ? opts : {});
+  };
 })();
