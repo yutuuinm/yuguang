@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>会员中心 · 予光</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .acc{max-width:640px;margin:0 auto;padding:120px 20px 80px;}
+  .acc .back{color:var(--gold);font-size:13px;text-decoration:none;}
+  .acc .sec{margin-top:26px;}
+  .acc .sec h3{font-family:var(--serif);font-size:17px;letter-spacing:.14em;color:var(--gold);border-bottom:1px solid var(--line-soft);padding-bottom:8px;margin-bottom:14px;}
+  .acc input{width:100%;padding:11px 13px;border-radius:10px;border:1px solid rgba(244,239,230,.18);background:var(--night2);color:var(--moon);font-size:14px;outline:none;margin-bottom:10px;}
+  .acc input:focus{border-color:var(--gold);}
+  .acc .msg{color:var(--gold);font-size:13px;min-height:16px;margin:6px 0;}
+  .acc .m-item{border:1px solid var(--line-soft);border-radius:10px;padding:9px 12px;margin-bottom:8px;font-size:13px;}
+  .acc .m-item b{color:var(--gold);font-weight:400;}
+  .acc .m-item p{color:var(--text-dim);font-size:12px;line-height:1.8;margin:4px 0 0;}
+  .acc .row {display:flex;gap:8px;}
+  .acc .row input{margin:0;}
+  .order-row{display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:space-between;align-items:center;border:1px solid var(--line-soft);border-radius:12px;padding:12px 14px;margin-bottom:10px;font-size:13px;}
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+
+<header class="nav" id="nav"><div class="nav-inner">
+  <img class="nav-logo" src="../予光.jpg" alt="予光 logo">
+  <a class="nav-brand" href="index.html">予光</a>
+  <nav class="nav-links" id="navLinks">
+    <a href="index.html">首页</a>
+    <a href="collections.html">系列</a>
+    <a href="studio.html">定制工坊</a>
+    <a href="gallery.html">光集</a>
+    <a href="atlas.html">星图志</a>
+    <a href="play.html">互动</a>
+    <a href="index.html" style="color:var(--text-dim);font-size:13px;">开始定制</a>
+  </nav>
+</div></header>
+
+<main><div class="acc">
+  <a class="back" href="javascript:history.back()">← 返回</a>
+  <h2 style="text-align:center;color:var(--gold);font-family:var(--serif);letter-spacing:.2em;margin-top:8px;">会员中心</h2>
+  <div class="msg" id="topMsg" style="text-align:center;"></div>
+
+  <div class="sec">
+    <h3>我的订单</h3>
+    <div id="ordersBox"><p style="color:var(--text-dim);font-size:13px;">加载中…</p></div>
+  </div>
+
+  <div class="sec">
+    <h3>基本资料</h3>
+    <input id="acNick" placeholder="昵称（头像=首字）">
+    <input id="acPhone" type="tel" placeholder="手机号（选填）">
+    <div class="msg" id="saveMsg"></div>
+    <button class="btn-gold" id="acSave" type="button" style="width:100%;">保存资料</button>
+  </div>
+
+  <div class="sec">
+    <h3>更换邮箱（需原邮箱验证码）</h3>
+    <div class="row">
+      <input id="acEmail" type="email" placeholder="新邮箱">
+      <button class="btn-ghost" id="acSend" type="button" style="flex-shrink:0;padding:8px 14px;font-size:13px;">发码到原邮箱</button>
+    </div>
+    <input id="acCode" placeholder="6 位验证码" style="display:none;">
+    <div class="msg" id="mailMsg"></div>
+    <button class="btn-gold" id="acSaveEmail" type="button" style="width:100%;">确认更换</button>
+  </div>
+
+  <div class="sec">
+    <h3>修改密码</h3>
+    <input id="acOld" type="password" placeholder="原密码">
+    <input id="acNew" type="password" placeholder="新密码（至少 6 位）">
+    <div class="msg" id="pwMsg"></div>
+    <button class="btn-gold" id="acPw" type="button" style="width:100%;">修改密码</button>
+  </div>
+
+  <div class="sec">
+    <h3>我的信箱</h3>
+    <div id="inboxBox"><p style="color:var(--text-dim);font-size:13px;">加载中…</p></div>
+  </div>
+
+  <div class="sec" style="display:flex;gap:12px;justify-content:center;">
+    <button class="btn-ghost" id="acOut" type="button">退出登录</button>
+    <a class="btn-ghost" href="index.html" style="font-size:14px;">返回首页</a>
+  </div>
+</div></main>
+
+<footer class="footer"><div class="wrap"><div class="disclaimer">© 予光 YUGUANG</div></div></footer>
+
+<script src="js/supabase-config.js"></script>
+<script src="js/main.js"></script>
+<script>
+(function () {
+  var cfg = window.SUPABASE || {};
+  var API = cfg.url + '/functions/v1/account-api';
+  var token = localStorage.getItem('yg_token') || '';
+  var account = localStorage.getItem('yg_account') || '';
+  var role = localStorage.getItem('yg_role') || 'user';
+  function api(body) {
+    return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-sess': token }, body: JSON.stringify(body) }).then(function (r) { return r.json(); });
+  }
+  function msg(id, t) { var el = document.getElementById(id); if (el) el.textContent = t; }
+  function fillOrders() {
+    var box = document.getElementById('ordersBox');
+    api({ op: 'orders' }).then(function (r) {
+      if (!r.ok || !r.orders || !r.orders.length) { box.innerHTML = '<p style="color:var(--text-dim);font-size:13px;">还没有订单 ✦ 去定制工坊生成第一枚光吧。</p>'; return; }
+      var st = { new: '待确认', paid: '已确认', making: '制作中', shipped: '已发货', done: '已完成', refund: '退款中' };
+      box.innerHTML = r.orders.map(function (o) {
+        var items = [];
+        try { var arr = (typeof o.items === 'string') ? JSON.parse(o.items) : (o.items || []); items = arr.map(function (x) { return x.name || ''; }); } catch (e) {}
+        return '<div class="order-row"><span class="on" style="color:var(--gold);">' + (o.order_no || '') + '</span><span>¥' + (o.amount || '—') + '</span><span class="st">' + (st[o.status] || o.status) + '</span><span style="flex-basis:100%;color:var(--text-dim);">' + (items.join('、') || '定制订单') + ' · ' + String(o.created_at || '').replace('T', ' ').slice(0, 16) + '</span></div>';
+      }).join('');
+    }).catch(function () { box.innerHTML = '<p style="color:var(--text-dim);font-size:13px;">订单加载失败</p>'; });
+  }
+  function fillInbox() {
+    var box = document.getElementById('inboxBox');
+    api({ op: 'inbox' }).then(function (r) {
+      if (!r.ok || !r.items || !r.items.length) { box.innerHTML = '<p style="color:var(--text-dim);font-size:13px;">信箱为空</p>'; return; }
+      var ids = [];
+      box.innerHTML = r.items.map(function (it) {
+        if (!it.read) ids.push(it.id);
+        return '<div class="m-item"><b>' + (it.kind === 'important' ? '🔔 ' : '📣 ') + it.title + '</b><p>' + it.body + '<br><span style="color:var(--text-dim);">' + String(it.created_at || '').replace('T', ' ').slice(0, 16) + '</span></p></div>';
+      }).join('');
+      if (ids.length) api({ op: 'inbox_read', ids: ids }).catch(function () {});
+    }).catch(function () { box.innerHTML = '<p style="color:var(--text-dim);font-size:13px;">信箱加载失败</p>'; });
+  }
+  function load() {
+    if (!token) { msg('topMsg', '请先登录'); return; }
+    api({ op: 'me' }).then(function (r) {
+      if (!r.ok) { msg('topMsg', (r.error || '请先登录') + '（点右上角登录）'); return; }
+      document.getElementById('acNick').value = r.nickname || '';
+      document.getElementById('acPhone').value = r.phone || '';
+      document.getElementById('acEmail').value = r.email || '';
+      msg('topMsg', '👤 ' + r.account + '（' + r.role + '）');
+    });
+    fillOrders(); fillInbox();
+  }
+  document.getElementById('acSave').addEventListener('click', function () {
+    api({ op: 'update_profile', nickname: document.getElementById('acNick').value.trim(), phone: document.getElementById('acPhone').value.trim() })
+      .then(function (r) { msg('saveMsg', r.ok ? '已保存' : (r.error || '失败')); if (r.ok) localStorage.setItem('yg_nick', document.getElementById('acNick').value.trim()); })
+      .catch(function () { msg('saveMsg', '网络错误'); });
+  });
+  var cd = 0;
+  document.getElementById('acSend').addEventListener('click', function () {
+    if (cd > 0) return;
+    api({ op: 'send_code', email: account }).then(function (r) {
+      if (r.ok) { document.getElementById('acCode').style.display = 'block'; msg('mailMsg', '验证码已发送到原邮箱'); cd = 60; var b = document.getElementById('acSend'); b.textContent = '已发送(' + cd + ')'; var t = setInterval(function () { cd--; if (cd <= 0) { clearInterval(t); b.textContent = '发码到原邮箱'; } else b.textContent = '已发送(' + cd + ')'; }, 1000); }
+      else msg('mailMsg', r.error || '发送失败');
+    }).catch(function () { msg('mailMsg', '网络错误'); });
+  });
+  document.getElementById('acSaveEmail').addEventListener('click', function () {
+    api({ op: 'update_profile', email: document.getElementById('acEmail').value.trim(), code: document.getElementById('acCode').value.trim() })
+      .then(function (r) {
+        if (r.ok) { account = document.getElementById('acEmail').value.trim(); localStorage.setItem('yg_account', account); msg('mailMsg', '邮箱已更换'); }
+        else msg('mailMsg', r.error || '更换失败');
+      }).catch(function () { msg('mailMsg', '网络错误'); });
+  });
+  document.getElementById('acPw').addEventListener('click', function () {
+    api({ op: 'change_pw', old_password: document.getElementById('acOld').value, new_password: document.getElementById('acNew').value })
+      .then(function (r) { msg('pwMsg', r.ok ? '密码已修改' : (r.error || '失败')); if (r.ok) { document.getElementById('acOld').value = ''; document.getElementById('acNew').value = ''; } })
+      .catch(function () { msg('pwMsg', '网络错误'); });
+  });
+  document.getElementById('acOut').addEventListener('click', function () {
+    api({ op: 'logout' }).catch(function () {});
+    ['yg_token', 'yg_account', 'yg_role', 'yg_nick'].forEach(function (k) { localStorage.removeItem(k); });
+    location.href = 'index.html';
+  });
+  load();
+})();
+</script>
+</body>
+</html>
