@@ -829,22 +829,19 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   }
 })();
 
-/* ---------- 会员 v2：白桦式账号（账号+密码；注册需手机号，昵称/邮箱选填；头像=昵称/账号首字） ---------- */
-(function initAuthV2() {
+/* ---------- 会员 v3：邮箱验证码（发码→10分钟有效→自动注册登录；管理员走密码） ---------- */
+(function initAuthV3() {
   var cfg = window.SUPABASE;
   if (!cfg || !cfg.url) return;
   var API = cfg.url + '/functions/v1/account-api';
   var token = localStorage.getItem('yg_token') || '';
   var account = localStorage.getItem('yg_account') || '';
-  var role = localStorage.getItem('yg_role') || 'user';
   var navLinks = document.getElementById('navLinks');
   if (!navLinks) return;
 
-  // 头像字符：昵称首字，无则账号首字
   function avatarChar() {
     var n = localStorage.getItem('yg_nick') || '';
-    var a = account || '光';
-    var s = (n || a).trim();
+    var s = (n || account || '光').trim();
     return s.charAt(0);
   }
   function refreshChip() {
@@ -859,44 +856,28 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   var chip = document.createElement('a');
   chip.className = 'nav-user';
   chip.href = 'javascript:void(0)';
-  chip.style.cssText = 'color:var(--gold);font-size:13px;letter-spacing:.06em;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;';
+  chip.style.cssText = 'color:var(--gold);font-size:13px;letter-spacing:.04em;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;';
   navLinks.parentNode.insertBefore(chip, navLinks.nextSibling);
 
   var mask = document.createElement('div');
   mask.className = 'login-modal-mask';
   mask.innerHTML =
-    '<div class="login-modal"><span class="close-x">✕</span><h3>予光会员</h3><div class="sub" id="lgSub">登录后可在「我的订单」查看进度</div>' +
-    '<input id="lgAccount" placeholder="账号（登录用）" autocomplete="off">' +
-    '<input id="lgPhone" type="tel" placeholder="手机号（注册必填）" style="display:none;">' +
-    '<input id="lgNick" placeholder="昵称（选填，用于头像）" style="display:none;">' +
-    '<input id="lgEmail" type="email" placeholder="邮箱（选填）" style="display:none;">' +
-    '<input id="lgPwd" type="password" placeholder="密码（至少 6 位）">' +
+    '<div class="login-modal"><span class="close-x">✕</span><h3>予光会员</h3><div class="sub">邮箱验证码登录 · 新邮箱自动注册 · 码 10 分钟有效</div>' +
+    '<input id="lgEmail" type="email" placeholder="邮箱" autocomplete="off">' +
+    '<div style="display:flex;gap:8px;">' +
+      '<input id="lgCode" type="text" inputmode="numeric" maxlength="6" placeholder="6 位验证码" style="flex:1;margin-bottom:0;">' +
+      '<button class="btn-ghost" id="lgSend" type="button" style="flex-shrink:0;padding:8px 14px;font-size:13px;">获取验证码</button>' +
+    '</div>' +
     '<div class="err" id="lgErr"></div>' +
-    '<button class="btn-gold" style="width:100%;" id="lgGo" type="button">登录</button>' +
-    '<div style="margin-top:12px;text-align:center;color:var(--text-dim);font-size:12px;"><span id="lgSwitch" style="cursor:pointer;color:var(--gold);">没有账号？注册</span></div>' +
+    '<button class="btn-gold" style="width:100%;" id="lgGo" type="button">登录 / 注册</button>' +
+    '<div style="margin-top:12px;text-align:center;color:var(--text-dim);font-size:12px;">验证码由予光邮箱发送至你填写的邮箱</div>' +
     '</div>';
   document.body.appendChild(mask);
-  var acctEl = mask.querySelector('#lgAccount');
-  var phoneEl = mask.querySelector('#lgPhone');
-  var nickEl = mask.querySelector('#lgNick');
-  var mailEl = mask.querySelector('#lgEmail');
-  var pwdEl = mask.querySelector('#lgPwd');
+  var emailEl = mask.querySelector('#lgEmail');
+  var codeEl = mask.querySelector('#lgCode');
   var errEl = mask.querySelector('#lgErr');
   var goEl = mask.querySelector('#lgGo');
-  var sw = mask.querySelector('#lgSwitch');
-  var mode = 'login';
-
-  function setMode(md) {
-    mode = md;
-    var reg = md === 'register';
-    phoneEl.style.display = reg ? 'block' : 'none';
-    nickEl.style.display = reg ? 'block' : 'none';
-    mailEl.style.display = reg ? 'block' : 'none';
-    goEl.textContent = reg ? '注册并登录' : '登录';
-    sw.textContent = reg ? '已有账号？登录' : '没有账号？注册';
-    errEl.textContent = '';
-  }
-  sw.addEventListener('click', function () { setMode(mode === 'login' ? 'register' : 'login'); });
+  var sendEl = mask.querySelector('#lgSend');
 
   function api(body) {
     return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-sess': token }, body: JSON.stringify(body) }).then(function (r) { return r.json(); });
@@ -931,66 +912,52 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       var list = document.getElementById('ordersList');
       if (list && !list.innerHTML) loadOrders();
     } else {
-      setMode('login'); acctEl.value = ''; pwdEl.value = '';
-      mask.classList.add('show'); acctEl.focus();
+      emailEl.value = ''; codeEl.value = '';
+      errEl.textContent = '';
+      mask.classList.add('show'); emailEl.focus();
     }
   });
   mask.querySelector('.close-x').addEventListener('click', function () { mask.classList.remove('show'); });
   mask.addEventListener('click', function (e) { if (e.target === mask) mask.classList.remove('show'); });
 
-  function submit() {
-    var body = { op: mode, account: (acctEl.value || '').trim(), password: pwdEl.value };
-    if (mode === 'register') {
-      body.phone = (phoneEl.value || '').trim();
-      body.nickname = (nickEl.value || '').trim();
-      body.email = (mailEl.value || '').trim();
-      if (!body.phone) { errEl.textContent = '注册需填写手机号'; return; }
-    }
-    if (!body.account || body.password.length < 6) { errEl.textContent = '请填写账号与至少 6 位密码'; return; }
-    goEl.disabled = true;
-    api(body).then(function (r) {
+  var cd = 0;
+  sendEl.addEventListener('click', function () {
+    if (cd > 0) return;
+    var email = (emailEl.value || '').trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { errEl.textContent = '请输入正确的邮箱'; return; }
+    errEl.textContent = '发送中…';
+    api({ op: 'send_code', email: email }).then(function (r) {
       if (r.ok) {
-        token = r.token; account = r.account || body.account; role = r.role || 'user';
+        errEl.textContent = '验证码已发送到 ' + email + '（10 分钟内有效）';
+        cd = 60;
+        sendEl.textContent = '重新发送(' + cd + ')';
+        var t = setInterval(function () {
+          cd--;
+          if (cd <= 0) { clearInterval(t); sendEl.textContent = '获取验证码'; }
+          else sendEl.textContent = '重新发送(' + cd + ')';
+        }, 1000);
+      } else errEl.textContent = r.error || '发送失败';
+    }).catch(function () { errEl.textContent = '网络错误，请重试'; });
+  });
+  goEl.addEventListener('click', function () {
+    var email = (emailEl.value || '').trim();
+    var code = (codeEl.value || '').trim();
+    if (!email || !/^\d{6}$/.test(code)) { errEl.textContent = '请输入邮箱与 6 位验证码'; return; }
+    goEl.disabled = true;
+    api({ op: 'code_login', email: email, code: code }).then(function (r) {
+      if (r.ok) {
+        token = r.token; account = r.account || email;
         localStorage.setItem('yg_token', token);
         localStorage.setItem('yg_account', account);
-        localStorage.setItem('yg_role', role);
+        localStorage.setItem('yg_role', r.role || 'user');
         localStorage.setItem('yg_nick', r.nickname || '');
         refreshChip(); mask.classList.remove('show');
         var sec = document.getElementById('myOrders');
         if (sec) loadOrders();
-      } else errEl.textContent = r.error || '操作失败';
+      } else errEl.textContent = r.error || '验证失败';
     }).catch(function () { errEl.textContent = '网络错误，请重试'; }).then(function () { goEl.disabled = false; });
-  }
-  goEl.addEventListener('click', submit);
-  pwdEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') submit(); });
+  });
+  codeEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') goEl.click(); });
   refreshChip();
-
-  // 供页面/表单读取当前登录账号
   window.ygAccount = function () { return localStorage.getItem('yg_account') || ''; };
-})();
-
-/* ---------- 主页展示条（后台 app_data.home_banners 可改；未配置用默认） ---------- */
-(function initHomeBanners() {
-  var track = document.getElementById('hbTrack');
-  if (!track) return;
-  var DEFAULT_BANNERS = [
-    { title: '黑暗中总有光伴你前行', text: '虽微弱，但足够照亮。东方生肖八卦 × 西方星座星盘双轨定制。', image: 'img/customers/示例图片.jpg', link: 'studio.html' },
-    { title: '生辰 / 星座 / 生肖', text: '三分钟生成只属于你的设计卡，提交即可定制。', image: '背景.jpg', link: 'studio.html' },
-    { title: 'AI 帮你选石', text: '说说你的需要，予光光语助手给出文化意象参考。', image: '予光.jpg', link: 'atlas.html' },
-  ];
-  function render(banners) {
-    if (!banners || !banners.length) return;
-    track.innerHTML = banners.map(function (b) {
-      return '<a class="hb-card" href="' + (b.link || '#') + '">' +
-        (b.image ? '<img src="' + b.image + '" alt="" loading="lazy" onerror="this.style.display=\'none\';">' : '') +
-        '<div class="hb-txt"><h4>' + (b.title || '') + '</h4><p>' + (b.text || '') + '</p></div></a>';
-    }).join('');
-  }
-  if (window.sb) {
-    window.sb('app_data?select=value&key=eq.home_banners').then(function (rows) {
-      var v = rows && rows[0] && rows[0].value;
-      if (v) render(typeof v === 'string' ? JSON.parse(v) : v);
-      else render(DEFAULT_BANNERS);
-    }).catch(function () { render(DEFAULT_BANNERS); });
-  } else render(DEFAULT_BANNERS);
 })();
