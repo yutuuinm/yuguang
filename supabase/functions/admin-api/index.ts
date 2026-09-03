@@ -5,11 +5,11 @@
 // op: list / insert / update / delete(软删入回收站) / restore / purge(回收站彻底删)
 //     purge_all / broadcast
 // 允许表：orders messages gallery products crystals records subscribers settings app_data
-//        users wheel_spins ai_usage mailboxes recycle_bin archives
+//        users wheel_spins ai_usage mailboxes articles recycle_bin archives
 // 行为：所有增删改自动写 archives 存档；delete 先入 recycle_bin 再删源行
 // ============================================================
 
-const TABLES = ['orders','messages','gallery','products','crystals','records','subscribers','settings','app_data','users','wheel_spins','ai_usage','mailboxes','recycle_bin','archives'];
+const TABLES = ['orders','messages','gallery','products','crystals','records','subscribers','settings','app_data','users','wheel_spins','ai_usage','mailboxes','articles','recycle_bin','archives'];
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "Content-Type, x-sess",
