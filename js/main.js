@@ -1043,3 +1043,44 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
   refreshChip();
   window.ygAccount = function () { return localStorage.getItem('yg_account') || ''; };
 })();
+
+/* ---------- 节气能量 & 需求选石速查 ---------- */
+(function initSeason() {
+  var box = document.getElementById('atlasSeason');
+  var needGo = document.getElementById('needGo');
+  var needSel = document.getElementById('needSel');
+  var needRes = document.getElementById('needRes');
+  if (!box && !needGo) return;
+
+  var SEASONS = [
+    ['春', '立春 雨水 惊蛰 春分 清明 谷雨', '木气生发：绿系为主（绿幽灵/孔雀石/绿发晶），意象为生长与开始', '木'],
+    ['夏', '立夏 小满 芒种 夏至 小暑 大暑', '火气盛：红紫系（红纹石/石榴石/紫水晶），意象为热烈与表达', '火'],
+    ['长夏', '小暑至立秋之间', '土气旺：黄棕系（黄水晶/虎眼石/蜜蜡），意象为安稳与承载', '土'],
+    ['秋', '立秋 处暑 白露 秋分 寒露 霜降', '金气敛：白金系（白水晶/金发晶/月光石），意象为收束与清醒', '金'],
+    ['冬', '立冬 小雪 大雪 冬至 小寒 大寒', '水气藏：黑蓝系（黑曜石/海蓝宝/蓝晶石），意象为沉淀与蓄力', '水'],
+  ];
+  if (box) {
+    box.innerHTML = SEASONS.map(function (s) {
+      return '<div class="mini-card"><h4>' + s[0] + '</h4><span class="sym">' + s[1] + '</span><p>' + s[2] + '</p><p class="sub" style="color:var(--gold);">五行养石 · ' + s[3] + '</p></div>';
+    }).join('');
+  }
+
+  var NEEDS = {
+    '情绪低落 / 迷茫': ['月光石', '紫水晶'],
+    '事业专注 / 效率': ['黄水晶', '金发晶', '虎眼石'],
+    '情感 / 关系': ['红纹石', '粉晶', '摩根石'],
+    '睡眠 / 放松': ['月光石', '烟晶'],
+    '人缘 / 沟通': ['海蓝宝', '绿玉髓'],
+    '守护 / 平安': ['黑曜石', '白水晶'],
+    '学业 / 灵感': ['紫水晶', '白水晶'],
+    '坚定 / 自控': ['虎眼石', '烟晶'],
+  };
+  if (needGo && needSel && needRes) {
+    needGo.addEventListener('click', function () {
+      var k = needSel.value;
+      if (!k) { needRes.textContent = '请先选择一个方面。'; return; }
+      var list = NEEDS[k] || [];
+      needRes.textContent = '「' + k + '」意象参考：' + list.join('、') + '。\n可到定制工坊让它们成为你的主石/辅石。以上为文化意象，不构成任何效果承诺。';
+    });
+  }
+})();
