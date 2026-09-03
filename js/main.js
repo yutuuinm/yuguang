@@ -1059,6 +1059,31 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   })();
   refreshChip();
   window.ygAccount = function () { return localStorage.getItem('yg_account') || ''; };
+  /* 静默校验：会话过期则清除假登录态（无弹窗） */
+  (function () {
+    var tk = localStorage.getItem('yg_token') || '';
+    var cfg = window.SUPABASE || {};
+    if (!tk || !cfg.url) return;
+    fetch(cfg.url + '/functions/v1/account-api', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-sess': tk },
+      body: JSON.stringify({ op: 'me' })
+    }).then(function (r) { return r.json(); }).then(function (j) {
+      if (j && j.ok) {
+        role = j.role || role;
+        account = j.account || account;
+        if (j.nickname) localStorage.setItem('yg_nick', j.nickname);
+        localStorage.setItem('yg_role', role);
+        localStorage.setItem('yg_account', account);
+        refreshChip();
+      } else if (j && !j.ok && /未登录|过期/.test(String(j.error || ''))) {
+        ['yg_token', 'yg_account', 'yg_role', 'yg_nick'].forEach(function (k) { localStorage.removeItem(k); });
+        account = ''; role = 'user';
+        refreshChip();
+      }
+    }).catch(function () {});
+  })();
+
 })();
 
 /* ---------- logo 点击：全部功能面板 ---------- */
@@ -1114,9 +1139,10 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
 (function () {
   var cfg = window.SUPABASE || {};
   if (!cfg.url) return;
+  window.__goAdmin = goAdmin;
   function goAdmin() {
     var token = localStorage.getItem('yg_token') || '';
-    if (!token) return;
+    if (!token) { location.href = 'account.html'; return; }
     fetch(cfg.url + '/functions/v1/account-api', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-sess': token },
@@ -1126,6 +1152,9 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
         localStorage.setItem('yg_role', j.role);
         localStorage.setItem('yg_account', j.account);
         location.href = 'admin.html';
+      } else if (j && !j.ok && /未登录|过期/.test(String(j.error || ''))) {
+        ['yg_token', 'yg_account', 'yg_role', 'yg_nick'].forEach(function (k) { localStorage.removeItem(k); });
+        location.href = 'account.html';
       }
     }).catch(function () {});
   }
@@ -1212,4 +1241,51 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     });
     syncBack();
   }
+})();
+
+
+/* ========== 管理员头像菜单入口（仅 admin/root 可见，点击服务端校验后进入） ========== */
+(function () {
+  function entryClick() {
+    var cfg = window.SUPABASE || {};
+    var tk = localStorage.getItem('yg_token') || '';
+    if (!cfg.url || !tk) { location.href = 'account.html'; return; }
+    fetch(cfg.url + '/functions/v1/account-api', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-sess': tk },
+      body: JSON.stringify({ op: 'me' })
+    }).then(function (r) { return r.json(); }).then(function (j) {
+      if (j && j.ok && (j.role === 'admin' || j.role === 'root')) {
+        localStorage.setItem('yg_role', j.role);
+        localStorage.setItem('yg_account', j.account);
+        location.href = 'admin.html';
+      } else if (j && !j.ok && /未登录|过期/.test(String(j.error || ''))) {
+        ['yg_token', 'yg_account', 'yg_role', 'yg_nick'].forEach(function (k) { localStorage.removeItem(k); });
+        location.href = 'account.html';
+      }
+    }).catch(function () {});
+  }
+  function sync() {
+    var menu = document.querySelector('.user-menu');
+    if (!menu) return;
+    var role = localStorage.getItem('yg_role') || '';
+    var had = menu.querySelector('#mmAdmin');
+    if (role === 'admin' || role === 'root') {
+      if (!had) {
+        var a = document.createElement('a');
+        a.id = 'mmAdmin';
+        a.href = 'javascript:void(0)';
+        a.textContent = '🛠 管理后台';
+        menu.insertBefore(a, menu.firstChild);
+        a.addEventListener('click', function (e) { e.preventDefault(); entryClick(); });
+      }
+    } else if (had) had.remove();
+  }
+  window.addEventListener('yg:login', sync);
+  document.addEventListener('DOMContentLoaded', sync);
+  var tries = 0;
+  var iv = setInterval(function () {
+    if (document.querySelector('.user-menu')) { sync(); clearInterval(iv); }
+    else if (++tries > 20) clearInterval(iv);
+  }, 400);
 })();
