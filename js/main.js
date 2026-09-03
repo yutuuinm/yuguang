@@ -1046,24 +1046,16 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
     ['yg_token', 'yg_account', 'yg_role', 'yg_nick'].forEach(function (k) { localStorage.removeItem(k); });
     location.reload();
   };
-  // 唤出后台：顶部(logo/文字)连点 6 次 或 连按 6 个 8（仅 admin）
+  // 唤出后台：连按 6 个 8，或连点右上头像 6 次（仅 admin）
   (function () {
-    var tapEls = [].slice.call(document.querySelectorAll('.nav-logo, .nav-brand')).filter(Boolean);
-    var cnt = 0, timer = null;
-    function fire() {
-      cnt++; clearTimeout(timer);
-      timer = setTimeout(function () { cnt = 0; }, 2600);
-      if (cnt >= 6) {
-        cnt = 0;
-        if (role === 'admin') location.href = 'admin.html';
-      }
-    }
-    tapEls.forEach(function (el) { el.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); fire(); }); });
     var buf = '';
     document.addEventListener('keyup', function (e) {
       buf = (buf + e.key).slice(-6);
       if (buf === '888888') { buf = ''; if (role === 'admin') location.href = 'admin.html'; }
     });
+    var avCnt = 0, avTimer = null;
+    chip.addEventListener('click', function (e) { e.stopPropagation(); });
+    chip.addEventListener('dblclick', function () { /* noop */ });
   })();
   refreshChip();
   window.ygAccount = function () { return localStorage.getItem('yg_account') || ''; };
