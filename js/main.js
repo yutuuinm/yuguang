@@ -875,6 +875,11 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
   right.appendChild(adminLink);
   right.appendChild(chip);
   navLinks.parentNode.insertBefore(right, navLinks.nextSibling);
+  var menu = document.createElement('div');
+  menu.className = 'user-menu';
+  menu.innerHTML = '<a href="account.html">会员中心</a><a href="javascript:void(0)" id="menuOut">退出登录</a>';
+  menu.style.display = 'none';
+  right.appendChild(menu);
 
   /* ---- 登录弹窗（注册/登录/忘记密码） ---- */
   var mask = document.createElement('div');
@@ -990,10 +995,13 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
     '</div>';
   document.body.appendChild(pmask);
 
-  chip.addEventListener('click', function () {
+  chip.addEventListener('click', function (e) {
+    e.stopPropagation();
     if (chip.getAttribute('data-logged') !== '1') { show('login'); useCode = false; mask.classList.add('show'); emailEl.focus(); return; }
-    if (location.pathname.indexOf('account.html') === -1) location.href = 'account.html';
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
   });
+  document.addEventListener('click', function () { menu.style.display = 'none'; });
+  menu.addEventListener('click', function (e) { e.stopPropagation(); });
 
   function openProfile() {
     document.getElementById('pmWho').innerHTML = '👤 <b>' + account + '</b>（' + role + '）';
@@ -1050,6 +1058,17 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
       .then(function (r) { document.getElementById('pmErr').textContent = r.ok ? '密码已修改' : (r.error || '失败'); if (r.ok) { document.getElementById('pmOld').value = ''; document.getElementById('pmNew').value = ''; } })
       .catch(function () { document.getElementById('pmErr').textContent = '网络错误'; });
   });
+  function doLogout() {
+    api({ op: 'logout' }).catch(function () {});
+    ['yg_token', 'yg_account', 'yg_role', 'yg_nick'].forEach(function (k) { localStorage.removeItem(k); });
+    account = ''; token = ''; role = 'user';
+    refreshChip();
+    menu.style.display = 'none';
+    var maskEl = document.querySelector('.login-modal-mask');
+    if (maskEl) maskEl.classList.remove('show');
+  }
+  var menuOut = document.getElementById('menuOut');
+  if (menuOut) menuOut.addEventListener('click', doLogout);
   document.getElementById('pmOut').addEventListener('click', function () {
     api({ op: 'logout' }).catch(function () {});
     localStorage.removeItem('yg_token');
