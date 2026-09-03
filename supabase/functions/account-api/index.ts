@@ -71,16 +71,17 @@ Deno.serve(async (req) => {
     }
     async function makeSession(u) {
       const token = randHex(32);
-      await fetch(SB_URL + "/rest/v1/sessions", { method: "POST", headers: { ...auth, Prefer: "return=minimal" },
+      const ins = await fetch(SB_URL + "/rest/v1/sessions", { method: "POST", headers: { ...auth, Prefer: "return=minimal" },
         body: JSON.stringify({ account_id: u.id, token_hash: await sha256Hex(token), expires_at: new Date(Date.now() + 30 * 86400000).toISOString() }) });
-      return Response.json({ ok: true, token, account: u.account, email: u.email || u.account, role: u.role || "user", avatar: avatarOf(u), nickname: u.nickname || "" }, { headers: corsHeaders });
+      const insText = await ins.text();
+      return Response.json({ ok: true, token, account: u.account, email: u.email || u.account, role: u.role || "user", avatar: avatarOf(u), nickname: u.nickname || "", __diag: "ins=" + ins.status + " " + insText.slice(0, 200) }, { headers: corsHeaders });
     }
     async function requireSession() {
       const sessToken = (req.headers.get("x-sess") || "").trim();
       const tokenHash = sessToken ? await sha256Hex(sessToken) : "";
       const rs = await fetch(SB_URL + "/rest/v1/sessions?select=account_id,expires_at&token_hash=eq." + encodeURIComponent(tokenHash) + "&expires_at=gt." + encodeURIComponent(new Date().toISOString()), { headers: auth });
       const sess = (await rs.json()) || [];
-      if (!sess.length) throw new Error("未登录或已过期");
+      if (!sess.length) throw new Error("未登录或已过期 [diag: st=" + rs.status + " arr=" + (Array.isArray(sess) ? sess.length : "no") + " raw=" + JSON.stringify(sess).slice(0, 160) + "]");
       const u = await findUser(String(sess[0].account_id));
       if (!u) throw new Error("用户不存在");
       return { u, tokenHash };
