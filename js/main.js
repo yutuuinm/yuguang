@@ -1108,3 +1108,40 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
     }
   });
 })();
+
+
+/* 唤醒统一：先服务端校验 admin/root 再进后台 */
+(function () {
+  var cfg = window.SUPABASE || {};
+  if (!cfg.url) return;
+  function goAdmin() {
+    var token = localStorage.getItem('yg_token') || '';
+    if (!token) return;
+    fetch(cfg.url + '/functions/v1/account-api', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-sess': token },
+      body: JSON.stringify({ op: 'me' })
+    }).then(function (r) { return r.json(); }).then(function (j) {
+      if (j.ok && (j.role === 'admin' || j.role === 'root')) {
+        localStorage.setItem('yg_role', j.role);
+        localStorage.setItem('yg_account', j.account);
+        location.href = 'admin.html';
+      }
+    }).catch(function () {});
+  }
+  var head = document.querySelector('header.nav');
+  var cnt = 0, timer = null;
+  if (head) head.addEventListener('click', function () {
+    cnt++;
+    clearTimeout(timer);
+    timer = setTimeout(function () { cnt = 0; }, 2600);
+    if (cnt >= 6) { cnt = 0; goAdmin(); }
+  });
+  var buf = '';
+  document.addEventListener('keyup', function (e) {
+    if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+      buf = (buf + e.key).slice(-6);
+      if (buf === '888888') { buf = ''; goAdmin(); }
+    }
+  });
+})();
