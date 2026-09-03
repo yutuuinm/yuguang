@@ -74,6 +74,8 @@
       <h2 style="font-size:18px;">配置编辑</h2>
       <textarea id="admMail" style="min-height:80px;font-family:monospace;"></textarea>
       <textarea id="admAi" style="min-height:80px;font-family:monospace;"></textarea>
+      <div style="margin-top:10px;"><b style="color:var(--gold);font-weight:400;">home_banners（主页展示条数组：title/text/image/link）</b></div>
+      <textarea id="admHome" style="min-height:120px;font-family:monospace;"></textarea>
       <button class="btn-gold" id="admSaveCfg" type="button">保存配置</button>
     </div>
   </div>
@@ -159,9 +161,10 @@
     var mail = pick('mail'), ai = pick('ai');
     document.getElementById('admMail').value = mail ? JSON.stringify(mail.value, null, 2) : '{}';
     document.getElementById('admAi').value = ai ? JSON.stringify(ai.value, null, 2) : '{}';
+    document.getElementById('admHome').value = (function () { var o = pick('home_banners'); return o ? JSON.stringify(o.value, null, 2) : '[]'; })();
     document.getElementById('admSaveCfg').onclick = function () {
       function upd(k, v) { try { return api(DAPI, { op: 'update', table: 'settings', id: k, set: { value: JSON.parse(v) } }); } catch (e) { msg.textContent = k + ' JSON 格式错误'; return null; } }
-      Promise.all([upd('mail', document.getElementById('admMail').value), upd('ai', document.getElementById('admAi').value)]).then(function () { msg.textContent = '配置已保存'; });
+      Promise.all([upd('mail', document.getElementById('admMail').value), upd('ai', document.getElementById('admAi').value), upd('home_banners', document.getElementById('admHome').value)]).then(function () { msg.textContent = '配置已保存'; });
     };
   }
 
