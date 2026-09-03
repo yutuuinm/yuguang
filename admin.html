@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>予光 · 管理后台</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09032226">
+<link rel="stylesheet" href="css/style.css?v=09032229">
 <style>
   .adm{max-width:1000px;margin:0 auto;padding:120px 20px 80px;}
   .adm h2{font-family:var(--serif);letter-spacing:.2em;color:var(--gold);margin-bottom:6px;}
@@ -66,7 +66,6 @@
         <option value="app_data">配置项 app_data</option>
         <option value="wheel_spins">转盘 wheel_spins</option>
         <option value="ai_usage">AI用量 ai_usage</option>
-        <option value="recycle_bin">回收站 recycle_bin</option>
         <option value="mailboxes">站内信 mailboxes</option>
       </select>
       <button class="btn-gold" id="admRefresh" type="button">刷新</button>
@@ -89,9 +88,28 @@
     </div>
   <div style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
     <button class="btn-ghost adm-tool-btn" data-t="crystal" type="button" style="font-size:13px;padding:8px 16px;">💎 新增晶石</button>
+    <button class="btn-ghost adm-tool-btn" data-t="product" type="button" style="font-size:13px;padding:8px 16px;">🛍️ 新增商品</button>
+    <button class="btn-ghost adm-tool-btn" data-t="gallery" type="button" style="font-size:13px;padding:8px 16px;">🖼️ 上架光集</button>
     <button class="btn-ghost adm-tool-btn" data-t="record" type="button" style="font-size:13px;padding:8px 16px;">🔑 生成验真码</button>
     <button class="btn-ghost adm-tool-btn" data-t="broadcast" type="button" style="font-size:13px;padding:8px 16px;">📨 群发站内信</button>
     <button class="btn-ghost adm-tool-btn" data-t="notice" type="button" style="font-size:13px;padding:8px 16px;">📢 活动通知</button>
+  </div>
+
+  <div class="adm-tool adm-tool-product doc-block" style="display:none;margin-top:12px;">
+    <input id="prSlug" placeholder="slug(唯一，如 sisi-liguang)"><input id="prName" placeholder="名称(必填)">
+    <select id="prSeries" style="width:auto;"><option value="east">east 东方线</option><option value="west">west 西方线</option><option value="union">union 合盘线</option><option value="destiny">destiny 命运线</option></select>
+    <input id="prSub" placeholder="副标题（如：本命火 · 离卦）"><input id="prMain" placeholder="主石"><input id="prAux" placeholder="配石">
+    <input id="prMetal" placeholder="材质/金属"><input id="prChain" placeholder="链型"><input id="prGlyph" placeholder="符文/刻字">
+    <div style="display:flex;gap:8px;"><input id="prPrice" placeholder="价格(元)" style="flex:1;"><input id="prSort" placeholder="排序" style="flex:1;max-width:90px;"></div>
+    <input id="prImg" placeholder="图片路径（客户图片/xx.jpg 或 img/customers/xx.jpg）"><input id="prQuote" placeholder="文案金句">
+    <div class="msg" id="prMsg"></div>
+    <button class="btn-gold" id="prSave" type="button">保存商品</button>
+  </div>
+  <div class="adm-tool adm-tool-gallery doc-block" style="display:none;margin-top:12px;">
+    <input id="galName" placeholder="作品名(必填)"><input id="galImg" placeholder="图片路径（客户图片/xx.jpg 或 img/customers/xx.jpg）">
+    <input id="galTag" placeholder="标签（如：东方线 · 示例）"><input id="galStory" placeholder="故事/备注">
+    <div class="msg" id="galMsg"></div>
+    <button class="btn-gold" id="galSave" type="button">上架到光集</button>
   </div>
   <div class="adm-tool adm-tool-crystal doc-block" style="display:none;margin-top:12px;">
     <input id="crName" placeholder="名称(必填)"><input id="crKind" placeholder="归属"><input id="crElement" placeholder="五行/星体">
@@ -129,8 +147,8 @@
 
 <footer class="footer"><div class="wrap"><div class="disclaimer">© 予光 YUGUANG · 管理后台 · 仅供内部使用</div></div></footer>
 
-<script src="js/supabase-config.js?v=09032226"></script>
-<script src="js/main.js?v=09032226"></script>
+<script src="js/supabase-config.js?v=09032229"></script>
+<script src="js/main.js?v=09032229"></script>
 <script>
 (function () {
   var cfg = window.SUPABASE || {};
@@ -330,6 +348,39 @@
     api(DAPI, { op: 'broadcast', title: title, body: body }).then(function (r) {
       document.getElementById('bcMsg').textContent = r.ok ? ('已发送 ' + (r.sent || 0) + ' / ' + (r.users || 0) + ' 个用户信箱') : ('失败：' + (r.error || ''));
     }).catch(function () { document.getElementById('bcMsg').textContent = '网络错误'; });
+  });
+
+
+  document.getElementById('prSave').addEventListener('click', function () {
+    var name = (document.getElementById('prName').value || '').trim();
+    var slug = (document.getElementById('prSlug').value || '').trim();
+    if (!name || !slug) { document.getElementById('prMsg').textContent = '名称与 slug 必填'; return; }
+    var row = { slug: slug, name: name, series: document.getElementById('prSeries').value || 'east', visible: true };
+    [['prSub','sub'],['prMain','main_stone'],['prAux','aux_stone'],['prMetal','metal'],['prChain','chain'],['prGlyph','glyph'],['prImg','image_url'],['prQuote','quote']].forEach(function (p) {
+      var v = (document.getElementById(p[0]).value || '').trim();
+      if (v) row[p[1]] = v;
+    });
+    var price = num(document.getElementById('prPrice').value);
+    if (price !== undefined) row.price_yuan = price;
+    var sort = num(document.getElementById('prSort').value);
+    if (sort !== undefined) row.sort = sort;
+    api(DAPI, { op: 'insert', table: 'products', row: row }).then(function (r) {
+      var el = document.getElementById('prMsg');
+      if (r.ok) { el.textContent = '已保存'; }
+      else { el.textContent = String(r.error || '失败') + (String(r.error||'').indexOf('duplicate') > -1 ? '（slug 已存在）' : ''); }
+    }).catch(function () { document.getElementById('prMsg').textContent = '网络错误'; });
+  });
+  document.getElementById('galSave').addEventListener('click', function () {
+    var name = (document.getElementById('galName').value || '').trim();
+    if (!name) { document.getElementById('galMsg').textContent = '作品名必填'; return; }
+    var row = { name: name, visible: true, approved: false };
+    [['galImg','image_url'],['galTag','tag'],['galStory','story']].forEach(function (p) {
+      var v = (document.getElementById(p[0]).value || '').trim();
+      if (v) row[p[1]] = v;
+    });
+    api(DAPI, { op: 'insert', table: 'gallery', row: row }).then(function (r) {
+      document.getElementById('galMsg').textContent = r.ok ? '已上架（需在前台审核区置 approved=true 才对外展示）' : ('失败：' + (r.error || ''));
+    }).catch(function () { document.getElementById('galMsg').textContent = '网络错误'; });
   });
 
   // ===== 搜索与行编辑 =====
