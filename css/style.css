@@ -1437,3 +1437,34 @@ main { animation: fadeIn .32s ease; }
 .panel.open, .doc-block.reveal.visible { will-change: transform, opacity; }
 /* 会员中心顶部横条随子界面隐藏 */
 .me-top.hide { display: none; }
+
+
+/* ========== 页面切换过渡（鸿蒙式）+ 左上返回 ========== */
+@keyframes ygPageIn { from { opacity: 0; } to { opacity: 1; } }
+body { animation: ygPageIn .3s ease-out both; }
+main { animation: ygMainIn .42s cubic-bezier(.22,.61,.36,1) both; }
+@keyframes ygMainIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+body.yg-exit { animation: ygPageOut .2s ease-in both; pointer-events: none; }
+@keyframes ygPageOut { to { opacity: 0; } }
+body.yg-exit main { animation: ygMainOut .2s ease-in both; }
+@keyframes ygMainOut { to { opacity: 0; transform: translateY(-10px); } }
+#ygBack {
+  position: fixed; left: 14px; top: 74px; z-index: 45;
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; line-height: 1; padding-bottom: 3px;
+  color: var(--gold); background: rgba(16,24,40,.72);
+  border: 1px solid var(--line);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  text-decoration: none; box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  transition: transform .18s ease, background .2s ease;
+}
+#ygBack:hover { transform: scale(1.08); background: rgba(227,196,124,.16); }
+#ygBack:active { transform: scale(.94); }
+@media (prefers-reduced-motion: reduce) {
+  body, main, body.yg-exit, body.yg-exit main { animation: none !important; }
+}
+@media (max-width: 640px) { #ygBack { top: 66px; left: 10px; width: 36px; height: 36px; font-size: 21px; } }
+
+/* 单文件视图切换（鸿蒙式滑入） */
+.view.active { animation: slideR .36s cubic-bezier(.22,.7,.3,1); }
