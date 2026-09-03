@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>巳蛇 · 离光（示例款）· 产品详情 · 予光</title>
 <meta name="description" content="巳蛇 · 离光——予光东方线示例款：本命火定红纹石主石，离卦为印，生肖暗刻。产品参数、文化解读（文化寓意 · 非效果承诺）与工艺保养。">
-<link rel="stylesheet" href="css/style.css?v=09040054"?>
+<link rel="stylesheet" href="css/style.css?v=09040140"?>
 </head>
 <body>
 
@@ -61,7 +61,7 @@
         <div class="p-quote">「安静炽烈，你的光不喧哗，但没人能忽略。」</div>
 
         <div class="product-actions">
-          <button class="btn-gold" id="addCart" type="button">加入礼盒（原型示意）</button>
+          <button class="btn-gold" id="addCart" type="button" data-buy data-buy-name="巳蛇 · 离光" data-buy-price="699">🛒 购买这枚光</button>
           <a class="btn-ghost" href="studio.html#east">定制我的款</a>
         </div>
 
@@ -152,7 +152,7 @@
         <a href="collections.html">系列总览</a>
         <a href="gallery.html">光集</a>
         <a href="intro.html">认识予光</a>
-        <a href="index.html#lights">微光时刻</a>
+        <a href="index.html#galleryHome">光集 · 她们与光</a>
       </div>
       <div>
         <h5>服务</h5>
@@ -168,11 +168,15 @@
   </div>
 </footer>
 
-<script src="js/supabase-config.js?v=09040054"></script>
-<script src="js/main.js?v=09040054"></script>
+<script src="js/supabase-config.js?v=09040140"></script>
+<script src="js/main.js?v=09040140"></script>
 <script>
+  // 「购买这枚光」由 main.js 的 initBuy 委托处理（按钮带 data-buy 属性，打开下单弹窗）。
+  // 仅当 main.js 未加载时退回原型提示，避免与委托重复打开。
   document.getElementById('addCart').addEventListener('click', function () {
-    alert('原型示意：已加入礼盒 ✦\n正式版将进入：确认订单信息 → 下单 → 夜蓝礼盒收货仪式。');
+    if (!window.ygOpenBuy) {
+      alert('原型示意：已加入礼盒 ✦\n正式版将进入：确认订单信息 → 下单 → 夜蓝礼盒收货仪式。');
+    }
   });
 </script>
 </body>
