@@ -78,8 +78,9 @@ Deno.serve(async (req) => {
       return Response.json({ ok: true }, { headers: corsHeaders });
     }
     if (op === "insert") {
-      const r = await fetch(base, { method: "POST", headers: auth, body: JSON.stringify(body.row || {}) });
-      return Response.json({ ok: r.ok, row: await r.json().catch(() => null) }, { headers: corsHeaders });
+      const r = await fetch(base, { method: "POST", headers: { ...auth, Prefer: "return=representation" }, body: JSON.stringify(body.row || {}) });
+      const j = await r.json().catch(() => null);
+      return Response.json({ ok: r.ok, row: Array.isArray(j) ? (j[0] || null) : j }, { headers: corsHeaders });
     }
     if (op === "update") {
       if (!body.id) throw new Error("缺少 id");
