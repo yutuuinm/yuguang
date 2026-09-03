@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>予光 · 管理后台</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09040054">
+<link rel="stylesheet" href="css/style.css?v=09040140">
 <style>
   /* ============ 予光 · 管理后台（分区式） ============ */
   .adm{max-width:1180px;margin:0 auto;padding:132px 20px 90px;position:relative;z-index:5;}
@@ -556,10 +556,6 @@
           <span class="g">💎</span><h3><em>水晶知识库</em></h3>
           <p>五行晶石 · 新增 / 编辑 / 删除 / 复制<br>生辰测石与星图志选材依据</p>
         </button>
-        <button class="card" type="button" data-sec="secPwd" title="修改当前管理员登录账号的密码（账号密码体系 = 操作密码）">
-          <span class="g">🔑</span><h3><em>修改操作密码</em></h3>
-          <p>修改当前管理员账号密码<br>旧密码校验 · 立即生效</p>
-        </button>
         <button class="card" type="button" data-sec="secAi" title="AI 光语助手配置：启用开关/模型/函数地址/提示词，密钥不明文显示">
           <span class="g">🤖</span><h3><em>AI 设计</em></h3>
           <p>启用 / 模型 / 函数地址 / 提示词<br>密钥不明文回显 · 留空保留原值</p>
@@ -669,27 +665,6 @@
       </div>
     </section>
 
-    <!-- ========== L. 修改操作密码 ========== -->
-    <section class="admSec" id="secPwd">
-      <div class="sec-top">
-        <button class="back-btn" type="button" data-act="back">← 返回</button>
-        <h2><span>🔑</span> 修改操作密码</h2><span class="sp"></span>
-      </div>
-      <div class="doc-pad" style="max-width:480px;">
-        <label class="f-label">旧密码（当前登录密码）*</label>
-        <input id="pwOld" type="password" autocomplete="current-password" placeholder="旧密码" style="width:100%;">
-        <label class="f-label">新密码（至少 6 位）*</label>
-        <input id="pwNew" type="password" autocomplete="new-password" placeholder="新密码" style="width:100%;">
-        <label class="f-label">重复新密码 *</label>
-        <input id="pwNew2" type="password" autocomplete="new-password" placeholder="再次输入新密码" style="width:100%;">
-        <div class="sec-note">操作密码 = 账号密码体系：此处修改的是当前登录管理员账号（<b style="color:var(--gold);" id="pwWho">—</b>）的登录密码，校验通过后立即生效，无需重启后台。</div>
-        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-          <button class="btn-gold" id="pwSave" type="button" title="account-api change_pw：旧密码校验 + 新密码两次一致">🔑 修改密码</button>
-          <span class="msg" id="pwMsg"></span>
-        </div>
-      </div>
-    </section>
-
     <!-- ========== M. AI 设计（表单式 → settings.ai） ========== -->
     <section class="admSec" id="secAi">
       <div class="sec-top">
@@ -748,8 +723,8 @@
 
 <footer class="footer"><div class="wrap"><div class="disclaimer">© 予光 YUGUANG · 管理后台 · 仅供内部使用</div></div></footer>
 
-<script src="js/supabase-config.js?v=09040054"></script>
-<script src="js/main.js?v=09040054"></script>
+<script src="js/supabase-config.js?v=09040140"></script>
+<script src="js/main.js?v=09040140"></script>
 <script>
 (function () {
   'use strict';
@@ -827,11 +802,6 @@
     if (name === 'secWx') wxLoad();
     if (name === 'secRecycle') loadRecycle();
     if (name === 'secArchive') loadArchive();
-    if (name === 'secPwd') {
-      var pwEl = $('pwWho');
-      if (pwEl) pwEl.textContent = ME.account || '—';
-      var pm = $('pwMsg'); if (pm) { pm.textContent = ''; pm.className = 'msg'; }
-    }
   }
   function goBackAdmin() { showHome(); }
 
@@ -2797,25 +2767,6 @@
   }
 
   /* ============================================================
-     ⑫ 🔑 修改操作密码 secPwd
-     ============================================================ */
-  function pwSave() {
-    var oldPw = $('pwOld').value;
-    var n1 = $('pwNew').value;
-    var n2 = $('pwNew2').value;
-    if (!oldPw) { setMsg('pwMsg', '请填写旧密码', 'bad'); return; }
-    if (!n1 || n1.length < 6) { setMsg('pwMsg', '新密码至少 6 位', 'bad'); return; }
-    if (n1 !== n2) { setMsg('pwMsg', '两次输入的新密码不一致', 'bad'); return; }
-    setMsg('pwMsg', '校验并修改中…');
-    acc({ op: 'change_pw', old_password: oldPw, new_password: n1 }).then(function (r) {
-      if (r.ok) {
-        ['pwOld', 'pwNew', 'pwNew2'].forEach(function (id) { var el = $(id); if (el) el.value = ''; });
-        setMsg('pwMsg', '✅ 已修改 ' + (ME.account || '本账号') + ' 的密码，立即生效', 'ok');
-      } else setMsg('pwMsg', '修改失败：' + (r.error || '（原密码错误？）'), 'bad');
-    }).catch(function () { setMsg('pwMsg', '网络错误', 'bad'); });
-  }
-
-  /* ============================================================
      ⑬ 🤖 AI 设计 secAi（表单式 → settings.ai）
      ============================================================ */
   function isSecretKey(k) {
@@ -2978,9 +2929,6 @@
     /* 发订阅邮件 */
     $('smRefresh').addEventListener('click', function () { loadSubscribers(true); });
     $('smSend').addEventListener('click', smSend);
-
-    /* 修改操作密码 */
-    $('pwSave').addEventListener('click', pwSave);
 
     /* AI 设计 */
     $('aiRefresh').addEventListener('click', aiLoad);
