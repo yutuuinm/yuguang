@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>予光 · 管理后台</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09032138"?>
+<link rel="stylesheet" href="css/style.css?v=09032140"?>
 <style>
   .adm{max-width:1000px;margin:0 auto;padding:120px 20px 80px;}
   .adm h2{font-family:var(--serif);letter-spacing:.2em;color:var(--gold);margin-bottom:6px;}
@@ -43,7 +43,7 @@
   <h2 style="text-align:center;">予光 · 管理后台</h2>
 
   <div class="adm-card doc-block" id="admGate">
-    <p style="text-align:center;color:var(--text-dim);font-size:13px;">仅管理员账号可进入（fftt0227）</p>
+    <p style="text-align:center;color:var(--text-dim);font-size:13px;">仅管理员可进入</p>
     <input id="admAccount" placeholder="账号">
     <input id="admPwd" type="password" placeholder="密码">
     <div class="err" id="admErr"></div>
@@ -84,10 +84,10 @@
   </div>
 </div></main>
 
-<footer class="footer"><div class="wrap"><div class="disclaimer">© 予光 YUGUANG · 管理后台仅供内部使用（仅 fftt0227）</div></div></footer>
+<footer class="footer"><div class="wrap"><div class="disclaimer">© 予光 YUGUANG · 管理后台 · 仅供内部使用</div></div></footer>
 
 <script src="js/supabase-config.js?v=09032056"></script>
-<script src="js/main.js?v=09032138"></script>
+<script src="js/main.js?v=09032140"></script>
 <script>
 (function () {
   var cfg = window.SUPABASE || {};
@@ -130,7 +130,7 @@
     if (!ac || !pw) { errEl.textContent = '请输入账号与密码'; return; }
     api(AAPI, { op: 'login', account: ac, password: pw }).then(function (r) {
       if (!r.ok) { errEl.textContent = r.error || '登录失败'; return; }
-      if (r.role !== 'admin') { errEl.textContent = '该账号无管理员权限（仅 fftt0227 可进后台）'; return; }
+      if (r.role !== 'admin') { errEl.textContent = '该账号无管理员权限'; return; }
       token = r.token;
       localStorage.setItem('yg_token', token);
       enter(r.account, r.role, r.nickname);
