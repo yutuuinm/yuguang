@@ -859,8 +859,8 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
     }
     refreshAdmin();
   }
-  function refreshAdmin() {
-    if (adminLink) adminLink.style.display = (account && role === 'admin') ? '' : 'none';
+  function refreshAdmin() { /* 后台入口已隐藏，由 logo 连点唤出 */
+    if (adminLink) adminLink.style.display = 'none';
   }
   window.addEventListener('yg:login', function () {
     account = localStorage.getItem('yg_account') || '';
@@ -881,7 +881,8 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
   right.appendChild(chip);
   var menu = document.createElement('div');
   menu.className = 'user-menu';
-  menu.innerHTML = '<a href="account.html">会员中心</a><a href="javascript:void(0)" id="menuOut">退出登录</a>';
+  menu.className = 'user-menu up-panel';
+  menu.innerHTML = '<a href="account.html#edit">✏️ 编辑资料</a><a href="account.html#email">📮 更换邮箱</a><a href="account.html#orders">📦 我的订单</a><a href="javascript:void(0)" id="menuOut">退出登录</a>';
   menu.style.display = 'none';
   right.appendChild(menu);
   navLinks.parentNode.insertBefore(right, navLinks.nextSibling);
@@ -1059,6 +1060,22 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
     ['yg_token', 'yg_account', 'yg_role', 'yg_nick'].forEach(function (k) { localStorage.removeItem(k); });
     location.reload();
   };
+  // 顶部 logo 连点 6 次 → 后台（仅 admin；点击任意处清零）
+  (function () {
+    var brand = document.querySelector('.nav-brand');
+    if (!brand) return;
+    var cnt = 0, timer = null;
+    brand.addEventListener('click', function (e) {
+      e.preventDefault(); e.stopPropagation();
+      cnt++;
+      clearTimeout(timer);
+      timer = setTimeout(function () { cnt = 0; }, 2200);
+      if (cnt >= 6) {
+        cnt = 0;
+        if (role === 'admin') location.href = 'admin.html';
+      }
+    });
+  })();
   refreshChip();
   window.ygAccount = function () { return localStorage.getItem('yg_account') || ''; };
 })();
