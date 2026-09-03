@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>予光 · 管理后台</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09040011">
+<link rel="stylesheet" href="css/style.css?v=09040017">
 <style>
   /* ============ 予光 · 管理后台（白桦规格 · 分区式） ============ */
   .adm{max-width:1180px;margin:0 auto;padding:132px 20px 90px;position:relative;z-index:5;}
@@ -185,6 +185,14 @@
         <button class="card" type="button" data-sec="secAi" title="AI 光语助手配置：model/funcUrl/prompt/enabled 等 settings.ai 键">
           <span class="g">🤖</span><h3><em>AI 设计</em></h3>
           <p>AI 光语助手设置（settings.ai）<br>模型 / 函数地址 / 提示词 / 开关</p>
+        </button>
+        <button class="card" type="button" data-sec="secRecycle">
+          <span class="g">♻️</span><h3><em>回收站</em></h3>
+          <p>被删除的记录与订单在此暂存<br>可一键恢复 · 彻底删除 · 清空</p>
+        </button>
+        <button class="card" type="button" data-sec="secArchive">
+          <span class="g">🗄️</span><h3><em>操作存档</em></h3>
+          <p>全程监控每次后台操作<br>键盘输入 fftt0227 直达本区</p>
         </button>
         <button class="card" type="button" data-sec="secSubMail" title="把订阅登记（subscribers.contact）中的邮箱逐个群发邮件">
           <span class="g">📮</span><h3><em>发订阅邮件</em></h3>
@@ -614,13 +622,39 @@
         </div>
       </div>
     </section>
+  <section class="admSec" id="secRecycle">
+    <div class="sec-top">
+      <button class="back-btn" data-act="back" type="button">← 返回</button>
+      <h2>回收站 <span>♻️</span></h2>
+      <div class="sp"></div>
+      <button class="btn-line" id="rcRefresh" type="button">🔄 刷新</button>
+      <button class="btn-line danger" id="rcClearAll" type="button">⚠️ 清空回收站</button>
+    </div>
+    <p class="small-note">删除的记录/订单会先移到这里；可单独「恢复」或「彻底删除」，也可一次清空。恢复时若与原表唯一字段冲突会失败（原字段仍被占用时请先彻底删除后重录）。</p>
+    <span class="msg" id="rcMsg"></span>
+    <div class="wrap-scroll"><table class="tbl" id="rcRows"></table></div>
+  </section>
+
+  <section class="admSec" id="secArchive">
+    <div class="sec-top">
+      <button class="back-btn" data-act="back" type="button">← 返回</button>
+      <h2>操作存档 <span>🗄️</span></h2>
+      <div class="sp"></div>
+      <button class="btn-line" id="arRefresh" type="button">🔄 刷新</button>
+      <button class="btn-line danger" id="arClearAll" type="button">🗑️ 清空存档</button>
+    </div>
+    <p class="small-note">自动记录每位管理员的增/删/改/恢复/群发操作（谁 · 何时 · 对什么 · 做了什么）。仅供追溯，不参与业务。</p>
+    <span class="msg" id="arMsg"></span>
+    <div class="wrap-scroll"><table class="tbl" id="arRows"></table></div>
+  </section>
+
   </div>
 </div></main>
 
 <footer class="footer"><div class="wrap"><div class="disclaimer">© 予光 YUGUANG · 管理后台 · 仅供内部使用</div></div></footer>
 
-<script src="js/supabase-config.js?v=09040011"></script>
-<script src="js/main.js?v=09040011"></script>
+<script src="js/supabase-config.js?v=09040017"></script>
+<script src="js/main.js?v=09040017"></script>
 <script>
 (function () {
   'use strict';
@@ -679,6 +713,8 @@
     if (name === 'secCms') cmsLoadAll();
     if (name === 'secSubMail') loadSubscribers(true);
     if (name === 'secAi') aiLoad();
+    if (name === 'secRecycle') loadRecycle();
+    if (name === 'secArchive') loadArchive();
     if (name === 'secPwd') {
       var pwEl = $('pwWho');
       if (pwEl) pwEl.textContent = ME.account || '—';
@@ -2745,6 +2781,92 @@
   var gate = $('admGate');
   if (gate) gate.style.display = 'block';
   tryEnter();
+
+  /* ===== 回收站 ===== */
+  var R = { rows: [] };
+  function rcSummary(p) {
+    p = p || {};
+    return String(p.code || p.order_no || p.name || p.product_ref || p.account || p.contact || p.title || (p.key || '')).slice(0, 60) || JSON.stringify(p).slice(0, 60);
+  }
+  function loadRecycle() {
+    setMsg('rcMsg', '加载中…');
+    adm({ op: 'list', table: 'recycle_bin', limit: 200 }).then(function (r) {
+      if (!r.ok) { setMsg('rcMsg', '加载失败：' + (r.error || ''), 'bad'); return; }
+      R.rows = r.rows || [];
+      setMsg('rcMsg', '回收站共 ' + R.rows.length + ' 条');
+      if (!R.rows.length) { $('rcRows').innerHTML = '<tr><td style="color:var(--text-dim);padding:22px;text-align:center;">回收站是空的 ✦</td></tr>'; return; }
+      var h = '<tr><th>原表</th><th>内容摘要</th><th>删除人</th><th>删除时间</th><th>操作</th></tr>';
+      R.rows.forEach(function (x) {
+        h += '<tr><td>' + esc(x.table_name || '') + '</td><td>' + esc(rcSummary(x.payload)) + '</td><td>' + esc(x.account || '') + '</td><td>' + esc(fmtTime(x.deleted_at)) + '</td>' +
+          '<td style="white-space:nowrap;"><button class="btn-sm" data-rc="restore" data-id="' + x.id + '">↩️ 恢复</button><button class="btn-sm danger" data-rc="purge" data-id="' + x.id + '">🗑️ 彻底删除</button></td></tr>';
+      });
+      $('rcRows').innerHTML = h;
+      $('rcRows').querySelectorAll('[data-rc="restore"]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          if (!confirm('从回收站恢复这条记录？')) return;
+          adm({ op: 'restore', table: 'recycle_bin', id: b.getAttribute('data-id') }).then(function (r) {
+            setMsg('rcMsg', r.ok ? '已恢复' : ('恢复失败：' + (r.error || '')), r.ok ? '' : 'bad');
+            loadRecycle();
+          }).catch(function () { setMsg('rcMsg', '网络错误', 'bad'); });
+        });
+      });
+      $('rcRows').querySelectorAll('[data-rc="purge"]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          if (!confirm('彻底删除该条（不可撤销）？')) return;
+          adm({ op: 'delete', table: 'recycle_bin', id: b.getAttribute('data-id') }).then(function (r) {
+            setMsg('rcMsg', r.ok ? '已彻底删除' : ('失败：' + (r.error || '')), r.ok ? '' : 'bad');
+            loadRecycle();
+          }).catch(function () { setMsg('rcMsg', '网络错误', 'bad'); });
+        });
+      });
+    }).catch(function () { setMsg('rcMsg', '网络错误', 'bad'); });
+  }
+  /* ===== 操作存档 ===== */
+  function loadArchive() {
+    setMsg('arMsg', '加载中…');
+    adm({ op: 'list', table: 'archives', limit: 200 }).then(function (r) {
+      if (!r.ok) { setMsg('arMsg', '加载失败：' + (r.error || ''), 'bad'); return; }
+      var rows = r.rows || [];
+      setMsg('arMsg', '存档共 ' + rows.length + ' 条（仅最近 200 条展示）');
+      if (!rows.length) { $('arRows').innerHTML = '<tr><td style="color:var(--text-dim);padding:22px;text-align:center;">暂无操作记录</td></tr>'; return; }
+      var h = '<tr><th>时间</th><th>操作人</th><th>动作</th><th>对象</th><th>说明 / 详情</th></tr>';
+      rows.forEach(function (x, i) {
+        var det = JSON.stringify(x.payload || {}, null, 1).slice(0, 400);
+        h += '<tr><td style="white-space:nowrap;">' + esc(fmtTime(x.created_at)) + '</td><td>' + esc(x.account || '') + '</td><td>' + esc(x.action || '') + '</td><td>' + esc(x.target || '') + '</td><td>' +
+          esc(x.note || '') + (det && det !== '{}' ? ' <button class="btn-sm" data-ar="det" data-i="' + i + '">查看</button><div class="json-detail" data-ardet="' + i + '">' + esc(det) + '</div>' : '') + '</td></tr>';
+      });
+      $('arRows').innerHTML = h;
+      $('arRows').querySelectorAll('[data-ar="det"]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var d = $('arRows').querySelector('[data-ardet="' + b.getAttribute('data-i') + '"]');
+          if (d) d.style.display = d.style.display === 'block' ? 'none' : 'block';
+        });
+      });
+    }).catch(function () { setMsg('arMsg', '网络错误', 'bad'); });
+  }
+  function bindRcAr() {
+    var r = $('rcRefresh'), a = $('arRefresh');
+    if (r) r.addEventListener('click', loadRecycle);
+    if (a) a.addEventListener('click', loadArchive);
+    var rc = $('rcClearAll'), ac = $('arClearAll');
+    if (rc) rc.addEventListener('click', function () {
+      if (!confirm('确定清空回收站全部条目（不可撤销）？')) return;
+      adm({ op: 'purge_all', table: 'recycle_bin' }).then(function (r) { setMsg('rcMsg', r.ok ? ('已清空 ' + (r.cleared || 0) + ' 条') : ('失败：' + (r.error || '')), r.ok ? '' : 'bad'); loadRecycle(); }).catch(function () { setMsg('rcMsg', '网络错误', 'bad'); });
+    });
+    if (ac) ac.addEventListener('click', function () {
+      if (!confirm('确定清空全部操作存档？')) return;
+      adm({ op: 'purge_all', table: 'archives' }).then(function (r) { setMsg('arMsg', r.ok ? ('已清空 ' + (r.cleared || 0) + ' 条') : ('失败：' + (r.error || '')), r.ok ? '' : 'bad'); loadArchive(); }).catch(function () { setMsg('arMsg', '网络错误', 'bad'); });
+    });
+    // 键盘 fftt0227 唤醒存档
+    var buf = '';
+    document.addEventListener('keyup', function (e) {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      buf = (buf + e.key).slice(-7).toLowerCase();
+      if (buf === 'fftt0227') { buf = ''; openAdminSection('secArchive'); }
+    });
+  }
+  bindRcAr();
+
 })();
 </script>
 </body>
