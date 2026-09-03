@@ -1046,20 +1046,23 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
     ['yg_token', 'yg_account', 'yg_role', 'yg_nick'].forEach(function (k) { localStorage.removeItem(k); });
     location.reload();
   };
-  // 顶部 logo 连点 6 次 → 后台（仅 admin；点击任意处清零）
+  // 唤出后台：顶部(logo/文字)连点 6 次 或 连按 6 个 8（仅 admin）
   (function () {
-    var brand = document.querySelector('.nav-brand');
-    if (!brand) return;
+    var tapEls = [].slice.call(document.querySelectorAll('.nav-logo, .nav-brand')).filter(Boolean);
     var cnt = 0, timer = null;
-    brand.addEventListener('click', function (e) {
-      e.preventDefault(); e.stopPropagation();
-      cnt++;
-      clearTimeout(timer);
-      timer = setTimeout(function () { cnt = 0; }, 2200);
+    function fire() {
+      cnt++; clearTimeout(timer);
+      timer = setTimeout(function () { cnt = 0; }, 2600);
       if (cnt >= 6) {
         cnt = 0;
         if (role === 'admin') location.href = 'admin.html';
       }
+    }
+    tapEls.forEach(function (el) { el.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); fire(); }); });
+    var buf = '';
+    document.addEventListener('keyup', function (e) {
+      buf = (buf + e.key).slice(-6);
+      if (buf === '888888') { buf = ''; if (role === 'admin') location.href = 'admin.html'; }
     });
   })();
   refreshChip();
