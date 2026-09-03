@@ -3,10 +3,10 @@
 // 鉴权：x-sess 会员令牌 → 必须 role='admin'/'root'
 // 用法：POST {op:'list'|'update'|'insert'|'delete'|'broadcast', table, id?, set?, row?, limit?, title?, body?}
 // 允许表：orders messages gallery products crystals records subscribers settings app_data
-//        users wheel_spins ai_usage recycle_bin mailboxes（users 含敏感字段仅管理员可读）
+//        users wheel_spins ai_usage mailboxes（users 含敏感字段仅管理员可读）
 // ============================================================
 
-const TABLES = ['orders','messages','gallery','products','crystals','records','subscribers','settings','app_data','users','wheel_spins','ai_usage','recycle_bin','mailboxes'];
+const TABLES = ['orders','messages','gallery','products','crystals','records','subscribers','settings','app_data','users','wheel_spins','ai_usage','mailboxes'];
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "Content-Type, x-sess",
