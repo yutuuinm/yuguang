@@ -55,6 +55,15 @@ Deno.serve(async (req) => {
     }
 
     const base = SB_URL + "/rest/v1/" + table;
+    // 用户表守卫：root 账号不可删改；非 root 管理员只能管理普通 user（防锁死后台）
+    async function guardUser(id) {
+      if (table !== "users" || !id) return;
+      const t = await fetch(base + "?select=account,role&id=eq." + encodeURIComponent(id), { headers: auth });
+      const target = ((await t.json()) || [])[0];
+      if (!target) throw new Error("目标用户不存在");
+      if (target.role === "root") throw new Error("终端管理员账号不可修改或删除");
+      if (user.role !== "root" && target.role !== "user") throw new Error("仅 root 可管理管理员账号");
+    }
     if (op === "list") {
       const limit = Math.min(Number(body.limit) || 100, 200);
       const r = await fetch(base + "?select=*&order=id.desc&limit=" + limit, { headers: auth });
@@ -62,6 +71,7 @@ Deno.serve(async (req) => {
     }
     if (op === "delete") {
       if (!body.id) throw new Error("缺少 id");
+      await guardUser(body.id);
       const where = (table === "settings" || table === "app_data") ? "key=eq." + encodeURIComponent(body.id) : "id=eq." + encodeURIComponent(body.id);
       await fetch(base + "?" + where, { method: "DELETE", headers: auth });
       return Response.json({ ok: true }, { headers: corsHeaders });
@@ -72,6 +82,7 @@ Deno.serve(async (req) => {
     }
     if (op === "update") {
       if (!body.id) throw new Error("缺少 id");
+      await guardUser(body.id);
       const where = (table === "settings" || table === "app_data") ? "key=eq." + encodeURIComponent(body.id) : "id=eq." + encodeURIComponent(body.id);
       await fetch(base + "?" + where, { method: "PATCH", headers: auth, body: JSON.stringify(body.set || {}) });
       return Response.json({ ok: true }, { headers: corsHeaders });
