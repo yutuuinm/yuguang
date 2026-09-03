@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>个人中心 · 予光</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09040054"?>
+<link rel="stylesheet" href="css/style.css?v=09040140"?>
 <style>
   .acc{max-width:620px;margin:0 auto;padding:110px 18px 80px;}
   .back{color:var(--gold);font-size:13px;text-decoration:none;}
@@ -141,7 +141,6 @@
     var ac = document.getElementById('acAccount'); if (ac) ac.value = r.account;
     var nk = document.getElementById('acNick'); if (nk) nk.value = r.nickname || '';
     var ph = document.getElementById('acPhone'); if (ph) ph.value = r.phone || '';
-    var em = document.getElementById('acEmail'); if (em) em.value = r.email || r.account;
     var ce = document.getElementById('curEmail'); if (ce) ce.textContent = r.email || r.account;
   }
   function doMe(times) {
