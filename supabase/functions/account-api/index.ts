@@ -110,7 +110,7 @@ Deno.serve(async (req) => {
       await fetch(SB_URL + "/rest/v1/email_codes", { method: "POST", headers: { ...auth, Prefer: "return=minimal" },
         body: JSON.stringify({ email, code_hash: await sha256Hex(code), expires_at: new Date(Date.now() + 10 * 60000).toISOString(), used: false }) });
       const mail = await getMailSettings(SB_URL, SK);
-      await sendMail(mail || {}, email, "【予光】验证码", "你的验证码是：" + code + "\n10 分钟内有效，请勿泄露。\n——予光 YUGUANG");
+      await sendMail(mail || {}, email, "【予光】邮箱验证码", "您好：\n\n您的予光验证码为：\n\n  " + code + "  \n\n验证码 10 分钟内有效，请尽快完成验证；如非本人操作，请忽略本邮件。\n\n——予光 YUGUANG\n黑暗中总有光伴你前行，虽微弱，但足够照亮。");
       return Response.json({ ok: true }, { headers: corsHeaders });
     }
 
@@ -171,6 +171,16 @@ Deno.serve(async (req) => {
     }
     if (op === "update_profile") {
       const set = {};
+      if (body.account !== undefined) {
+        const ac = String(body.account).trim();
+        if (!ac) throw new Error('账号不能为空');
+        if (ac !== u.account) {
+          const chk = await fetch(SB_URL + "/rest/v1/users?select=id&account=eq." + encodeURIComponent(ac) + "&limit=1", { headers: auth });
+          const chkRows = (await chk.json()) || [];
+          if (chkRows.length) throw new Error('该账号已被使用');
+          set.account = ac;
+        }
+      }
       if (body.nickname !== undefined) set.nickname = String(body.nickname).trim();
       if (body.phone !== undefined) set.phone = String(body.phone).trim();
       if (body.email !== undefined) {
