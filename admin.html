@@ -35,7 +35,7 @@
     <a href="collections.html">系列</a>
     <a href="studio.html">定制工坊</a>
     <a href="gallery.html">光集</a>
-    <a class="btn-gold" href="studio.html">开始定制</a>
+    <a href="studio.html" style="color:var(--text-dim);font-size:13px;">开始定制</a>
   </nav>
 </div></header>
 
@@ -65,6 +65,7 @@
         <option value="settings">配置 settings</option>
       </select>
       <button class="btn-gold" id="admRefresh" type="button">刷新</button>
+      <button class="btn-ghost" id="admExport" type="button" style="font-size:13px;padding:8px 18px;">导出 CSV</button>
       <a class="btn-ghost" style="font-size:13px;padding:8px 18px;" href="index.html">返回主页</a>
       <button class="btn-ghost" style="font-size:13px;padding:8px 18px;" id="admLogout" type="button">退出</button>
     </div>
@@ -138,6 +139,27 @@
     location.href = 'index.html';
   });
   document.getElementById('admRefresh').addEventListener('click', load);
+  var expBtn = document.getElementById('admExport');
+  if (expBtn) expBtn.addEventListener('click', function () {
+    var rows = window.__admRows || [];
+    if (!rows.length) { msg.textContent = '暂无可导出数据'; return; }
+    var keys = Object.keys(rows[0]);
+    var csv = [keys.join(',')];
+    rows.forEach(function (r) {
+      csv.push(keys.map(function (k) {
+        var v = r[k];
+        var s = typeof v === 'object' ? JSON.stringify(v) : String(v === undefined || v === null ? '' : v);
+        return '"' + String(s).replace(/"/g, '""') + '"';
+      }).join(','));
+    });
+    var blob = new Blob(['\ufeff' + csv.join('\n')], { type: 'text/csv;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = sel.value + '.csv';
+    a.click();
+    msg.textContent = '已导出 ' + rows.length + ' 条';
+  });
+
   sel.addEventListener('change', function () {
     document.getElementById('admSettings').style.display = sel.value === 'settings' ? 'block' : 'none';
     load();
@@ -149,6 +171,7 @@
     api(DAPI, { op: 'list', table: t }).then(function (r) {
       if (!r.ok) { msg.textContent = '加载失败：' + (r.error || '（无管理员权限？）'); return; }
       msg.textContent = t + ' 共 ' + (r.rows ? r.rows.length : 0) + ' 条';
+      window.__admRows = r.rows || [];
       if (t === 'settings') { loadSettings(r.rows || []); return; }
       renderRows(t, r.rows || []);
     }).catch(function () { msg.textContent = '网络错误'; });
