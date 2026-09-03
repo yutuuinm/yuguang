@@ -829,8 +829,8 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
   }
 })();
 
-/* ---------- 会员 v4：注册=邮箱验证码+密码两次(+手机号选填)；登录=密码/验证码；管理员触发后台 ---------- */
-(function initAuthV4() {
+/* ---------- 会员 v5：个人中心（头像字母入口） ---------- */
+(function initAuthV5() {
   var cfg = window.SUPABASE;
   if (!cfg || !cfg.url) return;
   var API = cfg.url + '/functions/v1/account-api';
@@ -840,16 +840,17 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
   var navLinks = document.getElementById('navLinks');
   if (!navLinks) return;
 
-  function avatarChar() {
-    var n = localStorage.getItem('yg_nick') || '';
-    var s = (n || account || '光').trim();
-    return s.charAt(0);
+  function nick() { return localStorage.getItem('yg_nick') || ''; }
+  function av() { var s = (nick() || account || '光').trim(); return s.charAt(0); }
+  function api(body) {
+    return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-sess': token }, body: JSON.stringify(body) }).then(function (r) { return r.json(); });
   }
+
   function refreshChip() {
     if (account) {
-      chip.classList.remove('cta');
-      chip.textContent = avatarChar() + ' ' + (localStorage.getItem('yg_nick') || account);
+      chip.innerHTML = '<span class="chip-av">' + av() + '</span>' + (nick() || account);
       chip.setAttribute('data-logged', '1');
+      chip.title = '个人中心';
     } else {
       chip.classList.add('cta');
       chip.textContent = '登录 / 注册';
@@ -869,11 +870,12 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
   adminLink.style.cssText = 'color:var(--gold);font-size:13px;border:1px solid var(--line);border-radius:999px;padding:5px 14px;display:none;';
   var chip = document.createElement('a');
   chip.href = 'javascript:void(0)';
-  chip.style.cssText = 'color:var(--gold);font-size:13px;letter-spacing:.03em;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;';
+  chip.style.cssText = 'color:var(--gold);font-size:13px;letter-spacing:.03em;white-space:nowrap;display:inline-flex;align-items:center;gap:8px;';
   right.appendChild(adminLink);
   right.appendChild(chip);
   navLinks.parentNode.insertBefore(right, navLinks.nextSibling);
 
+  /* ---- 登录弹窗（注册/登录/忘记密码） ---- */
   var mask = document.createElement('div');
   mask.className = 'login-modal-mask';
   mask.innerHTML =
@@ -884,30 +886,30 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
     '</div>' +
     '<h3 style="text-align:center;">予光会员</h3><div class="sub" id="lgSub"></div>' +
     '<input id="lgEmail" type="email" placeholder="邮箱（必填）" autocomplete="off">' +
-    '<div id="codeRow" style="display:flex;gap:8px;display:none;">' +
-      '<input id="lgCode" type="text" inputmode="numeric" maxlength="6" placeholder="6 位验证码" style="flex:1;">' +
-      '<button class="btn-ghost" id="lgSend" type="button" style="flex-shrink:0;padding:8px 14px;font-size:13px;">获取验证码</button>' +
+    '<div id="codeRow" style="display:none;flex-direction:column;gap:8px;margin-bottom:10px;">' +
+      '<div style="display:flex;gap:8px;"><input id="lgCode" type="text" inputmode="numeric" maxlength="6" placeholder="6 位验证码" style="flex:1;margin:0;"><button class="btn-ghost" id="lgSend" type="button" style="flex-shrink:0;padding:8px 14px;font-size:13px;">获取验证码</button></div>' +
     '</div>' +
-    '<input id="lgPwd" type="password" placeholder="密码（至少 6 位）" style="display:none;">' +
+    '<input id="lgPwd" type="password" placeholder="密码（至少 6 位）">' +
     '<input id="lgPwd2" type="password" placeholder="再次输入密码" style="display:none;">' +
     '<input id="lgPhone" type="tel" placeholder="手机号（选填）" style="display:none;">' +
     '<div class="err" id="lgErr"></div>' +
     '<button class="btn-gold" style="width:100%;" id="lgGo" type="button">登录</button>' +
-    '<div style="margin-top:12px;text-align:center;color:var(--text-dim);font-size:12px;" id="lgHint">验证码由予光邮箱发送，10 分钟内有效</div>' +
-    '<div style="margin-top:10px;text-align:center;"><a href="javascript:void(0)" id="lgBack" style="color:var(--text-dim);font-size:12px;text-decoration:underline;">← 返回</a></div>' +
+    '<div style="margin-top:12px;text-align:center;color:var(--text-dim);font-size:12px;">' +
+      '<span id="lgForget" style="cursor:pointer;text-decoration:underline;">忘记密码？</span>' +
+    '</div>' +
     '</div>';
   document.body.appendChild(mask);
   var emailEl = mask.querySelector('#lgEmail');
   var codeEl = mask.querySelector('#lgCode');
+  var codeRow = mask.querySelector('#codeRow');
   var pwdEl = mask.querySelector('#lgPwd');
   var pwd2El = mask.querySelector('#lgPwd2');
   var phoneEl = mask.querySelector('#lgPhone');
   var errEl = mask.querySelector('#lgErr');
   var goEl = mask.querySelector('#lgGo');
   var sendEl = mask.querySelector('#lgSend');
-  var codeRow = mask.querySelector('#codeRow');
   var subEl = mask.querySelector('#lgSub');
-  var hintEl = mask.querySelector('#lgHint');
+  var forgetEl = mask.querySelector('#lgForget');
   var tabLogin = mask.querySelector('[data-tab="login"]');
   var tabReg = mask.querySelector('[data-tab="reg"]');
   var tab = 'login';
@@ -917,34 +919,146 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
     tab = t;
     tabLogin.classList.toggle('active', t === 'login');
     tabReg.classList.toggle('active', t === 'reg');
-    goEl.textContent = t === 'login' ? (useCode ? '验证码登录' : '登录') : '注 册';
     if (t === 'login') {
       codeRow.style.display = useCode ? 'flex' : 'none';
       pwdEl.style.display = useCode ? 'none' : 'block';
       pwd2El.style.display = 'none';
       phoneEl.style.display = 'none';
+      goEl.textContent = useCode ? '验证码登录' : '登录';
       subEl.textContent = useCode ? '输入邮箱验证码登录' : '邮箱 + 密码登录';
-      hintEl.textContent = useCode ? '验证码由予光邮箱发送，10 分钟内有效' : '没有账号？切到「注册」创建';
     } else {
       codeRow.style.display = 'flex';
       pwdEl.style.display = 'block';
       pwd2El.style.display = 'block';
       phoneEl.style.display = 'block';
+      goEl.textContent = '注 册';
       subEl.textContent = '邮箱验证后设置密码即可注册';
-      hintEl.textContent = '验证码由予光邮箱发送，10 分钟内有效';
     }
     errEl.textContent = '';
   }
   tabLogin.addEventListener('click', function () { show('login'); });
   tabReg.addEventListener('click', function () { show('reg'); });
-  hintEl.addEventListener('click', function () {
-    if (tab === 'login') { useCode = !useCode; show('login'); }
+  forgetEl.addEventListener('click', function () {
+    var em = (emailEl.value || '').trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { errEl.textContent = '请先输入你的注册邮箱'; emailEl.focus(); return; }
+    goEl.disabled = true;
+    api({ op: 'forgot_pw', email: em }).then(function (r) {
+      if (r.ok) errEl.textContent = '已通知管理员，重置后临时密码会发到你的邮箱（也可直接联系客服）。';
+      else errEl.textContent = r.error || '提交失败';
+    }).catch(function () { errEl.textContent = '网络错误'; }).then(function () { goEl.disabled = false; });
   });
-  hintEl.style.cursor = 'pointer';
 
-  function api(body) {
-    return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-sess': token }, body: JSON.stringify(body) }).then(function (r) { return r.json(); });
+  function loginAfter(r) {
+    token = r.token; account = r.account; role = r.role || 'user';
+    localStorage.setItem('yg_token', token);
+    localStorage.setItem('yg_account', account);
+    localStorage.setItem('yg_role', role);
+    localStorage.setItem('yg_nick', r.nickname || '');
+    refreshChip(); mask.classList.remove('show');
   }
+
+  /* ---- 个人中心弹窗 ---- */
+  var pmask = document.createElement('div');
+  pmask.className = 'login-modal-mask';
+  pmask.innerHTML =
+    '<div class="login-modal" style="width:min(560px,94vw);"><span class="close-x" id="pmClose">✕</span>' +
+    '<h3 style="text-align:center;">个人中心</h3>' +
+    '<div class="sub" id="pmWho" style="text-align:center;"></div>' +
+    '<div class="bar" style="justify-content:center;gap:10px;">' +
+      '<button class="btn-ghost" id="pmOrders" type="button" style="font-size:13px;padding:8px 16px;">我的订单</button>' +
+      '<button class="btn-ghost" id="pmAdmin" type="button" style="font-size:13px;padding:8px 16px;display:none;">管理后台</button>' +
+    '</div>' +
+    '<div style="border-top:1px solid var(--line-soft);padding:14px 0 6px;"><b style="color:var(--gold);font-weight:400;">基本资料</b></div>' +
+    '<input id="pmNick" placeholder="昵称（头像=首字）">' +
+    '<input id="pmPhone" type="tel" placeholder="手机号（选填）">' +
+    '<div class="err" id="pmErr"></div>' +
+    '<button class="btn-gold" id="pmSave" type="button" style="width:100%;">保存资料</button>' +
+    '<div style="border-top:1px solid var(--line-soft);padding:12px 0 6px;"><b style="color:var(--gold);font-weight:400;">更换邮箱（需原邮箱验证码）</b></div>' +
+    '<div style="display:flex;gap:8px;"><input id="pmEmail" type="email" placeholder="新邮箱"><button class="btn-ghost" id="pmSendCode" type="button" style="flex-shrink:0;padding:8px 12px;font-size:12px;">发送验证码到原邮箱</button></div>' +
+    '<input id="pmCode" placeholder="6 位验证码" style="display:none;">' +
+    '<button class="btn-gold" id="pmSaveEmail" type="button" style="width:100%;margin-top:4px;">确认更换邮箱</button>' +
+    '<div style="border-top:1px solid var(--line-soft);padding:12px 0 6px;"><b style="color:var(--gold);font-weight:400;">修改密码</b></div>' +
+    '<input id="pmOld" type="password" placeholder="原密码">' +
+    '<input id="pmNew" type="password" placeholder="新密码（至少 6 位）">' +
+    '<button class="btn-gold" id="pmPw" type="button" style="width:100%;">修改密码</button>' +
+    '<div style="border-top:1px solid var(--line-soft);padding:12px 0 6px;"><b style="color:var(--gold);font-weight:400;">我的信箱</b></div>' +
+    '<div id="pmInbox" style="max-height:180px;overflow-y:auto;"></div>' +
+    '<div class="bar" style="justify-content:center;margin-top:10px;">' +
+      '<button class="btn-ghost" id="pmOut" type="button" style="font-size:13px;padding:8px 16px;">退出登录</button>' +
+    '</div>' +
+    '</div>';
+  document.body.appendChild(pmask);
+
+  chip.addEventListener('click', function () {
+    if (chip.getAttribute('data-logged') !== '1') { show('login'); useCode = false; mask.classList.add('show'); emailEl.focus(); return; }
+    openProfile();
+  });
+
+  function openProfile() {
+    document.getElementById('pmWho').innerHTML = '👤 <b>' + account + '</b>（' + role + '）';
+    document.getElementById('pmAdmin').style.display = role === 'admin' ? '' : 'none';
+    var nickInput = document.getElementById('pmNick');
+    var phInput = document.getElementById('pmPhone');
+    nickInput.value = nick();
+    api({ op: 'me' }).then(function (r) {
+      if (r.ok) { if (r.nickname) nickInput.value = r.nickname; if (r.phone) phInput.value = r.phone; document.getElementById('pmEmail').value = r.email || ''; }
+    }).catch(function () {});
+    var errEl2 = document.getElementById('pmErr');
+    errEl2.textContent = '';
+    pmask.classList.add('show');
+    loadInbox();
+  }
+  document.getElementById('pmClose').addEventListener('click', function () { pmask.classList.remove('show'); });
+  pmask.addEventListener('click', function (e) { if (e.target === pmask) pmask.classList.remove('show'); });
+  document.getElementById('pmOrders').addEventListener('click', function () {
+    var sec = document.getElementById('myOrders');
+    if (!sec) { location.href = 'index.html#myOrders'; return; }
+    pmask.classList.remove('show');
+    sec.style.display = 'block';
+    sec.scrollIntoView({ behavior: 'smooth' });
+    var list = document.getElementById('ordersList');
+    if (list && !list.innerHTML) loadOrders();
+  });
+  document.getElementById('pmAdmin').addEventListener('click', function () { location.href = 'admin.html'; });
+
+  document.getElementById('pmSave').addEventListener('click', function () {
+    var errEl2 = document.getElementById('pmErr');
+    api({ op: 'update_profile', nickname: document.getElementById('pmNick').value.trim(), phone: document.getElementById('pmPhone').value.trim() })
+      .then(function (r) {
+        if (r.ok) { localStorage.setItem('yg_nick', document.getElementById('pmNick').value.trim()); refreshChip(); errEl2.textContent = '已保存'; }
+        else errEl2.textContent = r.error || '保存失败';
+      }).catch(function () { errEl2.textContent = '网络错误'; });
+  });
+  var cd2 = 0;
+  document.getElementById('pmSendCode').addEventListener('click', function () {
+    if (cd2 > 0) return;
+    api({ op: 'send_code', email: account }).then(function (r) {
+      if (r.ok) { document.getElementById('pmCode').style.display = 'block'; document.getElementById('pmErr').textContent = '验证码已发送到原邮箱'; cd2 = 60; var b = document.getElementById('pmSendCode'); b.textContent = '已发送(' + cd2 + ')'; var t = setInterval(function () { cd2--; if (cd2 <= 0) { clearInterval(t); b.textContent = '重新发送'; } else b.textContent = '已发送(' + cd2 + ')'; }, 1000); }
+      else document.getElementById('pmErr').textContent = r.error || '发送失败';
+    }).catch(function () { document.getElementById('pmErr').textContent = '网络错误'; });
+  });
+  document.getElementById('pmSaveEmail').addEventListener('click', function () {
+    api({ op: 'update_profile', email: document.getElementById('pmEmail').value.trim(), code: document.getElementById('pmCode').value.trim() })
+      .then(function (r) {
+        if (r.ok) { account = document.getElementById('pmEmail').value.trim(); localStorage.setItem('yg_account', account); localStorage.setItem('yg_token', token); refreshChip(); document.getElementById('pmErr').textContent = '邮箱已更换'; }
+        else document.getElementById('pmErr').textContent = r.error || '更换失败';
+      }).catch(function () { document.getElementById('pmErr').textContent = '网络错误'; });
+  });
+  document.getElementById('pmPw').addEventListener('click', function () {
+    api({ op: 'change_pw', old_password: document.getElementById('pmOld').value, new_password: document.getElementById('pmNew').value })
+      .then(function (r) { document.getElementById('pmErr').textContent = r.ok ? '密码已修改' : (r.error || '失败'); if (r.ok) { document.getElementById('pmOld').value = ''; document.getElementById('pmNew').value = ''; } })
+      .catch(function () { document.getElementById('pmErr').textContent = '网络错误'; });
+  });
+  document.getElementById('pmOut').addEventListener('click', function () {
+    api({ op: 'logout' }).catch(function () {});
+    localStorage.removeItem('yg_token');
+    localStorage.removeItem('yg_account');
+    localStorage.removeItem('yg_role');
+    localStorage.removeItem('yg_nick');
+    account = ''; token = '';
+    refreshChip(); pmask.classList.remove('show');
+  });
+
   function loadOrders() {
     var list = document.getElementById('ordersList');
     var tip = document.getElementById('ordersTip');
@@ -965,122 +1079,72 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
       if (sec) sec.style.display = 'block';
     }).catch(function () { list.innerHTML = '<p class="orders-empty">网络开小差了</p>'; });
   }
-  function afterLogin(r) {
-    token = r.token; account = r.account; role = r.role || 'user';
-    localStorage.setItem('yg_token', token);
-    localStorage.setItem('yg_account', account);
-    localStorage.setItem('yg_role', role);
-    localStorage.setItem('yg_nick', r.nickname || '');
-    refreshChip(); mask.classList.remove('show');
-    var sec = document.getElementById('myOrders');
-    if (sec) loadOrders();
+  function loadInbox() {
+    var box = document.getElementById('pmInbox');
+    if (!box) return;
+    box.innerHTML = '加载中…';
+    api({ op: 'inbox' }).then(function (r) {
+      if (!r.ok || !r.items || !r.items.length) { box.innerHTML = '<p style="color:var(--text-dim);font-size:13px;">信箱为空</p>'; return; }
+      var ids = [];
+      box.innerHTML = r.items.map(function (it) {
+        if (!it.read) ids.push(it.id);
+        return '<div style="border:1px solid var(--line-soft);border-radius:10px;padding:8px 10px;margin-bottom:8px;font-size:13px;">' +
+          '<div style="color:var(--gold);">' + (it.kind === 'important' ? '🔔 ' : '📣 ') + it.title + '</div>' +
+          '<div style="color:var(--text-dim);font-size:12px;line-height:1.8;">' + it.body + ' · ' + String(it.created_at || '').replace('T', ' ').slice(0, 16) + '</div></div>';
+      }).join('');
+      if (ids.length) api({ op: 'inbox_read', ids: ids }).catch(function () {});
+    }).catch(function () { box.innerHTML = '<p style="color:var(--text-dim);font-size:13px;">信箱加载失败</p>'; });
   }
 
-  chip.addEventListener('click', function () {
-    if (chip.getAttribute('data-logged') === '1') {
-      var sec = document.getElementById('myOrders');
-      if (!sec) { location.href = 'index.html#myOrders'; return; }
-      sec.style.display = 'block';
-      sec.scrollIntoView({ behavior: 'smooth' });
-      var list = document.getElementById('ordersList');
-      if (list && !list.innerHTML) loadOrders();
-    } else {
-      useCode = false;
-      show('login');
-      mask.classList.add('show'); emailEl.focus();
-    }
-  });
-  mask.querySelector('.close-x').addEventListener('click', function () { mask.classList.remove('show'); });
-  mask.addEventListener('click', function (e) { if (e.target === mask) mask.classList.remove('show'); });
-  var backEl = mask.querySelector('#lgBack');
-  if (backEl) backEl.addEventListener('click', function () { mask.classList.remove('show'); });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') mask.classList.remove('show'); });
-
+  // 登录弹窗发送码 & 提交
   var cd = 0;
   sendEl.addEventListener('click', function () {
     if (cd > 0) return;
-    var email = (emailEl.value || '').trim();
-    if (!/^[^@s]+@[^@s]+.[^@s]+$/.test(email)) { errEl.textContent = '请输入正确的邮箱'; return; }
+    var em = (emailEl.value || '').trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { errEl.textContent = '请输入正确的邮箱'; return; }
     errEl.textContent = '发送中…';
-    api({ op: 'send_code', email: email }).then(function (r) {
+    api({ op: 'send_code', email: em }).then(function (r) {
       if (r.ok) {
-        errEl.textContent = '验证码已发送到 ' + email + '（10 分钟内有效）';
-        cd = 60; sendEl.textContent = '重新发送(' + cd + ')';
-        var t = setInterval(function () {
-          cd--;
-          if (cd <= 0) { clearInterval(t); sendEl.textContent = '获取验证码'; }
-          else sendEl.textContent = '重新发送(' + cd + ')';
-        }, 1000);
+        errEl.textContent = '验证码已发送（10 分钟内有效）'; cd = 60; sendEl.textContent = '已发送(' + cd + ')';
+        var t = setInterval(function () { cd--; if (cd <= 0) { clearInterval(t); sendEl.textContent = '获取验证码'; } else sendEl.textContent = '已发送(' + cd + ')'; }, 1000);
       } else errEl.textContent = r.error || '发送失败';
-    }).catch(function () { errEl.textContent = '网络错误，请重试'; });
+    }).catch(function () { errEl.textContent = '网络错误'; });
   });
   goEl.addEventListener('click', function () {
     var email = (emailEl.value || '').trim();
     var body;
     if (tab === 'reg') {
       var code = (codeEl.value || '').trim();
-      var pw = pwdEl.value, pw2 = pwd2El.value;
-      if (!/^[^@s]+@[^@s]+.[^@s]+$/.test(email)) { errEl.textContent = '请输入正确的邮箱'; return; }
-      if (!/^d{6}$/.test(code)) { errEl.textContent = '请输入 6 位验证码'; return; }
-      if (pw.length < 6) { errEl.textContent = '密码至少 6 位'; return; }
-      if (pw !== pw2) { errEl.textContent = '两次输入的密码不一致'; return; }
-      body = { op: 'register', email: email, code: code, password: pw, phone: (phoneEl.value || '').trim() };
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { errEl.textContent = '请输入正确的邮箱'; return; }
+      if (!/^\d{6}$/.test(code)) { errEl.textContent = '请输入 6 位验证码'; return; }
+      if (pwdEl.value.length < 6) { errEl.textContent = '密码至少 6 位'; return; }
+      if (pwdEl.value !== pwd2El.value) { errEl.textContent = '两次密码不一致'; return; }
+      body = { op: 'register', email: email, code: code, password: pwdEl.value, phone: (phoneEl.value || '').trim() };
     } else if (useCode) {
-      var code2 = (codeEl.value || '').trim();
-      if (!/^d{6}$/.test(code2)) { errEl.textContent = '请输入 6 位验证码'; return; }
-      body = { op: 'login_code', email: email, code: code2 };
+      var c2 = (codeEl.value || '').trim();
+      if (!/^\d{6}$/.test(c2)) { errEl.textContent = '请输入 6 位验证码'; return; }
+      body = { op: 'login_code', email: email, code: c2 };
     } else {
-      if (!/^[^@s]+@[^@s]+.[^@s]+$/.test(email) || !pwdEl.value) { errEl.textContent = '请输入邮箱与密码'; return; }
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || !pwdEl.value) { errEl.textContent = '请输入邮箱与密码'; return; }
       body = { op: 'login_pw', email: email, password: pwdEl.value };
     }
     goEl.disabled = true;
-    api(body).then(function (r) {
-      if (r.ok) afterLogin(r);
-      else errEl.textContent = r.error || '操作失败';
-    }).catch(function () { errEl.textContent = '网络错误，请重试'; }).then(function () { goEl.disabled = false; });
+    api(body).then(function (r) { if (r.ok) loginAfter(r); else errEl.textContent = r.error || '操作失败'; })
+      .catch(function () { errEl.textContent = '网络错误'; }).then(function () { goEl.disabled = false; });
   });
-  pwd2El.addEventListener('keydown', function (e) { if (e.key === 'Enter') goEl.click(); });
+
+  function toggleCode() {
+    if (tab !== 'login') return;
+    useCode = !useCode;
+    show('login');
+  }
+  subEl.addEventListener('click', toggleCode);
+  subEl.style.cursor = 'pointer';
+
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { mask.classList.remove('show'); pmask.classList.remove('show'); } });
+  mask.querySelector('.close-x').addEventListener('click', function () { mask.classList.remove('show'); });
+  mask.addEventListener('click', function (e) { if (e.target === mask) mask.classList.remove('show'); });
+
   refreshChip();
   window.ygAccount = function () { return localStorage.getItem('yg_account') || ''; };
-})();
-
-/* ---------- 节气能量 & 需求选石速查 ---------- */
-(function initSeason() {
-  var box = document.getElementById('atlasSeason');
-  var needGo = document.getElementById('needGo');
-  var needSel = document.getElementById('needSel');
-  var needRes = document.getElementById('needRes');
-  if (!box && !needGo) return;
-
-  var SEASONS = [
-    ['春', '立春 雨水 惊蛰 春分 清明 谷雨', '木气生发：绿系为主（绿幽灵/孔雀石/绿发晶），意象为生长与开始', '木'],
-    ['夏', '立夏 小满 芒种 夏至 小暑 大暑', '火气盛：红紫系（红纹石/石榴石/紫水晶），意象为热烈与表达', '火'],
-    ['长夏', '小暑至立秋之间', '土气旺：黄棕系（黄水晶/虎眼石/蜜蜡），意象为安稳与承载', '土'],
-    ['秋', '立秋 处暑 白露 秋分 寒露 霜降', '金气敛：白金系（白水晶/金发晶/月光石），意象为收束与清醒', '金'],
-    ['冬', '立冬 小雪 大雪 冬至 小寒 大寒', '水气藏：黑蓝系（黑曜石/海蓝宝/蓝晶石），意象为沉淀与蓄力', '水'],
-  ];
-  if (box) {
-    box.innerHTML = SEASONS.map(function (s) {
-      return '<div class="mini-card"><h4>' + s[0] + '</h4><span class="sym">' + s[1] + '</span><p>' + s[2] + '</p><p class="sub" style="color:var(--gold);">五行养石 · ' + s[3] + '</p></div>';
-    }).join('');
-  }
-
-  var NEEDS = {
-    '情绪低落 / 迷茫': ['月光石', '紫水晶'],
-    '事业专注 / 效率': ['黄水晶', '金发晶', '虎眼石'],
-    '情感 / 关系': ['红纹石', '粉晶', '摩根石'],
-    '睡眠 / 放松': ['月光石', '烟晶'],
-    '人缘 / 沟通': ['海蓝宝', '绿玉髓'],
-    '守护 / 平安': ['黑曜石', '白水晶'],
-    '学业 / 灵感': ['紫水晶', '白水晶'],
-    '坚定 / 自控': ['虎眼石', '烟晶'],
-  };
-  if (needGo && needSel && needRes) {
-    needGo.addEventListener('click', function () {
-      var k = needSel.value;
-      if (!k) { needRes.textContent = '请先选择一个方面。'; return; }
-      var list = NEEDS[k] || [];
-      needRes.textContent = '「' + k + '」意象参考：' + list.join('、') + '。\n可到定制工坊让它们成为你的主石/辅石。以上为文化意象，不构成任何效果承诺。';
-    });
-  }
 })();
