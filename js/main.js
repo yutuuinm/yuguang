@@ -1075,7 +1075,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       '<a class="lm-item" href="studio.html"><b>定制工坊</b><small>生成你的设计卡</small></a>' +
       '<a class="lm-item" href="atlas.html"><b>星图志</b><small>生肖/八卦/星座/晶石</small></a>' +
       '<a class="lm-item" href="gallery.html"><b>光集</b><small>客户作品</small></a>' +
-      '<a class="lm-item" href="play.html"><b>互动</b><small>拈签/答案书/转盘</small></a>' +
+      '<a class="lm-item" href="' + (location.pathname.indexOf('index.html') !== -1 ? '#playSec' : 'index.html#playSec') + '"><b>互动</b><small>拈签/答案书/转盘 · 并入首页</small></a>' +
       '<a class="lm-item" href="verify.html"><b>作品验真</b><small>防伪查询</small></a>' +
       '<a class="lm-item" href="faq.html"><b>常见问题</b></a>' +
       '<a class="lm-item" href="intro.html"><b>认识予光</b></a>' +
@@ -1144,4 +1144,72 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       if (buf === '888888') { buf = ''; goAdmin(); }
     }
   });
+})();
+
+
+/* ========== 页面切换过渡导航 + 左上角返回（鸿蒙式） ========== */
+(function () {
+  var leaving = false;
+  function nav(url) {
+    if (leaving) return; leaving = true;
+    document.body.classList.add('yg-exit');
+    setTimeout(function () { try { location.assign(url); } catch (e) { location.href = url; } }, 190);
+  }
+  window.ygNav = nav;
+
+  var singleMode = !!document.querySelector('.view[data-view]');
+
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    var a = t && t.closest ? t.closest('a') : null;
+    if (!a || e.defaultPrevented) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || a.target === '_blank' || a.hasAttribute('download')) return;
+    var href = (a.getAttribute('href') || '').trim();
+    if (!href || href.charAt(0) === '#' || /^(https?:)?\/\//.test(href)) return;
+    if (href.indexOf('mailto:') === 0 || href.indexOf('tel:') === 0 || href.indexOf('javascript:') === 0) return;
+    if (/\.html(?:#.*)?$/.test(href)) {
+      if (singleMode) return; // 单文件由视图路由接管
+      e.preventDefault();
+      nav(href);
+    }
+  });
+
+  var nm = (location.pathname || '').split('/').pop();
+  if (nm === 'index.html' || nm === '' || nm === 'account.html') return;
+  var b = document.createElement('a');
+  b.id = 'ygBack';
+  b.href = 'javascript:void(0)';
+  b.setAttribute('aria-label', '返回上一页');
+  b.innerHTML = '‹';
+  b.style.display = 'flex';
+  b.addEventListener('click', function (ev) {
+    ev.preventDefault();
+    document.body.classList.add('yg-exit');
+    setTimeout(function () {
+      if (singleMode) {
+        var home = document.querySelector('.nav-brand');
+        if (home) { home.click(); return; }
+      }
+      if (document.referrer && history.length > 1) history.back();
+      else location.href = 'index.html';
+    }, 190);
+  });
+  document.body.appendChild(b);
+
+  // 单文件：仅非首页视图显示返回键
+  var viewsEl = document.querySelectorAll('.view[data-view]');
+  if (viewsEl.length) {
+    function syncBack() {
+      var show = false;
+      viewsEl.forEach(function (v) {
+        if (v.classList.contains('active') && v.getAttribute('data-view') !== 'index') show = true;
+      });
+      b.style.display = show ? 'flex' : 'none';
+    }
+    viewsEl.forEach(function (v) {
+      var mo = new MutationObserver(syncBack);
+      mo.observe(v, { attributes: true, attributeFilter: ['class'] });
+    });
+    syncBack();
+  }
 })();
