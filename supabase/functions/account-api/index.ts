@@ -164,6 +164,12 @@ Deno.serve(async (req) => {
     if (op === "me") {
       return Response.json({ ok: true, account: u.account, email: u.email || u.account, role: u.role || "user", avatar: avatarOf(u), nickname: u.nickname || "", phone: u.phone || "" }, { headers: corsHeaders });
     }
+    if (op === "verify_pass") {
+      // 二次确认：校验本人登录密码（不产生新会话）
+      const pw = String(body.password || "");
+      const ok2 = !!u.salt && (await pbkdf2(pw, u.salt, 20000)) === u.pass_hash;
+      return Response.json(ok2 ? { ok: true } : { ok: false, error: "密码不正确" }, { headers: corsHeaders });
+    }
     if (op === "logout") {
       await fetch(SB_URL + "/rest/v1/sessions?token_hash=eq." + encodeURIComponent(await sha256Hex((req.headers.get("x-sess") || "").trim())), { method: "DELETE", headers: { ...auth, Prefer: "return=minimal" } });
       return Response.json({ ok: true }, { headers: corsHeaders });
