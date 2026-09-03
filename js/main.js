@@ -860,7 +860,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   chip.className = 'nav-user';
   chip.href = 'javascript:void(0)';
   chip.style.cssText = 'color:var(--gold);font-size:13px;letter-spacing:.06em;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;';
-  navLinks.appendChild(chip);
+  navLinks.parentNode.insertBefore(chip, navLinks.nextSibling);
 
   var mask = document.createElement('div');
   mask.className = 'login-modal-mask';
@@ -967,4 +967,30 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
 
   // 供页面/表单读取当前登录账号
   window.ygAccount = function () { return localStorage.getItem('yg_account') || ''; };
+})();
+
+/* ---------- 主页展示条（后台 app_data.home_banners 可改；未配置用默认） ---------- */
+(function initHomeBanners() {
+  var track = document.getElementById('hbTrack');
+  if (!track) return;
+  var DEFAULT_BANNERS = [
+    { title: '黑暗中总有光伴你前行', text: '虽微弱，但足够照亮。东方生肖八卦 × 西方星座星盘双轨定制。', image: 'img/customers/示例图片.jpg', link: 'studio.html' },
+    { title: '生辰 / 星座 / 生肖', text: '三分钟生成只属于你的设计卡，提交即可定制。', image: '背景.jpg', link: 'studio.html' },
+    { title: 'AI 帮你选石', text: '说说你的需要，予光光语助手给出文化意象参考。', image: '予光.jpg', link: 'atlas.html' },
+  ];
+  function render(banners) {
+    if (!banners || !banners.length) return;
+    track.innerHTML = banners.map(function (b) {
+      return '<a class="hb-card" href="' + (b.link || '#') + '">' +
+        (b.image ? '<img src="' + b.image + '" alt="" loading="lazy" onerror="this.style.display=\'none\';">' : '') +
+        '<div class="hb-txt"><h4>' + (b.title || '') + '</h4><p>' + (b.text || '') + '</p></div></a>';
+    }).join('');
+  }
+  if (window.sb) {
+    window.sb('app_data?select=value&key=eq.home_banners').then(function (rows) {
+      var v = rows && rows[0] && rows[0].value;
+      if (v) render(typeof v === 'string' ? JSON.parse(v) : v);
+      else render(DEFAULT_BANNERS);
+    }).catch(function () { render(DEFAULT_BANNERS); });
+  } else render(DEFAULT_BANNERS);
 })();
