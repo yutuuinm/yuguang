@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>个人中心 · 予光</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09040017"?>
+<link rel="stylesheet" href="css/style.css?v=09040054"?>
 <style>
   .acc{max-width:620px;margin:0 auto;padding:110px 18px 80px;}
   .back{color:var(--gold);font-size:13px;text-decoration:none;}
@@ -126,8 +126,8 @@
       if (menuList) menuList.classList.add('hide');
       closeAll();
       panel.classList.remove('open'); void panel.offsetWidth; panel.classList.add('open');
-      if (p === 'p-orders') loadOrders();
-      if (p === 'p-inbox') loadInbox();
+      if (p === 'p-orders') openLive('orders');
+      if (p === 'p-inbox') openLive('inbox');
       if (p === 'p-email') { var ce = document.getElementById('curEmail'); if (ce) ce.textContent = account; }
     });
   });
@@ -153,9 +153,10 @@
       fill(r);
     }).catch(function () { if ((times || 0) < 1) { setTimeout(function () { doMe((times || 0) + 1); }, 1200); } });
   }
-  function loadOrders() {
+  function loadOrders(done) {
     var box = document.getElementById('ordersBox');
     api({ op: 'orders' }).then(function (r) {
+      if (done) done(r);
       if (!r.ok || !r.orders || !r.orders.length) { box.innerHTML = '<p style="color:var(--text-dim);font-size:13px;">还没有订单 ✦ 去定制工坊生成第一枚光吧。</p>'; return; }
       var st = { new: '待确认', paid: '已确认', making: '制作中', shipped: '已发货', done: '已完成', refund: '退款中' };
       box.innerHTML = r.orders.map(function (o) {
@@ -165,9 +166,10 @@
       }).join('');
     }).catch(function () { box.innerHTML = '<p style="color:var(--text-dim);font-size:13px;">订单加载失败</p>'; });
   }
-  function loadInbox() {
+  function loadInbox(done) {
     var box = document.getElementById('inboxBox');
     api({ op: 'inbox' }).then(function (r) {
+      if (done) done(r);
       if (!r.ok || !r.items || !r.items.length) { box.innerHTML = '<p style="color:var(--text-dim);font-size:13px;">信箱为空</p>'; return; }
       var ids = [];
       box.innerHTML = r.items.map(function (it) {
@@ -176,6 +178,101 @@
       }).join('');
       if (ids.length) api({ op: 'inbox_read', ids: ids }).catch(function () {});
     }).catch(function () { box.innerHTML = '<p style="color:var(--text-dim);font-size:13px;">信箱加载失败</p>'; });
+  }
+
+  /* ================= B 组：订单 / 信箱 实时更新（复用上方 loadOrders / loadInbox 渲染） ================= */
+  var ORD_SIG = null, ORD_READY = false;   // 订单快照：id → 状态签名（id|status|时间）
+  var INB_SEEN = {}, INB_READY = false;    // 已见信箱 id（用于识别“新”信）
+  function panelOpenOf(name) { var p = document.getElementById('p-' + name); return !!(p && p.classList.contains('open')); }
+  function cardBtn(name) { return document.querySelector('.menu-card[data-p="' + name + '"]'); }
+  function badgeTargets(name) {
+    var els = [];
+    var c = cardBtn(name);
+    if (c) els.push(c);
+    if (name === 'orders') { // 顶部用户菜单「📦 我的订单」同步角标
+      var um = document.querySelector('.user-menu');
+      if (um) Array.prototype.forEach.call(um.querySelectorAll('a'), function (a) {
+        if (a.textContent.indexOf('我的订单') !== -1) els.push(a);
+      });
+    }
+    return els;
+  }
+  function clearBadge(name) {
+    if (!window.ygLive) return;
+    badgeTargets(name).forEach(function (el) { window.ygLive.badgeClear(el); });
+  }
+  function sigOf(o) { return (o.id || '') + '|' + (o.status || '') + '|' + (o.updated_at || o.created_at || ''); }
+  function snapOrders(r) {
+    var map = {};
+    (r.orders || []).forEach(function (o) { map[o.id] = sigOf(o); });
+    ORD_SIG = map;
+  }
+  function snapInbox(r) {
+    var now = {}, unread = 0;
+    (r.items || []).forEach(function (it) { now[it.id] = 1; if (!it.read) unread++; });
+    INB_SEEN = now;
+  }
+  /* 打开面板：清角标 + 立即刷新（快照同步，供后续变化检测） */
+  function openLive(name) {
+    clearBadge(name);
+    if (name === 'orders') loadOrders(function (r) { if (r && r.ok) snapOrders(r); });
+    else loadInbox(function (r) { if (r && r.ok) snapInbox(r); });
+  }
+  function goPanel(name) {
+    var panel = document.getElementById('p-' + name);
+    if (!panel) return;
+    if (menuList) menuList.classList.add('hide');
+    closeAll();
+    panel.classList.remove('open'); void panel.offsetWidth; panel.classList.add('open');
+    openLive(name);
+  }
+  /* 面板关闭时的静默变化检测（不渲染、不标已读；仅用于角标/轻提示） */
+  function detectOrders() {
+    if (panelOpenOf('orders')) return Promise.resolve();
+    return api({ op: 'orders' }).then(function (r) {
+      if (!r || !r.ok || !r.orders) return;
+      if (!ORD_READY) { snapOrders(r); ORD_READY = true; return; }  // 首次仅建立基线
+      var changed = 0, map = {};
+      r.orders.forEach(function (o) {
+        map[o.id] = sigOf(o);
+        if (ORD_SIG[o.id] !== sigOf(o)) changed++;
+      });
+      ORD_SIG = map;
+      if (changed > 0 && window.ygLive) {
+        badgeTargets('orders').forEach(function (el) { window.ygLive.badgeSet(el, changed); });
+        window.ygLive.tip({ key: 'ordLive', text: '✦ 你的订单有了新进展', onClick: function () { goPanel('orders'); } });
+      }
+    }).catch(function () {});
+  }
+  function detectInbox() {
+    if (panelOpenOf('inbox')) return Promise.resolve();
+    return api({ op: 'inbox' }).then(function (r) {
+      if (!r || !r.ok || !r.items) return;
+      var unread = 0, fresh = 0, now = {}, first = !INB_READY;
+      INB_READY = true;
+      r.items.forEach(function (it) {
+        now[it.id] = 1;
+        if (!it.read) { unread++; if (!INB_SEEN[it.id]) fresh++; }
+      });
+      INB_SEEN = now;
+      if (unread > 0) badgeTargets('inbox').forEach(function (el) { if (window.ygLive) window.ygLive.badgeSet(el, unread); });
+      else clearBadge('inbox');
+      if (!first && fresh > 0 && window.ygLive) {
+        window.ygLive.tip({ key: 'inbLive', text: fresh > 1 ? ('✦ 你有 ' + fresh + ' 封新的微光来信') : '✦ 你有一封新的微光来信', onClick: function () { goPanel('inbox'); } });
+      }
+    }).catch(function () {});
+  }
+  function startLive() {
+    if (!token || !window.ygLive) return;
+    window.ygLive.poll({
+      key: 'accLive', every: 20000,
+      tick: function () {
+        if (panelOpenOf('orders')) loadOrders(function (r) { if (r && r.ok) snapOrders(r); });
+        else detectOrders();
+        if (panelOpenOf('inbox')) loadInbox(function (r) { if (r && r.ok) snapInbox(r); });
+        else detectInbox();
+      }
+    });
   }
   document.getElementById('acSave').addEventListener('click', function () {
     api({ op: 'update_profile', account: document.getElementById('acAccount').value.trim(), nickname: document.getElementById('acNick').value.trim(), phone: document.getElementById('acPhone').value.trim() })
@@ -215,7 +312,8 @@
   doMe(0);
   var map = { edit: 'p-edit', email: 'p-email', pw: 'p-pw', orders: 'p-orders', inbox: 'p-inbox' };
   var target = map[(location.hash || '').replace('#', '')];
-  if (target) { var p = document.getElementById(target); if (p) { if (menuList) menuList.classList.add('hide'); p.classList.add('open'); if (target === 'p-orders') loadOrders(); if (target === 'p-inbox') loadInbox(); } }
+  if (target) { var p = document.getElementById(target); if (p) { if (menuList) menuList.classList.add('hide'); p.classList.add('open'); if (target === 'p-orders') openLive('orders'); if (target === 'p-inbox') openLive('inbox'); } }
+  startLive();
 })();
 </script>
 </body>
