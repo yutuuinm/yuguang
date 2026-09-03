@@ -205,6 +205,10 @@
     location.href = 'index.html';
   });
   load();
+  // hash 直达板块
+  var map={edit:"p-edit",email:"p-email",pw:"p-pw",orders:"p-orders",inbox:"p-inbox"};
+  var target=map[(location.hash||"").replace("#","")];
+  if(target){var p=document.getElementById(target);if(p)p.classList.add("open");}
 })();
 </script>
 </body>
