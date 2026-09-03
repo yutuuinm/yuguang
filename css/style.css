@@ -1370,3 +1370,14 @@ html { -webkit-tap-highlight-color: transparent; }
   }
 }
 
+
+
+/* 头像/账号区：顶到最右 */
+.nav-user-wrap { margin-left: auto !important; align-self: center; position: relative; }
+.nav-inner { position: relative; }
+.user-menu.up-panel { right: 0 !important; }
+@media (max-width: 640px) {
+  .user-menu.up-panel { position: fixed; top: 60px; right: 10px !important; left: auto; width: min(320px, 93vw); }
+  .nav-user-wrap { margin-left: auto; }
+  .nav-inner { padding-right: 10px; }
+}
