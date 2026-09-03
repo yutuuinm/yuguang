@@ -829,8 +829,8 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
   }
 })();
 
-/* ---------- 会员 v5：个人中心（头像字母入口） ---------- */
-(function initAuthV5() {
+/* ---------- 会员 v6：登录=账号+密码；注册=邮箱验证码+密码两遍 ---------- */
+(function initAuthV6() {
   var cfg = window.SUPABASE;
   if (!cfg || !cfg.url) return;
   var API = cfg.url + '/functions/v1/account-api';
@@ -845,43 +845,48 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
   function api(body) {
     return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-sess': token }, body: JSON.stringify(body) }).then(function (r) { return r.json(); });
   }
-
   function refreshChip() {
     if (account) {
       chip.innerHTML = '<span class="chip-av">' + av() + '</span>';
       chip.title = nick() || account;
       chip.setAttribute('data-logged', '1');
-      chip.title = '个人中心';
+      chip.classList.remove('cta');
     } else {
       chip.classList.add('cta');
       chip.textContent = '登录 / 注册';
       chip.removeAttribute('data-logged');
+      chip.title = '';
     }
     refreshAdmin();
   }
   function refreshAdmin() {
     if (adminLink) adminLink.style.display = (account && role === 'admin') ? '' : 'none';
   }
+  window.addEventListener('yg:login', function () {
+    account = localStorage.getItem('yg_account') || '';
+    role = localStorage.getItem('yg_role') || 'user';
+    refreshChip();
+  });
 
   var right = document.createElement('div');
-  right.style.cssText = 'margin-left:auto;display:inline-flex;align-items:center;gap:12px;';
+  right.className = 'nav-user-wrap';
   var adminLink = document.createElement('a');
   adminLink.href = 'admin.html';
   adminLink.textContent = '后台';
   adminLink.style.cssText = 'color:var(--gold);font-size:13px;border:1px solid var(--line);border-radius:999px;padding:5px 14px;display:none;';
   var chip = document.createElement('a');
   chip.href = 'javascript:void(0)';
-  chip.style.cssText = 'color:var(--gold);font-size:13px;letter-spacing:.03em;white-space:nowrap;display:inline-flex;align-items:center;gap:8px;';
+  chip.style.cssText = 'color:var(--gold);font-size:13px;display:inline-flex;align-items:center;';
   right.appendChild(adminLink);
   right.appendChild(chip);
-  navLinks.parentNode.insertBefore(right, navLinks.nextSibling);
   var menu = document.createElement('div');
   menu.className = 'user-menu';
   menu.innerHTML = '<a href="account.html">会员中心</a><a href="javascript:void(0)" id="menuOut">退出登录</a>';
   menu.style.display = 'none';
   right.appendChild(menu);
+  navLinks.parentNode.insertBefore(right, navLinks.nextSibling);
 
-  /* ---- 登录弹窗（注册/登录/忘记密码） ---- */
+  // ---- 登录/注册弹窗（登录=账号+密码；注册=账号+邮箱验证码+密码两遍）----
   var mask = document.createElement('div');
   mask.className = 'login-modal-mask';
   mask.innerHTML =
@@ -890,21 +895,24 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
       '<button type="button" class="tab-mini auth-tab active" data-tab="login">登录</button>' +
       '<button type="button" class="tab-mini auth-tab" data-tab="reg">注册</button>' +
     '</div>' +
-    '<h3 style="text-align:center;">予光会员</h3><div class="sub" id="lgSub"></div>' +
-    '<input id="lgEmail" type="email" placeholder="邮箱（必填）" autocomplete="off">' +
-    '<div id="codeRow" style="display:none;flex-direction:column;gap:8px;margin-bottom:10px;">' +
-      '<div style="display:flex;gap:8px;"><input id="lgCode" type="text" inputmode="numeric" maxlength="6" placeholder="6 位验证码" style="flex:1;margin:0;"><button class="btn-ghost" id="lgSend" type="button" style="flex-shrink:0;padding:8px 14px;font-size:13px;">获取验证码</button></div>' +
+    '<h3 style="text-align:center;">予光会员</h3>' +
+    '<input id="lgAccount" placeholder="账号（登录用）" autocomplete="off">' +
+    '<input id="lgEmail" type="email" placeholder="邮箱（注册用）" style="display:none;">' +
+    '<div id="codeRow" style="display:none;gap:8px;flex-wrap:wrap;">' +
+      '<input id="lgCode" type="text" inputmode="numeric" maxlength="6" placeholder="6 位验证码" style="flex:1;min-width:150px;margin:0;">' +
+      '<button class="btn-ghost" id="lgSend" type="button" style="flex-shrink:0;padding:8px 14px;font-size:13px;">获取验证码</button>' +
     '</div>' +
-    '<input id="lgPwd" type="password" placeholder="密码（至少 6 位）">' +
+    '<input id="lgPwd" type="password" placeholder="密码">' +
     '<input id="lgPwd2" type="password" placeholder="再次输入密码" style="display:none;">' +
     '<input id="lgPhone" type="tel" placeholder="手机号（选填）" style="display:none;">' +
     '<div class="err" id="lgErr"></div>' +
-    '<button class="btn-gold" style="width:100%;" id="lgGo" type="button">登录</button>' +
+    '<button class="btn-gold" style="width:100%;" id="lgGo" type="button">登 录</button>' +
     '<div style="margin-top:12px;text-align:center;color:var(--text-dim);font-size:12px;">' +
       '<span id="lgForget" style="cursor:pointer;text-decoration:underline;">忘记密码？</span>' +
     '</div>' +
     '</div>';
   document.body.appendChild(mask);
+  var acctEl = mask.querySelector('#lgAccount');
   var emailEl = mask.querySelector('#lgEmail');
   var codeEl = mask.querySelector('#lgCode');
   var codeRow = mask.querySelector('#codeRow');
@@ -914,45 +922,96 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
   var errEl = mask.querySelector('#lgErr');
   var goEl = mask.querySelector('#lgGo');
   var sendEl = mask.querySelector('#lgSend');
-  var subEl = mask.querySelector('#lgSub');
   var forgetEl = mask.querySelector('#lgForget');
   var tabLogin = mask.querySelector('[data-tab="login"]');
   var tabReg = mask.querySelector('[data-tab="reg"]');
   var tab = 'login';
-  var useCode = false;
 
   function show(t) {
     tab = t;
     tabLogin.classList.toggle('active', t === 'login');
     tabReg.classList.toggle('active', t === 'reg');
-    if (t === 'login') {
-      codeRow.style.display = useCode ? 'flex' : 'none';
-      pwdEl.style.display = useCode ? 'none' : 'block';
-      pwd2El.style.display = 'none';
-      phoneEl.style.display = 'none';
-      goEl.textContent = useCode ? '验证码登录' : '登录';
-      subEl.textContent = useCode ? '输入邮箱验证码登录' : '邮箱 + 密码登录';
-    } else {
-      codeRow.style.display = 'flex';
-      pwdEl.style.display = 'block';
-      pwd2El.style.display = 'block';
-      phoneEl.style.display = 'block';
-      goEl.textContent = '注 册';
-      subEl.textContent = '邮箱验证后设置密码即可注册';
-    }
+    var reg = t === 'reg';
+    acctEl.placeholder = reg ? '账号（登录用）' : '账号';
+    emailEl.style.display = reg ? 'block' : 'none';
+    codeRow.style.display = reg ? 'flex' : 'none';
+    pwdEl.placeholder = reg ? '设置密码（至少 6 位）' : '密码';
+    pwd2El.style.display = reg ? 'block' : 'none';
+    phoneEl.style.display = reg ? 'block' : 'none';
+    goEl.textContent = reg ? '注册并登录' : '登 录';
     errEl.textContent = '';
   }
   tabLogin.addEventListener('click', function () { show('login'); });
   tabReg.addEventListener('click', function () { show('reg'); });
+
   forgetEl.addEventListener('click', function () {
-    var em = (emailEl.value || '').trim();
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { errEl.textContent = '请先输入你的注册邮箱'; emailEl.focus(); return; }
+    var em = (emailEl.value || '').trim() || (acctEl.value || '').trim();
+    var q = em;
+    if (!q) { errEl.textContent = '请填写注册时的邮箱或账号'; acctEl.focus(); return; }
     goEl.disabled = true;
-    api({ op: 'forgot_pw', email: em }).then(function (r) {
-      if (r.ok) errEl.textContent = '已通知管理员，重置后临时密码会发到你的邮箱（也可直接联系客服）。';
+    api({ op: 'forgot_pw', email: q }).then(function (r) {
+      if (r.ok) errEl.textContent = '已通知管理员，重置后临时密码会发到你的注册邮箱。';
       else errEl.textContent = r.error || '提交失败';
     }).catch(function () { errEl.textContent = '网络错误'; }).then(function () { goEl.disabled = false; });
   });
+
+  chip.addEventListener('click', function (e) {
+    e.stopPropagation();
+    if (chip.getAttribute('data-logged') !== '1') { show('login'); mask.classList.add('show'); acctEl.focus(); return; }
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+  });
+  document.addEventListener('click', function () { menu.style.display = 'none'; });
+  menu.addEventListener('click', function (e) { e.stopPropagation(); });
+  var menuOut = document.getElementById('menuOut');
+  if (menuOut) menuOut.addEventListener('click', function () {
+    api({ op: 'logout' }).catch(function () {});
+    ['yg_token', 'yg_account', 'yg_role', 'yg_nick'].forEach(function (k) { localStorage.removeItem(k); });
+    account = ''; token = ''; role = 'user';
+    refreshChip(); menu.style.display = 'none';
+    if (location.pathname.indexOf('admin.html') !== -1) { location.href = 'index.html'; return; }
+  });
+
+  mask.querySelector('.close-x').addEventListener('click', function () { mask.classList.remove('show'); });
+  mask.addEventListener('click', function (e) { if (e.target === mask) mask.classList.remove('show'); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') mask.classList.remove('show'); });
+
+  var cd = 0;
+  sendEl.addEventListener('click', function () {
+    if (cd > 0) return;
+    var em = (emailEl.value || '').trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { errEl.textContent = '请输入正确的邮箱'; emailEl.focus(); return; }
+    errEl.textContent = '发送中…';
+    api({ op: 'send_code', email: em }).then(function (r) {
+      if (r.ok) {
+        errEl.textContent = '验证码已发送（10 分钟内有效）'; cd = 60; sendEl.textContent = '已发送(' + cd + ')';
+        var t = setInterval(function () { cd--; if (cd <= 0) { clearInterval(t); sendEl.textContent = '获取验证码'; } else sendEl.textContent = '已发送(' + cd + ')'; }, 1000);
+      } else errEl.textContent = r.error || '发送失败';
+    }).catch(function () { errEl.textContent = '网络错误'; });
+  });
+
+  goEl.addEventListener('click', function () {
+    var acc = (acctEl.value || '').trim();
+    var body;
+    if (tab === 'reg') {
+      var em = (emailEl.value || '').trim();
+      var code = (codeEl.value || '').trim();
+      if (!acc) { errEl.textContent = '请设置账号'; return; }
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { errEl.textContent = '请输入正确的邮箱'; return; }
+      if (!/^\d{6}$/.test(code)) { errEl.textContent = '请输入 6 位验证码'; return; }
+      if (pwdEl.value.length < 6) { errEl.textContent = '密码至少 6 位'; return; }
+      if (pwdEl.value !== pwd2El.value) { errEl.textContent = '两次输入的密码不一致'; return; }
+      body = { op: 'register', account: acc, email: em, code: code, password: pwdEl.value, phone: (phoneEl.value || '').trim() };
+    } else {
+      if (!acc || !pwdEl.value) { errEl.textContent = '请输入账号与密码'; return; }
+      body = { op: 'login_pw', account: acc, password: pwdEl.value };
+    }
+    goEl.disabled = true;
+    api(body).then(function (r) {
+      if (r.ok) loginAfter(r);
+      else errEl.textContent = r.error || '操作失败';
+    }).catch(function () { errEl.textContent = '网络错误'; }).then(function () { goEl.disabled = false; });
+  });
+  pwd2El.addEventListener('keydown', function (e) { if (e.key === 'Enter') goEl.click(); });
 
   function loginAfter(r) {
     token = r.token; account = r.account; role = r.role || 'user';
@@ -962,126 +1021,9 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
     localStorage.setItem('yg_nick', r.nickname || '');
     refreshChip(); mask.classList.remove('show');
     window.dispatchEvent(new Event('yg:login'));
-  }
-
-  /* ---- 个人中心弹窗 ---- */
-  var pmask = document.createElement('div');
-  pmask.className = 'login-modal-mask';
-  pmask.innerHTML =
-    '<div class="login-modal" style="width:min(560px,94vw);"><span class="close-x" id="pmClose">✕</span>' +
-    '<h3 style="text-align:center;">个人中心</h3>' +
-    '<div class="sub" id="pmWho" style="text-align:center;"></div>' +
-    '<div class="bar" style="justify-content:center;gap:10px;">' +
-      '<button class="btn-ghost" id="pmOrders" type="button" style="font-size:13px;padding:8px 16px;">我的订单</button>' +
-      '<button class="btn-ghost" id="pmAdmin" type="button" style="font-size:13px;padding:8px 16px;display:none;">管理后台</button>' +
-    '</div>' +
-    '<div style="border-top:1px solid var(--line-soft);padding:14px 0 6px;"><b style="color:var(--gold);font-weight:400;">基本资料</b></div>' +
-    '<input id="pmNick" placeholder="昵称（头像=首字）">' +
-    '<input id="pmPhone" type="tel" placeholder="手机号（选填）">' +
-    '<div class="err" id="pmErr"></div>' +
-    '<button class="btn-gold" id="pmSave" type="button" style="width:100%;">保存资料</button>' +
-    '<div style="border-top:1px solid var(--line-soft);padding:12px 0 6px;"><b style="color:var(--gold);font-weight:400;">更换邮箱（需原邮箱验证码）</b></div>' +
-    '<div style="display:flex;gap:8px;"><input id="pmEmail" type="email" placeholder="新邮箱"><button class="btn-ghost" id="pmSendCode" type="button" style="flex-shrink:0;padding:8px 12px;font-size:12px;">发送验证码到原邮箱</button></div>' +
-    '<input id="pmCode" placeholder="6 位验证码" style="display:none;">' +
-    '<button class="btn-gold" id="pmSaveEmail" type="button" style="width:100%;margin-top:4px;">确认更换邮箱</button>' +
-    '<div style="border-top:1px solid var(--line-soft);padding:12px 0 6px;"><b style="color:var(--gold);font-weight:400;">修改密码</b></div>' +
-    '<input id="pmOld" type="password" placeholder="原密码">' +
-    '<input id="pmNew" type="password" placeholder="新密码（至少 6 位）">' +
-    '<button class="btn-gold" id="pmPw" type="button" style="width:100%;">修改密码</button>' +
-    '<div style="border-top:1px solid var(--line-soft);padding:12px 0 6px;"><b style="color:var(--gold);font-weight:400;">我的信箱</b></div>' +
-    '<div id="pmInbox" style="max-height:180px;overflow-y:auto;"></div>' +
-    '<div class="bar" style="justify-content:center;margin-top:10px;">' +
-      '<button class="btn-ghost" id="pmOut" type="button" style="font-size:13px;padding:8px 16px;">退出登录</button>' +
-    '</div>' +
-    '</div>';
-  document.body.appendChild(pmask);
-
-  chip.addEventListener('click', function (e) {
-    e.stopPropagation();
-    if (chip.getAttribute('data-logged') !== '1') { show('login'); useCode = false; mask.classList.add('show'); emailEl.focus(); return; }
-    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-  });
-  document.addEventListener('click', function () { menu.style.display = 'none'; });
-  menu.addEventListener('click', function (e) { e.stopPropagation(); });
-
-  function openProfile() {
-    document.getElementById('pmWho').innerHTML = '👤 <b>' + account + '</b>（' + role + '）';
-    document.getElementById('pmAdmin').style.display = role === 'admin' ? '' : 'none';
-    var nickInput = document.getElementById('pmNick');
-    var phInput = document.getElementById('pmPhone');
-    nickInput.value = nick();
-    api({ op: 'me' }).then(function (r) {
-      if (r.ok) { if (r.nickname) nickInput.value = r.nickname; if (r.phone) phInput.value = r.phone; document.getElementById('pmEmail').value = r.email || ''; }
-    }).catch(function () {});
-    var errEl2 = document.getElementById('pmErr');
-    errEl2.textContent = '';
-    pmask.classList.add('show');
-    loadInbox();
-  }
-  document.getElementById('pmClose').addEventListener('click', function () { pmask.classList.remove('show'); });
-  pmask.addEventListener('click', function (e) { if (e.target === pmask) pmask.classList.remove('show'); });
-  document.getElementById('pmOrders').addEventListener('click', function () {
     var sec = document.getElementById('myOrders');
-    if (!sec) { location.href = 'index.html#myOrders'; return; }
-    pmask.classList.remove('show');
-    sec.style.display = 'block';
-    sec.scrollIntoView({ behavior: 'smooth' });
-    var list = document.getElementById('ordersList');
-    if (list && !list.innerHTML) loadOrders();
-  });
-  document.getElementById('pmAdmin').addEventListener('click', function () { location.href = 'admin.html'; });
-
-  document.getElementById('pmSave').addEventListener('click', function () {
-    var errEl2 = document.getElementById('pmErr');
-    api({ op: 'update_profile', nickname: document.getElementById('pmNick').value.trim(), phone: document.getElementById('pmPhone').value.trim() })
-      .then(function (r) {
-        if (r.ok) { localStorage.setItem('yg_nick', document.getElementById('pmNick').value.trim()); refreshChip(); errEl2.textContent = '已保存'; }
-        else errEl2.textContent = r.error || '保存失败';
-      }).catch(function () { errEl2.textContent = '网络错误'; });
-  });
-  var cd2 = 0;
-  document.getElementById('pmSendCode').addEventListener('click', function () {
-    if (cd2 > 0) return;
-    api({ op: 'send_code', email: account }).then(function (r) {
-      if (r.ok) { document.getElementById('pmCode').style.display = 'block'; document.getElementById('pmErr').textContent = '验证码已发送到原邮箱'; cd2 = 60; var b = document.getElementById('pmSendCode'); b.textContent = '已发送(' + cd2 + ')'; var t = setInterval(function () { cd2--; if (cd2 <= 0) { clearInterval(t); b.textContent = '重新发送'; } else b.textContent = '已发送(' + cd2 + ')'; }, 1000); }
-      else document.getElementById('pmErr').textContent = r.error || '发送失败';
-    }).catch(function () { document.getElementById('pmErr').textContent = '网络错误'; });
-  });
-  document.getElementById('pmSaveEmail').addEventListener('click', function () {
-    api({ op: 'update_profile', email: document.getElementById('pmEmail').value.trim(), code: document.getElementById('pmCode').value.trim() })
-      .then(function (r) {
-        if (r.ok) { account = document.getElementById('pmEmail').value.trim(); localStorage.setItem('yg_account', account); localStorage.setItem('yg_token', token); refreshChip(); document.getElementById('pmErr').textContent = '邮箱已更换'; }
-        else document.getElementById('pmErr').textContent = r.error || '更换失败';
-      }).catch(function () { document.getElementById('pmErr').textContent = '网络错误'; });
-  });
-  document.getElementById('pmPw').addEventListener('click', function () {
-    api({ op: 'change_pw', old_password: document.getElementById('pmOld').value, new_password: document.getElementById('pmNew').value })
-      .then(function (r) { document.getElementById('pmErr').textContent = r.ok ? '密码已修改' : (r.error || '失败'); if (r.ok) { document.getElementById('pmOld').value = ''; document.getElementById('pmNew').value = ''; } })
-      .catch(function () { document.getElementById('pmErr').textContent = '网络错误'; });
-  });
-  function doLogout() {
-    api({ op: 'logout' }).catch(function () {});
-    ['yg_token', 'yg_account', 'yg_role', 'yg_nick'].forEach(function (k) { localStorage.removeItem(k); });
-    account = ''; token = ''; role = 'user';
-    refreshChip();
-    menu.style.display = 'none';
-    window.dispatchEvent(new Event('yg:login'));
-    if (location.pathname.indexOf('admin.html') !== -1) { location.href = 'index.html'; return; }
-    var maskEl = document.querySelector('.login-modal-mask');
-    if (maskEl) maskEl.classList.remove('show');
+    if (sec) { sec.style.display = 'block'; var list = document.getElementById('ordersList'); if (list && !list.innerHTML) loadOrders(); }
   }
-  var menuOut = document.getElementById('menuOut');
-  if (menuOut) menuOut.addEventListener('click', doLogout);
-  document.getElementById('pmOut').addEventListener('click', function () {
-    api({ op: 'logout' }).catch(function () {});
-    localStorage.removeItem('yg_token');
-    localStorage.removeItem('yg_account');
-    localStorage.removeItem('yg_role');
-    localStorage.removeItem('yg_nick');
-    account = ''; token = '';
-    refreshChip(); pmask.classList.remove('show');
-  });
-
   function loadOrders() {
     var list = document.getElementById('ordersList');
     var tip = document.getElementById('ordersTip');
@@ -1098,81 +1040,9 @@ const BG_PHOTO = '../背景.jpg'; // 星夜底图：替换为新的背景图文�
         }).join('');
       }
       if (tip) tip.textContent = '共 ' + r.orders.length + ' 笔订单';
-      var sec = document.getElementById('myOrders');
-      if (sec) sec.style.display = 'block';
     }).catch(function () { list.innerHTML = '<p class="orders-empty">网络开小差了</p>'; });
   }
-  function loadInbox() {
-    var box = document.getElementById('pmInbox');
-    if (!box) return;
-    box.innerHTML = '加载中…';
-    api({ op: 'inbox' }).then(function (r) {
-      if (!r.ok || !r.items || !r.items.length) { box.innerHTML = '<p style="color:var(--text-dim);font-size:13px;">信箱为空</p>'; return; }
-      var ids = [];
-      box.innerHTML = r.items.map(function (it) {
-        if (!it.read) ids.push(it.id);
-        return '<div style="border:1px solid var(--line-soft);border-radius:10px;padding:8px 10px;margin-bottom:8px;font-size:13px;">' +
-          '<div style="color:var(--gold);">' + (it.kind === 'important' ? '🔔 ' : '📣 ') + it.title + '</div>' +
-          '<div style="color:var(--text-dim);font-size:12px;line-height:1.8;">' + it.body + ' · ' + String(it.created_at || '').replace('T', ' ').slice(0, 16) + '</div></div>';
-      }).join('');
-      if (ids.length) api({ op: 'inbox_read', ids: ids }).catch(function () {});
-    }).catch(function () { box.innerHTML = '<p style="color:var(--text-dim);font-size:13px;">信箱加载失败</p>'; });
-  }
 
-  // 登录弹窗发送码 & 提交
-  var cd = 0;
-  sendEl.addEventListener('click', function () {
-    if (cd > 0) return;
-    var em = (emailEl.value || '').trim();
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { errEl.textContent = '请输入正确的邮箱'; return; }
-    errEl.textContent = '发送中…';
-    api({ op: 'send_code', email: em }).then(function (r) {
-      if (r.ok) {
-        errEl.textContent = '验证码已发送（10 分钟内有效）'; cd = 60; sendEl.textContent = '已发送(' + cd + ')';
-        var t = setInterval(function () { cd--; if (cd <= 0) { clearInterval(t); sendEl.textContent = '获取验证码'; } else sendEl.textContent = '已发送(' + cd + ')'; }, 1000);
-      } else errEl.textContent = r.error || '发送失败';
-    }).catch(function () { errEl.textContent = '网络错误'; });
-  });
-  goEl.addEventListener('click', function () {
-    var email = (emailEl.value || '').trim();
-    var body;
-    if (tab === 'reg') {
-      var code = (codeEl.value || '').trim();
-      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { errEl.textContent = '请输入正确的邮箱'; return; }
-      if (!/^\d{6}$/.test(code)) { errEl.textContent = '请输入 6 位验证码'; return; }
-      if (pwdEl.value.length < 6) { errEl.textContent = '密码至少 6 位'; return; }
-      if (pwdEl.value !== pwd2El.value) { errEl.textContent = '两次密码不一致'; return; }
-      body = { op: 'register', email: email, code: code, password: pwdEl.value, phone: (phoneEl.value || '').trim() };
-    } else if (useCode) {
-      var c2 = (codeEl.value || '').trim();
-      if (!/^\d{6}$/.test(c2)) { errEl.textContent = '请输入 6 位验证码'; return; }
-      body = { op: 'login_code', email: email, code: c2 };
-    } else {
-      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || !pwdEl.value) { errEl.textContent = '请输入邮箱与密码'; return; }
-      body = { op: 'login_pw', email: email, password: pwdEl.value };
-    }
-    goEl.disabled = true;
-    api(body).then(function (r) { if (r.ok) loginAfter(r); else errEl.textContent = r.error || '操作失败'; })
-      .catch(function () { errEl.textContent = '网络错误'; }).then(function () { goEl.disabled = false; });
-  });
-
-  function toggleCode() {
-    if (tab !== 'login') return;
-    useCode = !useCode;
-    show('login');
-  }
-  subEl.addEventListener('click', toggleCode);
-  subEl.style.cursor = 'pointer';
-
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { mask.classList.remove('show'); pmask.classList.remove('show'); } });
-  mask.querySelector('.close-x').addEventListener('click', function () { mask.classList.remove('show'); });
-  mask.addEventListener('click', function (e) { if (e.target === mask) mask.classList.remove('show'); });
-
-  window.addEventListener('yg:login', function () {
-    account = localStorage.getItem('yg_account') || '';
-    role = localStorage.getItem('yg_role') || 'user';
-    refreshChip();
-  });
   refreshChip();
   window.ygAccount = function () { return localStorage.getItem('yg_account') || ''; };
 })();
