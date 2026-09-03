@@ -6,6 +6,3 @@ verify_jwt = false
 
 [functions.ai-assistant]
 verify_jwt = false
-// trigger deploy 1788435740
-// redeploy 1788435893
-// go 1788436564
