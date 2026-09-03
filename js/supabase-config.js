@@ -39,7 +39,7 @@ window.sb = function (pathname, opts) {
    - 其余（如 storage 路径 yuguang/xx.jpg）→ 拼接公开存储桶 */
 window.sbImg = function (v) {
   if (!v) return '';
-  if (v.indexOf('http') === 0 || v.indexOf('img/') === 0) return v;
+  if (v.indexOf('http') === 0 || v.indexOf('img/') === 0 || v.indexOf('客户图片/') === 0) return v;
   return window.SUPABASE.url + '/storage/v1/object/public/' + v;
 };
 
