@@ -115,16 +115,22 @@ Deno.serve(async (req) => {
     }
 
     if (op === "register") {
+      const account = String(body.account || "").trim();
       const email = norm(body.email);
       const code = String(body.code || "").trim();
       const password = String(body.password || "");
-      if (!isValidEmail(email) || !/^\d{6}$/.test(code)) throw new Error("请输入邮箱与 6 位验证码");
+      if (!account || !isValidEmail(email)) throw new Error("请填写账号与邮箱");
+      if (!/^\d{6}$/.test(code)) throw new Error("请输入 6 位验证码");
       if (password.length < 6) throw new Error("密码至少 6 位");
       await verifyCode(email, code);
-      if (await findUser(email)) throw new Error("该邮箱已注册，请直接登录");
+      const exist = await findUser(account);
+      if (exist) throw new Error("该账号已注册");
+      const byEmail = await fetch(SB_URL + "/rest/v1/users?select=id&or=(account.eq." + encodeURIComponent(email) + ",email.eq." + encodeURIComponent(email) + ")&limit=1", { headers: auth });
+      const emRows = (await byEmail.json()) || [];
+      if (emRows.length) throw new Error("该邮箱已被注册");
       const salt = randHex(16);
       const ins = await fetch(SB_URL + "/rest/v1/users", { method: "POST", headers: { ...auth, Prefer: "return=representation" },
-        body: JSON.stringify({ account: email, email, pass_hash: await pbkdf2(password, salt, 20000), salt, phone: String(body.phone || "").trim(), nickname: "", role: "user" }) });
+        body: JSON.stringify({ account, email, pass_hash: await pbkdf2(password, salt, 20000), salt, phone: String(body.phone || "").trim(), nickname: "", role: "user" }) });
       if (!ins.ok) throw new Error("注册失败（" + ins.status + "）");
       const u = (await ins.json())[0];
       await mailbox(u.account, "important", "欢迎来到予光", "账号注册成功。黑暗中总有光伴你前行。");
@@ -140,9 +146,11 @@ Deno.serve(async (req) => {
       return await makeSession(u);
     }
     if (op === "login" || op === "login_pw") {
-      const email = norm(body.email || body.account);
-      const u = await findUser(email);
-      if (!u) throw new Error("邮箱未注册");
+      const acc = String(body.account || body.email || "").trim();
+      const rq = await fetch(SB_URL + "/rest/v1/users?select=id,account,email,pass_hash,salt,phone,nickname,role&account=eq." + encodeURIComponent(acc) + "&limit=1", { headers: auth });
+      const rows = (await rq.json()) || [];
+      const u = rows[0];
+      if (!u) throw new Error("账号不存在");
       if (!u.salt || (await pbkdf2(String(body.password || ""), u.salt, 20000)) !== u.pass_hash) throw new Error("密码错误");
       return await makeSession(u);
     }
@@ -173,7 +181,6 @@ Deno.serve(async (req) => {
           await verifyCode(norm(u.email || u.account), String(body.code).trim());
           if (await findUser(email)) throw new Error("该邮箱已被使用");
           set.email = email;
-          set.account = email; // 账号随邮箱
         }
       }
       if (!Object.keys(set).length) throw new Error("没有要修改的内容");
@@ -200,10 +207,10 @@ Deno.serve(async (req) => {
     }
     if (op === "forgot_pw") {
       // 允许游客（未登录也可申请）
-      const email = norm(body.email);
-      if (!isValidEmail(email)) throw new Error("邮箱格式不正确");
-      const uu = await findUser(email);
-      if (!uu) throw new Error("该邮箱未注册");
+      const q = norm(body.email || body.account);
+      if (!q) throw new Error("请填写账号或邮箱");
+      const uu = await findUser(q);
+      if (!uu) throw new Error("账号或邮箱未注册");
       await fetch(SB_URL + "/rest/v1/pw_resets", { method: "POST", headers: { ...auth, Prefer: "return=minimal" },
         body: JSON.stringify({ account: uu.account, email, status: "pending" }) });
       const mail = await getMailSettings(SB_URL, SK);
