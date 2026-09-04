@@ -527,6 +527,9 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
 
   /* ---------- 出生年份 → 生肖自动推演 ---------- */
   var yearEl = $('eastYear');
+  var bzMEl = $('bzMonth'), bzDEl = $('bzDay');
+  if (bzMEl) { for (var mi = 1; mi <= 12; mi++) { var mo = document.createElement('option'); mo.value = String(mi); mo.textContent = mi + ' 月'; bzMEl.appendChild(mo); } }
+  if (bzDEl) { for (var di = 1; di <= 31; di++) { var dd = document.createElement('option'); dd.value = String(di); dd.textContent = di + ' 日'; bzDEl.appendChild(dd); } }
   var zodEl = $('eastZodiac');
   var ZO_LIST = Object.keys(ZODIAC); // 子鼠…亥猪
   function zodiacOfYear(y) {
@@ -634,6 +637,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     });
   }
   function drawBracelet(beads, flat) {
+    window.__flatFlag = !!flat;
     if (flat) { drawTopView(beads); return; }
     var cv = $('braceletCanvas');
     if (!cv || !beads || !beads.length) return;
@@ -729,7 +733,54 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     setLegend(cfg.legend || []);
     syncOrderItem();
   }
-  function caps() {
+  var beadSize = 10;
+  window.__beads = function (mainC, auxC) {
+    var mm = Number(window.__bs || 10);
+    var n = mm >= 10 ? 18 : 22;
+    var arr = [];
+    for (var i = 0; i < n; i++) arr.push({ color: (i % 5 === 2) ? mainC : auxC, mm: mm });
+    return arr;
+  };
+  function initBeadRow() {
+    var row = $('beadSizeRow');
+    if (!row) return;
+    row.querySelectorAll('.bs-btn').forEach(function (b) {
+      b.addEventListener('click', function () {
+        row.querySelectorAll('.bs-btn').forEach(function (x) { x.classList.remove('active'); });
+        b.classList.add('active');
+        window.__bs = Number(b.getAttribute('data-mm'));
+        if (window.__lastBeads) drawBracelet(window.__lastBeads, false);
+      });
+    });
+  }
+  initBeadRow();
+  (function () {
+    var cv = $('braceletCanvas');
+    if (!cv) return;
+    var down = false, startX = 0;
+    cv.style.touchAction = 'none';
+    cv.addEventListener('pointerdown', function (e) { down = true; startX = e.clientX; });
+    window.addEventListener('pointermove', function (e) {
+      if (!down || window.__flatFlag || !window.__lastBeads || !window.__lastBeads.length) return;
+      var dx = e.clientX - startX;
+      if (Math.abs(dx) < 4) return;
+      var k = Math.round(dx / 24);
+      if (!k) return;
+      startX = e.clientX;
+      var arr = window.__lastBeads;
+      var out = [];
+      var n = arr.length;
+      for (var i = 0; i < n; i++) out.push(arr[(i + (k % n) + n) % n]);
+      window.__lastBeads = out;
+      drawBracelet(out, false);
+    });
+    window.addEventListener('pointerup', function () { down = false; });
+  })();
+  ['metalEast', 'metalEastZ', 'metalWest', 'metalUnion'].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) { var fd = el.closest ? el.closest('.field') : null; if (fd) fd.style.display = 'none'; else el.style.display = 'none'; }
+  });
+    function caps() {
     return [
       { color: '#e3c47c', mm: 3 },
       { color: '#e3c47c', mm: 3 }
@@ -747,6 +798,8 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     var list = ELEMENT_STONES[info.el];
     var main = list[0];
     var hourVal = $('eastHour') ? $('eastHour').value : '午';
+    var bm = bzMEl ? bzMEl.value : '';
+    var bd = bzDEl ? bzDEl.value : '';
     var hour = hourVal ? HOURS.filter((h) => h[0] === hourVal)[0] : null;
     var guaIdx = Number($('eastGua') ? $('eastGua').value : '') - 1;
     var gua = (guaIdx >= 0 && HEXES[guaIdx]) ? HEXES[guaIdx] : null;
@@ -766,9 +819,9 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       auxText: aux[0] + '（' + (gua ? '随卦' + gua[2] + '系意象 · ' : info.el + '色系辅光 · ') + '配石 8mm）',
       metal: $('metalEast') ? $('metalEast').value : '',
       chain: gua ? (gua[0] + ' · 手作') : '生肖暗刻 · 手作',
-      glyph: gua ? (gua[1] + ' ' + gua[0]) : (hour ? hour[0] + '时' : '生辰'),
+      glyph: (bm && bd ? (bm + '/' + bd + ' · ') : '') + (gua ? (gua[1] + ' ' + gua[0]) : (hour ? hour[0] + '时' : '生辰')),
       quote: parts.join('　'),
-      beads: caps().concat([{ color: aux[1], mm: 8 }, { color: main[1], mm: 10 }, { color: aux[1], mm: 8 }], caps()),
+      beads: (window.__mainC = main[1], window.__auxC = aux[1], window.__lastBeads = window.__beads(main[1], aux[1])),
       legend: [
         { role: '主石', name: main[0], color: main[1], mm: 10 },
         { role: '配石', name: aux[0], color: aux[1], mm: 8 }
@@ -829,7 +882,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       chain: hex[0] + ' · 手作',
       glyph: hex[1] + ' ' + hex[0],
       quote: '卦象「' + hex[0] + '」：' + hex[3] + '　' + info.quote,
-      beads: caps().concat([{ color: aux[1], mm: 8 }, { color: main[1], mm: 10 }, { color: aux[1], mm: 8 }], caps()),
+      beads: (window.__mainC = main[1], window.__auxC = aux[1], window.__lastBeads = window.__beads(main[1], aux[1])),
       legend: [
         { role: '主石', name: main[0], color: main[1], mm: 10 },
         { role: '配石', name: aux[0], color: aux[1], mm: 8 }
@@ -860,7 +913,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       chain: chainTxt + (risRaw ? ' · 上升意象' : ''),
       glyph: GLYPH[sun] + (moonKey ? ' ☽' : ''),
       quote: quote,
-      beads: caps().concat([{ color: auxC, mm: 8 }, { color: s.stone[1], mm: 10 }, { color: auxC, mm: 8 }], caps()),
+      beads: (window.__mainC = s.stone[1], window.__auxC = auxC, window.__lastBeads = window.__beads(s.stone[1], auxC)),
       legend: [
         { role: '主石', name: s.stone[0], color: s.stone[1], mm: 10 },
         { role: '配石', name: auxN, color: auxC, mm: 8 }
@@ -884,7 +937,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       chain: '互扣 · ' + clasp,
       glyph: GLYPH[aKey] + ' + ' + GLYPH[bKey],
       quote: a.quote + '　' + b.quote + '　两个人的光，合起来是一轮满月。各自佩戴时，你们都是完整的自己。',
-      beads: caps().concat([{ color: a.stone[1], mm: 10 }, { color: b.stone[1], mm: 10 }], caps()),
+      beads: (function () { var mm = Number(window.__bs || 10); var n = mm >= 10 ? 18 : 22; var arr = []; for (var i = 0; i < n; i++) arr.push({ color: (i % 2 === 0) ? a.stone[1] : b.stone[1], mm: mm }); window.__lastBeads = arr; return arr; })(),
       legend: [
         { role: '主石一', name: a.stone[0], color: a.stone[1], mm: 10 },
         { role: '主石二', name: b.stone[0], color: b.stone[1], mm: 10 }
@@ -2451,14 +2504,6 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   function openBuy(opts) {
     opts = opts || {};
     saleVal = toPrice(opts.sale);
-    try {
-      var vc = JSON.parse(sessionStorage.getItem('yg_voucher') || 'null');
-      if (vc && vc.d === new Date().toDateString() && Number(vc.amt) > 0 && discount === 0) {
-        discount = Number(vc.amt);
-        localStorage.setItem('yg_buy_wheel_day', new Date().toDateString());
-        sessionStorage.removeItem('yg_voucher');
-      }
-    } catch (e2) {}
     var name = (opts.name != null && String(opts.name).trim()) ? String(opts.name).trim() : '';
     var price = toPrice(opts.price);
     if (!name || !price) {
@@ -2470,6 +2515,14 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     nameVal = name;
     priceVal = price;
     qty = 1; discount = 0; spinning = false; busy = false;
+    try {
+      var vc = JSON.parse(sessionStorage.getItem('yg_voucher') || 'null');
+      if (vc && vc.d === new Date().toDateString() && Number(vc.amt) > 0) {
+        discount = Number(vc.amt);
+        localStorage.setItem('yg_buy_wheel_day', new Date().toDateString());
+        sessionStorage.removeItem('yg_voucher');
+      }
+    } catch (e2) {}
 
     var card = ensureOverlay().querySelector('.buyCard');
     card.innerHTML = formHtml();
@@ -2495,8 +2548,8 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     });
     var used = wheelUsed();
     setWheelMsg(used
-      ? '今日已转过 ✦ 明日再来'
-      : '转一下，本单立减一份小光礼 ✦ 每日一次');
+      ? '今日已转过 ✦ 收到的光越亮，明日再见'
+      : '收到你的光后来转一轮返利 ✦ 下次下单自动抵扣，每日一次');
     showOverlay(true);
     isOpen = true;
   }
@@ -3067,4 +3120,45 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   });
   sel.addEventListener('change', function () { go.click(); });
   if (!sel.value) go.click();
+})();
+
+/* ===== 东方·生肖快捷定制（subZodiac） ===== */
+(function () {
+  var sel = document.getElementById('zqZodiac');
+  var gen = document.getElementById('zqGen');
+  var zqEl = document.getElementById('zqElement');
+  if (!sel || !gen) return;
+  Object.keys(ZODIAC).forEach(function (k) {
+    var o = document.createElement('option');
+    o.value = k; o.textContent = k;
+    sel.appendChild(o);
+  });
+  function paint() {
+    var info = ZODIAC[sel.value];
+    if (zqEl && info) zqEl.textContent = '本命五行：' + info.el;
+  }
+  sel.addEventListener('change', paint);
+  paint();
+  gen.addEventListener('click', function () {
+    var z = sel.value;
+    var info = ZODIAC[z];
+    if (!info) return;
+    var list = ELEMENT_STONES[info.el];
+    var main = list[0], aux = list[1];
+    if (window.__studioShow) window.__studioShow({
+      name: z + ' · 本命',
+      sub: 'EAST · 生肖定制',
+      mainText: main[0] + '（本命' + info.el + ' · 主珠）',
+      auxText: aux[0] + '（' + info.el + '色系辅光）',
+      metal: '',
+      chain: '生肖暗刻 · 手作',
+      glyph: z,
+      quote: info.quote,
+      beads: (window.__mainC = main[1], window.__auxC = aux[1], window.__lastBeads = (window.__beads ? window.__beads(main[1], aux[1]) : [{ color: main[1], mm: 10 }])),
+      legend: [
+        { role: '主珠', name: main[0], color: main[1], mm: Number(window.__bs || 10) },
+        { role: '配珠', name: aux[0], color: aux[1], mm: Number(window.__bs || 10) }
+      ]
+    });
+  });
 })();
