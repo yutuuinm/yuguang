@@ -73,6 +73,10 @@ Deno.serve(async (req) => {
       const token = randHex(32);
       await fetch(SB_URL + "/rest/v1/sessions", { method: "POST", headers: { ...auth, Prefer: "return=minimal" },
         body: JSON.stringify({ account_id: u.id, token_hash: await sha256Hex(token), expires_at: new Date(Date.now() + 30 * 86400000).toISOString() }) });
+      try {
+        const now = new Date().toISOString();
+        await fetch(SB_URL + "/rest/v1/users?id=eq." + u.id, { method: "PATCH", headers: { ...auth, Prefer: "return=minimal" }, body: JSON.stringify({ last_login_at: now, last_active_at: now }) });
+      } catch (_) { /* 列未建则忽略 */ }
       return Response.json({ ok: true, token, account: u.account, email: u.email || u.account, role: u.role || "user", avatar: avatarOf(u), nickname: u.nickname || "" }, { headers: corsHeaders });
     }
     async function requireSession() {
@@ -170,6 +174,12 @@ Deno.serve(async (req) => {
       const ok2 = !!u.salt && (await pbkdf2(pw, u.salt, 20000)) === u.pass_hash;
       return Response.json(ok2 ? { ok: true } : { ok: false, error: "密码不正确" }, { headers: corsHeaders });
     }
+    if (op === "touch") {
+      try {
+        await fetch(SB_URL + "/rest/v1/users?id=eq." + u.id, { method: "PATCH", headers: { ...auth, Prefer: "return=minimal" }, body: JSON.stringify({ last_active_at: new Date().toISOString() }) });
+      } catch (_) { /* 列未建则忽略 */ }
+      return Response.json({ ok: true }, { headers: corsHeaders });
+    }
     if (op === "logout") {
       await fetch(SB_URL + "/rest/v1/sessions?token_hash=eq." + encodeURIComponent(await sha256Hex((req.headers.get("x-sess") || "").trim())), { method: "DELETE", headers: { ...auth, Prefer: "return=minimal" } });
       return Response.json({ ok: true }, { headers: corsHeaders });
@@ -218,6 +228,12 @@ Deno.serve(async (req) => {
     if (op === "inbox") {
       const ro = await fetch(SB_URL + "/rest/v1/mailboxes?select=*&account=eq." + encodeURIComponent(u.account) + "&order=id.desc&limit=60", { headers: auth });
       return Response.json({ ok: true, items: (await ro.json()) || [] }, { headers: corsHeaders });
+    }
+    if (op === "inbox_del") {
+      const ids = Array.isArray(body.ids) ? body.ids.map(Number).filter((n) => n > 0) : [];
+      if (!ids.length) throw new Error("缺少要删除的信件");
+      await fetch(SB_URL + "/rest/v1/mailboxes?account=eq." + encodeURIComponent(u.account) + "&id=in.(" + ids.join(",") + ")", { method: "DELETE", headers: { ...auth, Prefer: "return=minimal" } });
+      return Response.json({ ok: true }, { headers: corsHeaders });
     }
     if (op === "inbox_read") {
       const ids = (body.ids || []).map(Number).join(",");
