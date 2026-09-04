@@ -2772,3 +2772,22 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     if (parts.length) raf = requestAnimationFrame(loop);
   }
 })();
+
+/* ===== 心跳：登录后每 60s 上报活跃，后台“最后活跃”随之刷新 ===== */
+(function () {
+  var cfg = window.SUPABASE || {};
+  if (!cfg.url) return;
+  function beat() {
+    if (document.hidden) return;
+    var tk = localStorage.getItem('yg_token');
+    if (!tk) return;
+    fetch(cfg.url + '/functions/v1/account-api', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-sess': tk },
+      body: JSON.stringify({ op: 'touch' })
+    }).catch(function () {});
+  }
+  var iv = setInterval(function () {
+    if (localStorage.getItem('yg_token')) { beat(); clearInterval(iv); setInterval(beat, 60000); }
+  }, 2500);
+})();
