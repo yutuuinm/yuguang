@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>定制工坊 · 予光</title>
 <meta name="description" content="予光定制工坊——东方生肖五行、西方星座星盘、双人合盘，三分钟生成一枚属于你的光。把古老的星空语言做成你愿意戴在身上的光。">
-<link rel="stylesheet" href="css/style.css?v=09041901">
+<link rel="stylesheet" href="css/style.css?v=09042041">
 </head>
 <body>
 
@@ -90,6 +90,7 @@
         <!-- ===== 东方：生辰定制 / 摇卦定制 ===== -->
         <div class="panel active" id="panel-east">
           <div class="sub-tabs" id="eastSubTabs" role="tablist" aria-label="东方定制方式">
+            <button type="button" class="sub-btn" data-sub="zodiac" id="subTabZodiac" role="tab" aria-selected="false">生肖定制</button>
             <button type="button" class="sub-btn active" data-sub="birth" id="subTabBirth" role="tab" aria-selected="true">生辰定制</button>
             <button type="button" class="sub-btn" data-sub="shake" id="subTabShake" role="tab" aria-selected="false">摇卦定制</button>
           </div>
@@ -109,6 +110,24 @@
                 <option value="白金">白金</option>
               </select>
             </div>
+          </div>
+
+          <div class="subpane" id="subZodiac" data-name="生肖定制" hidden>
+            <div class="field">
+              <label for="zqZodiac">本命生肖（五行自动推演）</label>
+              <select id="zqZodiac"></select>
+              <div class="hint" id="zqElement"></div>
+            </div>
+            <div class="field">
+              <label for="metalEastZ">金属</label>
+              <select id="metalEastZ">
+                <option value="18K 哑光金">18K 哑光金</option>
+                <option value="925 做旧银">925 做旧银</option>
+                <option value="玫瑰金">玫瑰金</option>
+                <option value="白金">白金</option>
+              </select>
+            </div>
+            <button class="btn-gold gen-btn" id="zqGen" type="button">生成我的手串</button>
           </div>
 
           <div class="subpane" id="subBirth" data-name="生辰定制">
@@ -286,7 +305,7 @@
   </div>
 </footer>
 
-<script src="js/supabase-config.js?v=09041901"></script>
-<script src="js/main.js?v=09041901"></script>
+<script src="js/supabase-config.js?v=09042041"></script>
+<script src="js/main.js?v=09042041"></script>
 </body>
 </html>
