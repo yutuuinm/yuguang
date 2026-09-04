@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>个人中心 · 予光</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09042041"?>
+<link rel="stylesheet" href="css/style.css?v=09042143"?>
 <style>
   .acc{max-width:620px;margin:0 auto;padding:110px 18px 80px;}
   .back{color:var(--gold);font-size:13px;text-decoration:none;}
@@ -114,7 +114,7 @@
   var menuList = document.getElementById('menuList');
   var backTop = document.getElementById('backTop');
   function anyOpen(){ return !!document.querySelector('.panel.open'); }
-  if (backTop) backTop.addEventListener('click', function(){ if (anyOpen()) goBack(); else history.back(); });
+  if (backTop) backTop.addEventListener('click', function(){ if (sessionStorage.getItem('yg_acc_deep')) { sessionStorage.removeItem('yg_acc_deep'); history.back(); return; } if (anyOpen()) goBack(); else history.back(); });
   function closeAll() { document.querySelectorAll('.panel').forEach(function (x) { x.classList.remove('open'); }); }
   function goBack() {
     closeAll();
@@ -323,6 +323,7 @@
   doMe(0);
   var map = { edit: 'p-edit', email: 'p-email', pw: 'p-pw', orders: 'p-orders', inbox: 'p-inbox' };
   function openPanelByKey(k) {
+    try { sessionStorage.setItem('yg_acc_deep', '1'); } catch (e) {}
     var t = map[k];
     if (!t) { goBack(); return; }
     var p2 = document.getElementById(t);
