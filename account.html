@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>个人中心 · 予光</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09040849"?>
+<link rel="stylesheet" href="css/style.css?v=09040856"?>
 <style>
   .acc{max-width:620px;margin:0 auto;padding:110px 18px 80px;}
   .back{color:var(--gold);font-size:13px;text-decoration:none;}
@@ -67,7 +67,7 @@
     <button class="btn-gold" id="acSave" type="button" style="width:100%;">保存</button>
   </div>
 
-  <div class="panel"   <div class="panel" id="p-email">
+  <div class="panel" id="p-email">
     <h4>更换邮箱</h4>
     <p style="color:var(--text-dim);font-size:13px;margin:0 0 8px;">① 输入当前(旧)邮箱并获取验证码</p>
     <div class="row">
@@ -174,9 +174,19 @@
       var ids = [];
       box.innerHTML = r.items.map(function (it) {
         if (!it.read) ids.push(it.id);
-        return '<div class="m-item"><b>' + (it.kind === 'important' ? '🔔 ' : '📣 ') + it.title + '</b><p>' + it.body + '<br><span style="color:var(--text-dim);">' + String(it.created_at || '').replace('T', ' ').slice(0, 16) + '</span></p></div>';
+        return '<div class="m-item"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;"><b>' + (it.kind === 'important' ? '🔔 ' : '📣 ') + it.title + '</b><button class="btn-sm m-del" type="button" data-id="' + it.id + '">🗑 删除</button></div><p>' + it.body + '<br><span style="color:var(--text-dim);">' + String(it.created_at || '').replace('T', ' ').slice(0, 16) + '</span></p></div>';
       }).join('');
       if (ids.length) api({ op: 'inbox_read', ids: ids }).catch(function () {});
+      box.querySelectorAll('.m-del').forEach(function (b2) {
+        b2.addEventListener('click', function () {
+          var mid = b2.getAttribute('data-id');
+          if (!confirm('删除这封信？')) return;
+          api({ op: 'inbox_del', ids: [Number(mid)] }).then(function (r2) {
+            if (r2.ok) { loadInbox(function (r3) { if (r3 && r3.ok && window.snapInbox) snapInbox(r3); }); }
+            else msg('mailMsg', '删除失败');
+          }).catch(function () { msg('mailMsg', '删除失败'); });
+        });
+      });
     }).catch(function () { box.innerHTML = '<p style="color:var(--text-dim);font-size:13px;">信箱加载失败</p>'; });
   }
 
@@ -311,8 +321,25 @@
   });
   doMe(0);
   var map = { edit: 'p-edit', email: 'p-email', pw: 'p-pw', orders: 'p-orders', inbox: 'p-inbox' };
-  var target = map[(location.hash || '').replace('#', '')];
-  if (target) { var p = document.getElementById(target); if (p) { if (menuList) menuList.classList.add('hide'); p.classList.add('open'); if (target === 'p-orders') openLive('orders'); if (target === 'p-inbox') openLive('inbox'); } }
+  function openPanelByKey(k) {
+    var t = map[k];
+    if (!t) { goBack(); return; }
+    var p2 = document.getElementById(t);
+    if (!p2) return;
+    if (menuList) menuList.classList.add('hide');
+    closeAll();
+    p2.classList.remove('open'); void p2.offsetWidth; p2.classList.add('open');
+    if (t === 'p-orders') openLive('orders');
+    if (t === 'p-inbox') openLive('inbox');
+    if (t === 'p-email') { var ce2 = document.getElementById('curEmail'); if (ce2) ce2.textContent = account; }
+  }
+  var key = (location.hash || '').replace('#', '');
+  if (key) openPanelByKey(key);
+  document.addEventListener('click', function (e) {
+    if (!anyOpen()) return;
+    if (e.target && e.target.closest && e.target.closest('.acc, #nav, #ygBack, .user-menu')) return;
+    goBack();
+  });
   startLive();
 })();
 </script>
