@@ -1362,16 +1362,20 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
               '<stop offset="0%" stop-color="#fff9e9"/><stop offset="42%" stop-color="#ffe9b8"/><stop offset="72%" stop-color="#e8bd67"/><stop offset="100%" stop-color="#cf9740"/>' +
             '</radialGradient>' +
             '<radialGradient id="ygOrbHalo" cx="50%" cy="50%" r="50%">' +
-              '<stop offset="0%" stop-color="rgba(227,196,124,0.42)"/><stop offset="58%" stop-color="rgba(227,196,124,0.14)"/><stop offset="100%" stop-color="rgba(227,196,124,0)"/>' +
+              '<stop offset="0%" stop-color="rgba(227,196,124,0.40)"/><stop offset="58%" stop-color="rgba(227,196,124,0.12)"/><stop offset="100%" stop-color="rgba(227,196,124,0)"/>' +
             '</radialGradient>' +
           '</defs>' +
           '<circle class="ai-halo" cx="32" cy="32" r="30" fill="url(#ygOrbHalo)"/>' +
-          '<circle class="ai-orb" cx="32" cy="32" r="12.6" fill="url(#ygOrbCore)"/>' +
-          '<ellipse class="ai-spec" cx="27.3" cy="26.8" rx="3.4" ry="2.5" fill="#fffdf2" transform="rotate(-24 27.3 26.8)"/>' +
-          '<path class="ai-glint" transform="translate(13.5 16) scale(.85)" d="M0 -3.4 C0.5 -1.1 1.1 -0.5 3.4 0 C1.1 0.5 0.5 1.1 0 3.4 C-0.5 1.1 -1.1 0.5 -3.4 0 C-1.1 -0.5 -0.5 -1.1 0 -3.4 Z" fill="#fff6e0"/>' +
-          '<path class="ai-glint g2" transform="translate(50.5 14) scale(.6)" d="M0 -3.4 C0.5 -1.1 1.1 -0.5 3.4 0 C1.1 0.5 0.5 1.1 0 3.4 C-0.5 1.1 -1.1 0.5 -3.4 0 C-1.1 -0.5 -0.5 -1.1 0 -3.4 Z" fill="#fff3d4"/>' +
-          '<path class="ai-glint g3" transform="translate(52.5 44) scale(.75)" d="M0 -3.4 C0.5 -1.1 1.1 -0.5 3.4 0 C1.1 0.5 0.5 1.1 0 3.4 C-0.5 1.1 -1.1 0.5 -3.4 0 C-1.1 -0.5 -0.5 -1.1 0 -3.4 Z" fill="#fff6e0"/>' +
-          '<path class="ai-glint g4" transform="translate(15.5 47) scale(.55)" d="M0 -3.4 C0.5 -1.1 1.1 -0.5 3.4 0 C1.1 0.5 0.5 1.1 0 3.4 C-0.5 1.1 -1.1 0.5 -3.4 0 C-1.1 -0.5 -0.5 -1.1 0 -3.4 Z" fill="#ffe9b8"/>' +
+          '<g fill="none" stroke="#e3c47c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">' +
+            '<path d="M12.5 58 Q31.5 42.5 51.5 58"/>' +
+            '<path d="M15.5 53.5 Q17.5 46.5 22.5 43"/>' +
+            '<path d="M48.5 53.5 Q46.5 46.5 41.5 43"/>' +
+            '<path d="M26 61 L38 61"/>' +
+          '</g>' +
+          '<circle class="ai-orb" cx="32" cy="26.5" r="10.5" fill="url(#ygOrbCore)"/>' +
+          '<ellipse class="ai-spec" cx="27.8" cy="22.6" rx="2.9" ry="2.1" fill="#fffdf2" transform="rotate(-24 27.8 22.6)"/>' +
+          '<path class="ai-glint" transform="translate(15.5 12) scale(.7)" d="M0 -3.4 C0.5 -1.1 1.1 -0.5 3.4 0 C1.1 0.5 0.5 1.1 0 3.4 C-0.5 1.1 -1.1 0.5 -3.4 0 C-1.1 -0.5 -0.5 -1.1 0 -3.4 Z" fill="#fff6e0"/>' +
+          '<path class="ai-glint g2" transform="translate(48.5 11.5) scale(.55)" d="M0 -3.4 C0.5 -1.1 1.1 -0.5 3.4 0 C1.1 0.5 0.5 1.1 0 3.4 C-0.5 1.1 -1.1 0.5 -3.4 0 C-1.1 -0.5 -0.5 -1.1 0 -3.4 Z" fill="#ffe9b8"/>' +
         '</svg>' +
       '</button>' +
       '<div class="ai-panel" id="aiPanel">' +
