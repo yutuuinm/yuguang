@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>予光 · 管理后台</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09040206">
+<link rel="stylesheet" href="css/style.css?v=09040841">
 <style>
   /* ============ 予光 · 管理后台（分区式） ============ */
-  .adm{max-width:1180px;margin:0 auto;padding:132px 20px 90px;position:relative;z-index:5;}
+  .adm{max-width:1280px;margin:0 auto;padding:132px 12px 90px;position:relative;z-index:5;}
   .adm-title{font-family:var(--serif);font-size:clamp(24px,3vw,32px);letter-spacing:.28em;color:var(--moon);text-align:center;margin-bottom:4px;}
   .adm-title .dot{color:var(--gold);}
   .adm-sub{text-align:center;color:var(--text-dim);font-size:13px;letter-spacing:.2em;margin-bottom:8px;}
@@ -173,12 +173,13 @@
 
     <!-- ========== 首页 · 主卡（9）+ 快捷工具总入口 ========== -->
     <section id="admHome" class="admSec on">
+      <div style="display:flex;align-items:center;gap:12px;margin:0 0 2px;">
+        <a class="btn-line" href="index.html" title="返回予光主站首页">↩ 返回主界面</a>
+        <span class="who" id="hWho" style="flex:1;text-align:right;"></span>
+      </div>
       <div class="adm-title">予光 · <span class="dot">管</span>理后台</div>
       <div class="adm-sub">YU GUANG ADMIN · 把光给你，我，就是光</div>
-      <div class="bar" style="justify-content:center;">
-        <span class="who" id="hWho"></span>
-        <span class="small-note" style="text-align:center;">登录账号即后台身份 · 退出请到前台账号页</span>
-      </div>
+
 
       <div class="grp-title">日常操作</div>
       <div class="card-grid" id="homeGrid">
@@ -351,9 +352,21 @@
         <label class="f-label">📮 通知收件邮箱（每行一个，或逗号分隔）→ 存为 settings.mail.to</label>
         <textarea id="mTo" style="min-height:96px;" placeholder="admin@example.com&#10;boss@example.com"></textarea>
         <div class="small-note" style="color:var(--gold);margin-bottom:8px;">下单 / 发货 / 重置密码 等通知均发往这些邮箱（email-send / account-api 从 settings 表 key=mail 读取收件人）。</div>
-        <label class="f-label">🧩 其余邮件配置（JSON，键名：smtp_user / smtp_pass / smtp_host / smtp_port）</label>
-        <textarea id="mJson" style="min-height:130px;font-family:monospace;" placeholder='{"smtp_user":"you@qq.com","smtp_pass":"授权码","smtp_host":"smtp.qq.com","smtp_port":465}'></textarea>
-        <div class="hint">提示：保存时仅「收件邮箱」会按行拆分写入 <b style="color:var(--gold);">to</b>，JSON 框中的其余键原样保留合并。保存前会先查询 settings 是否已有 mail 键：已存在 → 更新，不存在 → 新建，不会丢配置。</div>
+        <div class="grid-2">
+          <div>
+            <label class="f-label">发件邮箱（SMTP 账号，如 you@qq.com）</label>
+            <input id="mUser" type="email" placeholder="发件邮箱" style="width:100%;" autocomplete="off">
+            <label class="f-label">SMTP 主机</label>
+            <input id="mHost" placeholder="smtp.qq.com" style="width:100%;">
+          </div>
+          <div>
+            <label class="f-label">发件授权码（密码）</label>
+            <input id="mPass" type="password" placeholder="留空表示保持不变" style="width:100%;" autocomplete="new-password">
+            <label class="f-label">SMTP 端口</label>
+            <input id="mPort" type="number" placeholder="465" style="width:100%;">
+          </div>
+        </div>
+        <div class="hint">保存时「收件邮箱」按行拆分写入 <b style="color:var(--gold);">to</b>；发件邮箱/授权码/主机/端口为 SMTP 配置，授权码留空则沿用原值。已存在 settings.mail 则更新，否则新建，不会丢配置。</div>
         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:6px;">
           <button class="btn-gold" id="mSave" type="button" title="先查 settings.mail 是否存在，再选择 insert/update">💾 保存邮件配置</button>
           <span class="msg" id="mMsg"></span>
@@ -768,8 +781,8 @@
 
 <footer class="footer"><div class="wrap"><div class="disclaimer">© 予光 YUGUANG · 管理后台 · 仅供内部使用</div></div></footer>
 
-<script src="js/supabase-config.js?v=09040206"></script>
-<script src="js/main.js?v=09040206"></script>
+<script src="js/supabase-config.js?v=09040841"></script>
+<script src="js/main.js?v=09040841"></script>
 <script>
 (function () {
   'use strict';
@@ -1989,19 +2002,26 @@
       if (!v) v = { smtp_user: '', smtp_pass: '', smtp_host: 'smtp.qq.com', smtp_port: 465, to: [] };
       var toArr = Array.isArray(v.to) ? v.to : [];
       $('mTo').value = toArr.join('\n');
-      var rest = {};
-      Object.keys(v).forEach(function (k) { if (k !== 'to') rest[k] = v[k]; });
-      $('mJson').value = JSON.stringify(rest, null, 2);
+      window.__mailRest = {};
+      Object.keys(v).forEach(function (k) { if (k !== 'to') window.__mailRest[k] = v[k]; });
+      var mu = $('mUser'), mh = $('mHost'), mp = $('mPort'), mk = $('mPass');
+      if (mu) mu.value = v.smtp_user || '';
+      if (mh) mh.value = v.smtp_host || 'smtp.qq.com';
+      if (mp) mp.value = (v.smtp_port !== undefined && v.smtp_port !== null) ? v.smtp_port : 465;
+      if (mk) mk.placeholder = v.smtp_pass ? '已配置 · 留空保持不变' : '授权码';
       setMsg('mMsg', '已读取 settings.mail（收件邮箱 ' + toArr.length + ' 个）', 'ok');
     }).catch(function () { setMsg('mMsg', '网络错误', 'bad'); });
   }
   function mailSave() {
     var toList = ($('mTo').value || '').split(/[,，;\n\r]+/).map(function (s) { return s.trim(); }).filter(Boolean);
-    var rest;
-    try { rest = JSON.parse($('mJson').value || '{}'); } catch (e) { setMsg('mMsg', '邮件配置 JSON 格式错误：' + e.message, 'bad'); return; }
-    if (!rest || typeof rest !== 'object' || Array.isArray(rest)) { setMsg('mMsg', '邮件配置需为 JSON 对象', 'bad'); return; }
     var value = {};
+    var rest = window.__mailRest || {};
     Object.keys(rest).forEach(function (k) { value[k] = rest[k]; });
+    var u = $('mUser'), h = $('mHost'), pt = $('mPort'), mk = $('mPass');
+    if (u && u.value.trim()) value.smtp_user = u.value.trim();
+    if (h && h.value.trim()) value.smtp_host = h.value.trim();
+    if (pt && pt.value) value.smtp_port = Number(pt.value);
+    if (mk && mk.value) value.smtp_pass = mk.value;
     value.to = toList;
     setMsg('mMsg', '保存中…');
     // 先查 settings 是否存在 key=mail：存在 → update，不存在 → insert（不丢配置）
