@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>予光 · 拾光铺</title>
 <meta name="description" content="拾光铺——转一轮微光小礼，再挑一枚想带走的光。">
-<link rel="stylesheet" href="css/style.css?v=09042041">
+<link rel="stylesheet" href="css/style.css?v=09042143">
 <style>
   .shop-hero{text-align:center;padding:118px 20px 8px;}
   .shop-enter{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:26px auto 8px;}
@@ -47,7 +47,7 @@
   </div>
   <section class="section">
     <div class="wrap">
-      <div class="shop-panel on" id="shopWheelPanel">
+      <div class="shop-panel" id="shopWheelPanel">
         <div class="shop-wheel-wrap">
           <h2 style="font-family:var(--serif);letter-spacing:.2em;color:var(--gold);font-size:17px;">每日一转 · 立减券</h2>
           <p class="shop-tip" style="margin:6px auto 0;">转出立减券后，去「臻品橱窗」选一枚光下单，金额会自动抵扣 ✦ 券当日有效。</p>
@@ -59,7 +59,7 @@
           <div class="shop-msg" id="shopSpinMsg">转盘已备好 ✦ 每日一次</div>
         </div>
       </div>
-      <div class="shop-panel" id="shopCabPanel">
+      <div class="shop-panel on" id="shopCabPanel">
         <h2 style="text-align:center;font-family:var(--serif);letter-spacing:.2em;color:var(--gold);font-size:17px;">臻品橱窗</h2>
         <p class="shop-tip" style="text-align:center;">例款一览 · 点「选择这枚光」填收货地址即可下单，予光会第一时间与你确认</p>
         <div class="hs-grid" id="shopGrid"><p style="text-align:center;color:var(--text-dim);" class="section-sub">正在整理橱窗…</p></div>
@@ -68,8 +68,8 @@
   </section>
 </main>
 <footer class="footer"><div class="wrap"><div class="disclaimer">予光所有产品均为饰品；生肖、八卦、星座、星盘等符号及其解读源自传统文化与流行文化中的象征寓意，属文化意象的表达与陪伴。© 予光 YUGUANG · 拾光铺</div></div></footer>
-<script src="js/supabase-config.js?v=09042041"></script>
-<script src="js/main.js?v=09042041"></script>
+<script src="js/supabase-config.js?v=09042143"></script>
+<script src="js/main.js?v=09042143"></script>
 <script>
 (function () {
   var DIS = document.getElementById('shopDisc');
@@ -115,7 +115,8 @@
     for (var i = 0; i < 4; i++) { acc += p[i]; if (r <= acc) return i; }
     return 3;
   }
-  if (spinBtn) spinBtn.addEventListener('click', function () {
+  var checkedOrder = false;
+  function doSpin() {
     if (used()) { spinMsg.innerHTML = '今日已转过 ✦ 明日再来'; spinBtn.disabled = true; return; }
     spinBtn.disabled = true;
     spinMsg.innerHTML = '微光转动中…';
@@ -130,6 +131,24 @@
       spinMsg.innerHTML = '本单立减 <b style="color:var(--gold)">¥' + amt + '</b> ✦ 去臻品橱窗下单即自动抵扣';
       spinBtn.disabled = true;
     }, 4300);
+  }
+  if (spinBtn) spinBtn.addEventListener('click', function () {
+    var tk = localStorage.getItem('yg_token') || '';
+    if (!tk || !localStorage.getItem('yg_account')) { spinMsg.innerHTML = '请先在会员中心登录，收到光后再来转返利 ✦'; return; }
+    if (!checkedOrder) {
+      checkedOrder = true;
+      spinMsg.innerHTML = '确认中…';
+      try {
+        fetch(cfg.url + '/functions/v1/account-api', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-sess': tk }, body: JSON.stringify({ op: 'orders' }) })
+          .then(function (r) { return r.json(); }).then(function (j) {
+            var got = (j && j.ok && (j.orders || []).some(function (o) { return o && o.status === 'shipped'; }));
+            if (!got) { spinMsg.innerHTML = '先下一单并收到你的光，再来转返利 ✦ 可先去臻品橱窗挑选'; spinBtn.disabled = false; return; }
+            doSpin();
+          }).catch(function () { spinMsg.innerHTML = '网络开小差，稍后再试 ✦'; spinBtn.disabled = false; });
+      } catch (e) { spinBtn.disabled = false; }
+      return;
+    }
+    doSpin();
   });
   var wTab = document.getElementById('shopTabWheel');
   var cTab = document.getElementById('shopTabCab');
