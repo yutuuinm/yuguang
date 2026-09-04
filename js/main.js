@@ -518,10 +518,12 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     });
     if ($('subBirth')) $('subBirth').hidden = (name !== 'birth');
     if ($('subShake')) $('subShake').hidden = (name !== 'shake');
+    if ($('subZodiac')) $('subZodiac').hidden = (name !== 'zodiac');
   }
   subBtns.forEach((b) => {
     b.addEventListener('click', function () { setEastSub(b.getAttribute('data-sub')); });
   });
+  window.__studioShow = function (cfg) { showDesign(cfg); };
 
   /* ---------- 出生年份 → 生肖自动推演 ---------- */
   var yearEl = $('eastYear');
@@ -1437,17 +1439,24 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
               '<stop offset="0%" stop-color="rgba(227,196,124,0.40)"/><stop offset="58%" stop-color="rgba(227,196,124,0.12)"/><stop offset="100%" stop-color="rgba(227,196,124,0)"/>' +
             '</radialGradient>' +
           '</defs>' +
-          '<circle class="ai-halo" cx="32" cy="32" r="30" fill="url(#ygOrbHalo)"/>' +
-          '<g fill="none" stroke="#e3c47c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">' +
-            '<path d="M12.5 58 Q31.5 42.5 51.5 58"/>' +
-            '<path d="M15.5 53.5 Q17.5 46.5 22.5 43"/>' +
-            '<path d="M48.5 53.5 Q46.5 46.5 41.5 43"/>' +
-            '<path d="M26 61 L38 61"/>' +
+          '<circle class="ai-halo" cx="32" cy="34" r="30" fill="url(#ygOrbHalo)"/>' +
+          '<g>' +
+            '<ellipse cx="20" cy="20" rx="5.4" ry="11.6" fill="#f7efe2" transform="rotate(-16 20 20)"/>' +
+            '<ellipse cx="44" cy="20" rx="5.4" ry="11.6" fill="#f7efe2" transform="rotate(16 44 20)"/>' +
+            '<ellipse cx="21" cy="22" rx="2.4" ry="6.8" fill="#f6c9c0" transform="rotate(-16 21 22)"/>' +
+            '<ellipse cx="43" cy="22" rx="2.4" ry="6.8" fill="#f6c9c0" transform="rotate(16 43 22)"/>' +
           '</g>' +
-          '<circle class="ai-orb" cx="32" cy="26.5" r="10.5" fill="url(#ygOrbCore)"/>' +
-          '<ellipse class="ai-spec" cx="27.8" cy="22.6" rx="2.9" ry="2.1" fill="#fffdf2" transform="rotate(-24 27.8 22.6)"/>' +
-          '<path class="ai-glint" transform="translate(15.5 12) scale(.7)" d="M0 -3.4 C0.5 -1.1 1.1 -0.5 3.4 0 C1.1 0.5 0.5 1.1 0 3.4 C-0.5 1.1 -1.1 0.5 -3.4 0 C-1.1 -0.5 -0.5 -1.1 0 -3.4 Z" fill="#fff6e0"/>' +
-          '<path class="ai-glint g2" transform="translate(48.5 11.5) scale(.55)" d="M0 -3.4 C0.5 -1.1 1.1 -0.5 3.4 0 C1.1 0.5 0.5 1.1 0 3.4 C-0.5 1.1 -1.1 0.5 -3.4 0 C-1.1 -0.5 -0.5 -1.1 0 -3.4 Z" fill="#ffe9b8"/>' +
+          '<circle cx="32" cy="42" r="13.6" fill="#faf3e6"/>' +
+          '<circle cx="32" cy="55" r="8" fill="#efe3cd"/>' +
+          '<circle cx="26.4" cy="40.2" r="1.7" fill="#3a2f2b"/>' +
+          '<circle cx="37.6" cy="40.2" r="1.7" fill="#3a2f2b"/>' +
+          '<path d="M30 45.4 Q32 47.4 34 45.4" fill="none" stroke="#b08a63" stroke-width="1.4" stroke-linecap="round"/>' +
+          '<circle cx="21.5" cy="44.5" r="3.2" fill="#f3c3b6" opacity="0.55"/>' +
+          '<circle cx="42.5" cy="44.5" r="3.2" fill="#f3c3b6" opacity="0.55"/>' +
+          '<circle cx="32" cy="50.5" r="5.6" fill="url(#ygOrbCore)"/>' +
+          '<ellipse cx="30.4" cy="49" rx="1.5" ry="1.1" fill="#fffdf2" transform="rotate(-22 30.4 49)"/>' +
+          '<path transform="translate(13.5 31) scale(.5)" d="M0 -3.4 C0.5 -1.1 1.1 -0.5 3.4 0 C1.1 0.5 0.5 1.1 0 3.4 C-0.5 1.1 -1.1 0.5 -3.4 0 C-1.1 -0.5 -0.5 -1.1 0 -3.4 Z" fill="#fff6e0"/>' +
+          '<path transform="translate(50.5 30) scale(.42)" d="M0 -3.4 C0.5 -1.1 1.1 -0.5 3.4 0 C1.1 0.5 0.5 1.1 0 3.4 C-0.5 1.1 -1.1 0.5 -3.4 0 C-1.1 -0.5 -0.5 -1.1 0 -3.4 Z" fill="#ffe9b8"/>' +
         '</svg>' +
       '</button>' +
       '<div class="ai-panel" id="aiPanel">' +
@@ -2985,4 +2994,77 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       } catch (e) {}
     }, 700);
   }
+})();
+
+/* ===== 光集 / 首页光集：点击查看大卡弹层 ===== */
+(function () {
+  var ov = null;
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function close() { if (ov) ov.classList.remove('show'); }
+  function openCard(card) {
+    var img = card.querySelector('img');
+    var nameEl = card.querySelector('.gh-name, .g-name');
+    var tagEl = card.querySelector('.gh-tag, .g-tag');
+    var storyEl = card.querySelector('.gh-story, .g-story');
+    var quoteEl = card.querySelector('.gh-q, .g-quote, .gh-story');
+    var name = nameEl ? String(nameEl.textContent || '').trim() : '予光 · 光集';
+    var tag = tagEl ? String(tagEl.textContent || '').trim() : '';
+    var story = storyEl ? String(storyEl.textContent || '').trim() : '';
+    var quote = (quoteEl && quoteEl !== storyEl) ? String(quoteEl.textContent || '').trim() : '';
+    var src = img ? (img.getAttribute('src') || '') : '';
+    if (!ov) {
+      ov = document.createElement('div');
+      ov.className = 'ygLight';
+      ov.innerHTML = '<div class="ygLightCard"><button class="ygLightX" type="button" aria-label="关闭">✕</button><div class="ygLightBody"></div></div>';
+      document.body.appendChild(ov);
+      ov.addEventListener('click', function (e) { if (e.target === ov) close(); });
+      ov.querySelector('.ygLightX').addEventListener('click', close);
+    }
+    var inner = '';
+    if (src) inner += '<div class="ygLightImg"><img src="' + esc(src) + '" alt="' + esc(name) + '" loading="lazy"></div>';
+    inner += '<div class="ygLightTxt"><div class="ygLightName">' + esc(name) + '</div>' +
+      (tag ? '<div class="ygLightTag">' + esc(tag) + '</div>' : '') +
+      (story ? '<p class="ygLightStory">' + esc(story) + '</p>' : '') +
+      (quote ? '<p class="ygLightQuote">' + esc(quote) + '</p>' : '') +
+      '<p class="ygLightDim">✦ 文化与陪伴的表达 · 仅展示已授权作品</p></div>';
+    ov.querySelector('.ygLightBody').innerHTML = inner;
+    ov.classList.add('show');
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    var card = (t && t.closest) ? t.closest('.g-card, .gh-card') : null;
+    if (!card) return;
+    if (t.closest && t.closest('button, a, input, textarea, select')) return;
+    e.stopPropagation();
+    openCard(card);
+  });
+})();
+
+/* ===== 星图志 · 需求选石速查 ===== */
+(function () {
+  var sel = document.getElementById('needSel');
+  var go = document.getElementById('needGo');
+  var res = document.getElementById('needRes');
+  if (!sel || !go || !res) return;
+  var NEEDS = {
+    '情绪低落 / 迷茫': ['月光石', '海蓝宝', '紫水晶'],
+    '事业专注 / 效率': ['虎眼石', '黄水晶', '金发晶'],
+    '情感 / 关系': ['粉晶', '红纹石', '石榴石'],
+    '睡眠 / 放松': ['月光石', '蓝纹玛瑙', '白水晶'],
+    '人缘 / 沟通': ['天河石', '海蓝宝', '蜜蜡'],
+    '守护 / 平安': ['黑曜石', '墨玉', '茶晶'],
+    '学业 / 灵感': ['紫水晶', '白水晶', '青金石'],
+    '坚定 / 自控': ['黑发晶', '虎眼石', '玛瑙']
+  };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  go.addEventListener('click', function () {
+    var key = sel.value;
+    if (!key) { res.innerHTML = '<span style="color:var(--text-dim);">请先选一个想被照顾的方面 ✦</span>'; return; }
+    var list = NEEDS[key] || ['白水晶'];
+    res.innerHTML = '<b style="color:var(--gold);">' + esc(key) + '</b> 的晶石意象：<br>' +
+      list.map(function (n) { return '<span class="need-chip">' + esc(n) + '</span>'; }).join('') +
+      '<div class="dim" style="margin-top:8px;">✦ 以上为文化意象的参考，最终设计以定制工坊里与你确认的为准。</div>';
+  });
+  sel.addEventListener('change', function () { go.click(); });
+  if (!sel.value) go.click();
 })();
