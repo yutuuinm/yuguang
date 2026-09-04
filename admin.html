@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>予光 · 管理后台</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09041901">
+<link rel="stylesheet" href="css/style.css?v=09042041">
 <style>
   /* ============ 予光 · 管理后台（分区式） ============ */
   .adm{max-width:1280px;margin:0 auto;padding:132px 12px 90px;position:relative;z-index:5;}
@@ -798,8 +798,8 @@
 
 <footer class="footer"><div class="wrap"><div class="disclaimer">© 予光 YUGUANG · 管理后台 · 仅供内部使用</div></div></footer>
 
-<script src="js/supabase-config.js?v=09041901"></script>
-<script src="js/main.js?v=09041901"></script>
+<script src="js/supabase-config.js?v=09042041"></script>
+<script src="js/main.js?v=09042041"></script>
 <script>
 (function () {
   'use strict';
@@ -1151,7 +1151,7 @@
     if (isPending(st)) {
       b += '<button class="btn-sm" data-act="oEdit" data-id="' + o.id + '" title="展开行内编辑：每件作品的产品名/光语/图片（缺码项待生成）">💾 保存修改</button>';
       b += '<button class="btn-sm" data-act="oCode" data-id="' + o.id + '" title="给无码项逐件入库 records 并写回订单">🧾 生成防伪码</button>';
-      b += '<button class="btn-sm" data-act="oFinish" data-id="' + o.id + '" title="先补齐防伪码，再置为 已发货(shipped)">✅ 完成订单</button>';
+      b += '<button class="btn-sm" data-act="oFinish" data-id="' + o.id + '" title="先补齐防伪码；填过运单号后才可发出">✅ 完成订单</button>';
       b += '<button class="btn-sm" data-act="oTrack" data-id="' + o.id + '" title="填写/修改快递单号（写入备注 物流：…）">📦 运单号</button>';
     }
     if (st === 'shipped') b += '<button class="btn-sm" data-act="oRecall" data-id="' + o.id + '" title="shipped → 待处理(making)，需重新完成发货">↩️ 撤回待处理</button><button class="btn-sm" data-act="oTrack" data-id="' + o.id + '">📦 运单号</button>';
@@ -1241,10 +1241,12 @@
         if (!confirm('完成订单「' + (o.order_no || o.id) + '」？\n将先为缺码项补齐官方码，再置为 已发货(shipped)。')) return;
         setMsg('oMsg', '正在补齐防伪码并完成订单…');
         genCodesForOrder(o).then(function () {
+          if (!oTrack(o)) { throw new Error('请先点击「📦 运单号」填写快递单号，才算发出'); }
           return adm({ op: 'update', table: 'orders', id: o.id, set: { status: 'shipped' } });
         }).then(function (r) {
           if (!r.ok) throw new Error(r.error || '状态更新失败');
-          O.lastMsg = '✅ 已发货（单 ' + o.order_no + '）';
+          shipNotify(o);
+          O.lastMsg = '✅ 已发出（单 ' + o.order_no + '，已通知顾客信箱' + (o.account ? '与邮箱' : '') + '）';
           O.lastBad = '';
           loadOrders();
         }).catch(function (e) { setMsg('oMsg', '失败：' + (e.message || e), 'bad'); });
@@ -1329,7 +1331,38 @@
       }).catch(function () { setMsg('oMsg', '网络错误', 'bad'); });
     });
   }
-  function oSelCandidates() {
+  function oTrack(o) {
+    var m = (o && o.note) ? /物流[：:]\s*([^\n；;，,]+)/.exec(o.note) : null;
+    return m ? m[1].trim() : '';
+  }
+  function shipNotify(o) {
+    var tk = oTrack(o);
+    try {
+      if (o.account) {
+        adm({ op: 'insert', table: 'mailboxes', row: { account: o.account, kind: 'important', title: '你的订单已发出 ✦', body: '订单 ' + (o.order_no || o.id) + ' 已发出' + (tk ? '\n物流单号：' + tk : '') + '\n——予光 · 黑暗中总有光伴你前行' } }).catch(function () {});
+      }
+      var cfg2 = window.SUPABASE || {};
+      if (cfg2.url) {
+        adm({ op: 'list', table: 'users', limit: 200 }).then(function (r2) {
+          var u = ((r2.rows || []).filter(function (x) { return x.account === o.account; }))[0];
+          var em = u && u.email;
+          if (!em) return;
+          var eurl = cfg2.emailUrl || (cfg2.url + '/functions/v1/email-send');
+          fetch(eurl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              kind: 'ship',
+              subject: '【予光】你的订单已发出',
+              fields: { '订单号': o.order_no || o.id, '物流单号': tk || '—', '温馨提示': '感谢等待 ✦ 拆开时，愿微光亮起' },
+              to: [em]
+            })
+          }).catch(function () {});
+        }).catch(function () {});
+      }
+    } catch (e3) {}
+  }
+    function oSelCandidates() {
     return O.all.filter(function (o) { return oVisible(o) && isPending(o.status) && !isMergedRow(o); });
   }
   function oSelRows() { return oSelCandidates().filter(function (o) { return O.sel[String(o.id)]; }); }
@@ -1342,7 +1375,7 @@
   function oBatchFinish() {
     var targets = oSelRows();
     if (!targets.length) { setMsg('oMsg', '请先勾选待处理订单', 'bad'); return; }
-    if (!confirm('批量完成 ' + targets.length + ' 单？将逐单补齐防伪码并置为已发货。')) return;
+    if (!confirm('批量完成 ' + targets.length + ' 单？将逐单补齐防伪码；未填运单号的单会跳过，请先补运单号。')) return;
     var i = 0; var done = 0;
     setMsg('oMsg', '批量完成中 0/' + targets.length + ' …');
     function step() {
@@ -1352,9 +1385,12 @@
         loadOrders(); return;
       }
       var o = targets[i++];
-      genCodesForOrder(o).then(function () { return adm({ op: 'update', table: 'orders', id: o.id, set: { status: 'shipped' } }); })
-        .then(function (r) { if (r.ok) done++; setMsg('oMsg', '批量完成中 ' + i + '/' + targets.length + ' …'); step(); })
-        .catch(function () { setMsg('oMsg', '批量完成中 ' + i + '/' + targets.length + '（第 ' + i + ' 单失败跳过）…'); step(); });
+      genCodesForOrder(o).then(function () {
+        if (!oTrack(o)) throw new Error('单 ' + (o.order_no || o.id) + ' 未填运单号，先补运单');
+        return adm({ op: 'update', table: 'orders', id: o.id, set: { status: 'shipped' } });
+      })
+        .then(function (r) { if (r.ok) { done++; shipNotify(o); } setMsg('oMsg', '批量完成中 ' + i + '/' + targets.length + ' …'); step(); })
+        .catch(function () { setMsg('oMsg', '批量完成中 ' + i + '/' + targets.length + '（第 ' + i + ' 单失败跳过：未填运单号或网络）…'); step(); });
     }
     step();
   }
