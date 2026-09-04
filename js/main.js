@@ -314,6 +314,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       ['gallery.html', '光集', '她们与光的时刻'],
       ['atlas.html', '星图志', '生肖·八卦·星座'],
       ['knowledge.html', '学堂', '晶石 · 养石 · 文化'],
+      ['shop.html', '拾光铺', '转盘立减 · 臻品橱窗'],
       [pageHref('#playSec'), '互动', '拈签 · 答案之书']
     ] },
     { t: '探索', items: [
@@ -589,7 +590,49 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     }
     return out;
   }
+  function drawTopView(beads) {
+    var cv = $('braceletCanvas');
+    if (!cv || !beads || !beads.length) return;
+    var w = 520, h = 176;
+    cv.width = w; cv.height = h;
+    var ctx = cv.getContext('2d');
+    ctx.clearRect(0, 0, w, h);
+    var cx = w / 2, cy = h / 2 + 6;
+    var R = 58;
+    ctx.strokeStyle = 'rgba(227, 196, 124, 0.4)';
+    ctx.lineWidth = 1.2;
+    ctx.setLineDash([3, 6]);
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    var n = beads.length;
+    beads.forEach(function (bd, i) {
+      var a = -Math.PI / 2 + (i / n) * Math.PI * 2;
+      var bx = cx + Math.cos(a) * R;
+      var by = cy + Math.sin(a) * R;
+      var r = Math.max(3.2, bd.mm * 1.15);
+      var isMain = bd.mm >= 10;
+      if (isMain) {
+        var gg = ctx.createRadialGradient(bx, by, r * 0.3, bx, by, r * 2.2);
+        gg.addColorStop(0, 'rgba(227, 196, 124, 0.25)');
+        gg.addColorStop(1, 'rgba(227, 196, 124, 0)');
+        ctx.fillStyle = gg;
+        ctx.beginPath(); ctx.arc(bx, by, r * 2.2, 0, Math.PI * 2); ctx.fill();
+      }
+      var grad = ctx.createRadialGradient(bx - r * 0.35, by - r * 0.4, r * 0.12, bx, by, r);
+      grad.addColorStop(0, shade(bd.color, 1.4));
+      grad.addColorStop(0.6, bd.color);
+      grad.addColorStop(1, shade(bd.color, 0.5));
+      ctx.beginPath(); ctx.arc(bx, by, r, 0, Math.PI * 2);
+      ctx.fillStyle = grad; ctx.fill();
+      ctx.strokeStyle = isMain ? 'rgba(227, 196, 124, 0.95)' : 'rgba(244, 239, 230, 0.5)';
+      ctx.lineWidth = isMain ? 2 : 1;
+      ctx.stroke();
+    });
+  }
   function drawBracelet(beads, flat) {
+    if (flat) { drawTopView(beads); return; }
     var cv = $('braceletCanvas');
     if (!cv || !beads || !beads.length) return;
     var w = 520, h = 176;
@@ -600,6 +643,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     var midY = 104;                // 弧线基准：中段略垂、两端上扬，呈手链自然弧度
     function arcY(x) {
       if (flat) return midY;
+
       var t = (x - L) / (R - L);
       if (t < 0) t = 0;
       if (t > 1) t = 1;
@@ -670,7 +714,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     flatMode = false;
     var hx = $('genHex'); if (hx) hx.style.display = curHex ? 'inline-flex' : 'none';
     var hb = $('genHexBox'); if (hb) { hb.style.display = 'none'; hb.innerHTML = ''; }
-    var hf = $('genFlat'); if (hf) hf.textContent = '📿 整串平视图';
+    var hf = $('genFlat'); if (hf) hf.textContent = '📿 俯视图';
     if ($('pName')) $('pName').textContent = cfg.name || '予光 · 定制';
     if ($('pSub')) $('pSub').textContent = cfg.sub || '';
     if ($('rMain')) $('rMain').textContent = cfg.mainText || '';
@@ -926,7 +970,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   });
   if ($('genFlat')) $('genFlat').addEventListener('click', function () {
     flatMode = !flatMode;
-    var b = $('genFlat'); if (b) b.textContent = flatMode ? '📿 回到弧面' : '📿 整串平视图';
+    var b = $('genFlat'); if (b) b.textContent = flatMode ? '📿 回到侧视' : '📿 俯视图';
     if (lastDesign) drawBracelet(lastDesign.beads || [], flatMode);
   });
 
@@ -1860,7 +1904,10 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       else location.href = 'index.html';
     }, 250);
   });
-  document.body.appendChild(b);
+  var navInner = document.querySelector('.nav-inner');
+  if (navInner && navInner.firstChild) navInner.insertBefore(b, navInner.firstChild);
+  else document.body.appendChild(b);
+  document.body.classList.add('yg-hasback');
 
   // 单文件：仅非首页视图显示返回键
   var viewsEl = document.querySelectorAll('.view[data-view]');
@@ -2395,6 +2442,14 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   function openBuy(opts) {
     opts = opts || {};
     saleVal = toPrice(opts.sale);
+    try {
+      var vc = JSON.parse(sessionStorage.getItem('yg_voucher') || 'null');
+      if (vc && vc.d === new Date().toDateString() && Number(vc.amt) > 0 && discount === 0) {
+        discount = Number(vc.amt);
+        localStorage.setItem('yg_buy_wheel_day', new Date().toDateString());
+        sessionStorage.removeItem('yg_voucher');
+      }
+    } catch (e2) {}
     var name = (opts.name != null && String(opts.name).trim()) ? String(opts.name).trim() : '';
     var price = toPrice(opts.price);
     if (!name || !price) {
@@ -2620,7 +2675,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
 
 /* ===== 首页「系列 · 把它带回家」商品区 ===== */
 (function initHomeShop() {
-  var grid = document.getElementById('hsGrid');
+  var grid = document.getElementById('hsGrid') || document.getElementById('shopGrid');
   if (!grid) return;
   function show(rows) {
     if (!rows || !rows.length) { grid.innerHTML = '<p class="section-sub" style="text-align:center;color:var(--text-dim);">系列正在打磨 ✦ 稍后再来看看</p>'; return; }
