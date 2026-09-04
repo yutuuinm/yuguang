@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>予光 · 管理后台</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09042041">
+<link rel="stylesheet" href="css/style.css?v=09042143">
 <style>
   /* ============ 予光 · 管理后台（分区式） ============ */
   .adm{max-width:1280px;margin:0 auto;padding:132px 12px 90px;position:relative;z-index:5;}
@@ -798,8 +798,8 @@
 
 <footer class="footer"><div class="wrap"><div class="disclaimer">© 予光 YUGUANG · 管理后台 · 仅供内部使用</div></div></footer>
 
-<script src="js/supabase-config.js?v=09042041"></script>
-<script src="js/main.js?v=09042041"></script>
+<script src="js/supabase-config.js?v=09042143"></script>
+<script src="js/main.js?v=09042143"></script>
 <script>
 (function () {
   'use strict';
@@ -2489,6 +2489,7 @@
     var t = $('prFormTitle'); if (t) t.textContent = '✏️ 编辑商品（id ' + id + '）';
     var c = $('prCancel'); if (c) c.style.display = 'inline-flex';
     var f = $('prForm'); if (f) f.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    prPrevRender();
     setMsg('prMsg', '正在编辑「' + x.name + '」…', 'ok');
   }
   function prSave() {
@@ -2604,6 +2605,7 @@
     var t = $('gaFormTitle'); if (t) t.textContent = '✏️ 编辑光集（id ' + id + '）';
     var c = $('gaCancel'); if (c) c.style.display = 'inline-flex';
     var f = $('gaForm'); if (f) f.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    gaPrevRender();
     setMsg('gaMsg', '正在编辑「' + x.name + '」…', 'ok');
   }
   function gaSave() {
