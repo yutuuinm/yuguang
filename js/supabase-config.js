@@ -46,19 +46,35 @@ window.sbImg = function (v) {
 /* 提交成功后触发邮件通知（需已部署 email-send；失败静默） */
 window.notifyEmail = function (table, body) {
   var cfg = window.SUPABASE;
-  if (!cfg.emailUrl) return;
-  var kind = table === 'orders' ? 'order' : (body && body.type) || 'message';
-  var headers = { 'Content-Type': 'application/json' };
-  if (cfg.emailToken) headers['x-func-token'] = cfg.emailToken;
+  if (!cfg || !cfg.url) return;
   try {
-    fetch(cfg.emailUrl, {
+    var subject = '【予光】新信息通知';
+    var f = {};
+    if (table === 'orders') {
+      subject = '【予光】新的定制/购买意向';
+      f['客户联系方式'] = body.phone || body.account || '';
+      f['商品明细'] = typeof body.items === 'string' ? body.items : JSON.stringify(body.items || []).slice(0, 300);
+      f['留言/备注'] = body.note || '—';
+      f['下单账号'] = body.account || '（未登录）';
+      f['期望金额'] = body.amount !== undefined ? ('¥' + body.amount) : '—';
+    } else if (table === 'messages') {
+      subject = '【予光】新的留言/投稿';
+      f['称呼'] = body.name || '—';
+      f['联系方式'] = body.contact || '—';
+      f['内容'] = String(body.content || '').slice(0, 500);
+    } else if (table === 'subscribers') {
+      subject = '【予光】新的订阅';
+      f['联系方式'] = body.contact || '—';
+    } else {
+      f['内容'] = JSON.stringify(body || {}).slice(0, 500);
+    }
+    fetch(cfg.url + '/functions/v1/email-send', {
       method: 'POST',
-      headers: headers,
-      body: JSON.stringify({ kind: kind, fields: body })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ kind: table || 'info', subject: subject, fields: f })
     }).catch(function () {});
-  } catch (e) { /* 忽略 */ }
+  } catch (e) {}
 };
-
 /* AI 助手统一调用：sbAI({mode:'chat'|'stones', question/need, history}) → Promise<{ok,answer|error}> */
 window.sbAI = function (payload) {
   var cfg = window.SUPABASE;
