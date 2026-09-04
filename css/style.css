@@ -2938,3 +2938,37 @@ html { overscroll-behavior-y: none; }
   .mb-fab { right: 14px !important; bottom: 82px !important; }
   .mb-fab .mb-ico { font-size: 19px; }
 }
+
+/* ===== 悬浮钮统一金圈 + 加载提示 ===== */
+.mb-fab,
+.ai-fab {
+  border: 1px solid rgba(227, 196, 124, 0.55) !important;
+  box-shadow: 0 0 0 4px rgba(227, 196, 124, 0.16), 0 0 18px rgba(227, 196, 124, 0.28), inset 0 0 10px rgba(0, 0, 0, 0.25) !important;
+  background: linear-gradient(150deg, rgba(30, 40, 62, 0.85), rgba(13, 18, 30, 0.92)) !important;
+}
+.yg-loading { display: inline-flex; align-items: center; gap: 8px; color: var(--gold); font-size: 13px; }
+.yg-loading::before { content: ''; width: 14px; height: 14px; border: 2px solid rgba(227, 196, 124, 0.35); border-top-color: var(--gold); border-radius: 50%; animation: ygSpin 0.7s linear infinite; }
+@keyframes ygSpin { to { transform: rotate(360deg); } }
+
+/* ===== 首页系列商品区 ===== */
+.hs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 18px; }
+.hs-card { border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: linear-gradient(165deg, rgba(20, 27, 46, .6), rgba(11, 14, 23, .92)); display: flex; flex-direction: column; transition: transform .25s, box-shadow .25s; }
+.hs-card:hover { transform: translateY(-4px); box-shadow: 0 10px 28px rgba(0, 0, 0, .4); }
+.hs-img { position: relative; min-height: 150px; background: rgba(7, 10, 18, .5); display: flex; align-items: center; justify-content: center; }
+.hs-img img { width: 100%; height: 190px; object-fit: cover; display: block; }
+.hs-ph { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; color: var(--text-dim); font-size: 12px; }
+.hs-name { padding: 10px 12px 0; font-family: var(--serif); letter-spacing: .08em; color: var(--moon); }
+.hs-tag { padding: 2px 12px; color: var(--gold); font-size: 11px; letter-spacing: .14em; }
+.hs-price { padding: 6px 12px 2px; color: var(--moon); font-size: 15px; }
+.hs-price b { color: var(--gold); }
+.hs-price s { color: var(--text-dim); font-size: 12px; margin-right: 6px; }
+.hs-q { padding: 2px 12px 10px; color: var(--text-dim); font-size: 12px; line-height: 1.9; }
+.hs-buy { margin: auto 12px 14px; }
+@media (max-width: 560px) { .hs-grid { grid-template-columns: 1fr 1fr; gap: 12px; } .hs-img img { height: 150px; } .hs-buy { width: 100%; padding: 10px 0; } }
+
+/* 解卦详情 */
+.gen-hexbox { margin-top: 12px; text-align: left; }
+.gen-hex-inner { border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; background: rgba(16, 24, 40, .75); font-size: 13px; line-height: 2; color: var(--moon); }
+.ghex-title { font-family: var(--serif); color: var(--gold); letter-spacing: .18em; margin-bottom: 6px; }
+.gen-hex-inner p { margin: 4px 0; }
+.ghex-dim { color: var(--text-dim); font-size: 12px; }
