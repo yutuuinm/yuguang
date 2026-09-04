@@ -1180,9 +1180,10 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
 (function initLiveGallery() {
   var grid = document.getElementById('galleryGrid');
   if (!grid || !window.sb) return;
+  grid.innerHTML = '<p class="section-sub" style="text-align:center;padding:24px 0;"><span class="yg-loading"></span> 光集正在点亮…</p>';
   window.sb('gallery?select=*&visible=eq.true&approved=eq.true&order=sort.asc')
     .then(function (rows) {
-      if (!rows || !rows.length) return;
+      if (!rows || !rows.length) { grid.innerHTML = '<p class="section-sub" style="text-align:center;color:var(--text-dim);padding:20px 0;">光集正在整理 ✦ 敬请期待</p>'; return; }
       grid.innerHTML = rows.map(function (it) {
         var src = (window.sbImg && it.image_url) ? window.sbImg(it.image_url) : '';
         return '<figure class="g-card reveal">' +
@@ -1198,7 +1199,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
           '</figcaption></figure>';
       }).join('');
     })
-    .catch(function () {});
+    .catch(function () { try { grid.innerHTML = '<p class="section-sub" style="text-align:center;color:var(--text-dim);padding:20px 0;">光集加载失败 ✦ 请稍后刷新</p>'; } catch (e) {} });
 })();
 
 /* ---------- 星图志：图鉴/百科/养石 ---------- */
@@ -1951,6 +1952,24 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   b.setAttribute('aria-label', '返回上一页');
   b.innerHTML = '‹';
   b.style.display = 'flex';
+  var STK = 'yg_navstack';
+  function stkGet() { try { return JSON.parse(sessionStorage.getItem(STK) || '[]'); } catch (e) { return []; } }
+  function stkPush() {
+    try {
+      var pp = location.pathname; if (!pp) return;
+      var a = stkGet();
+      if (a[a.length - 1] !== pp) { a.push(pp); if (a.length > 10) a.shift(); sessionStorage.setItem(STK, JSON.stringify(a)); }
+    } catch (e) {}
+  }
+  function stkPop() {
+    try {
+      var a = stkGet();
+      if (a.length > 1) { var t = a.pop(); sessionStorage.setItem(STK, JSON.stringify(a)); return t; }
+    } catch (e) {}
+    return null;
+  }
+  stkPush();
+  window.addEventListener('load', function () { document.body.classList.remove('yg-exit'); });
   b.addEventListener('click', function (ev) {
     ev.preventDefault();
     document.body.classList.add('yg-exit');
@@ -1959,6 +1978,8 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
         var home = document.querySelector('.nav-brand');
         if (home) { home.click(); return; }
       }
+      var tgt = stkPop();
+      if (tgt && tgt !== location.pathname && /\.html$/.test(tgt)) { location.assign(tgt); return; }
       var ref = document.referrer || '';
       var same = false;
       try { same = ref && (new URL(ref).origin === location.origin); } catch (e) { same = ref.indexOf(location.origin) === 0; }
