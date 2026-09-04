@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>予光 · 管理后台</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09041406">
+<link rel="stylesheet" href="css/style.css?v=09041901">
 <style>
   /* ============ 予光 · 管理后台（分区式） ============ */
   .adm{max-width:1280px;margin:0 auto;padding:132px 12px 90px;position:relative;z-index:5;}
@@ -267,10 +267,10 @@
 
       <div class="grp-title">快捷工具</div>
       <div class="card-grid entry-grid" id="homeToolsEntry">
-        <button class="card" type="button" data-sec="secTools" title="回收站 · 批量生成 · 邮件/微信设置 · 水晶库 · 修改密码 · AI · 转盘">
+        <button class="card" type="button" data-sec="secTools" title="回收站 · 批量生成 · 邮件设置 · 水晶库 · 修改密码 · AI · 转盘">
           <span class="g">⚡</span>
           <h3><em>快捷工具</em></h3>
-          <p>回收站 · 批量生成 · 邮件/微信设置 · 水晶库 · 修改密码 · AI 设计 · 转盘优惠</p>
+          <p>回收站 · 批量生成 · 邮件设置 · 水晶库 · 修改密码 · AI 设计 · 转盘优惠</p>
           <span class="arr">›</span>
         </button>
       </div>
@@ -566,33 +566,7 @@
       </div>
     </section>
 
-    <!-- ========== P4. 微信设置（app_data.contact） ========== -->
-    <section class="admSec" id="secWx">
-      <div class="sec-top">
-        <button class="back-btn" type="button" data-act="back">← 返回</button>
-        <h2><span>💬</span> 微信设置</h2>
-        <span class="sp"></span>
-        <button class="btn-sm" id="wxRefresh" type="button" title="重新读取 app_data.contact">🔄 重新读取</button>
-      </div>
-      <div class="doc-pad" style="max-width:560px;">
-        <div style="font-size:13px;color:var(--gold);letter-spacing:.1em;margin-bottom:6px;">💬 微信/联系设置（保存为 app_data key=<b>contact</b>）</div>
-        <label class="f-label">公众号二维码文件名</label>
-        <input id="wxQrMp" placeholder="img/…mp_qr.png" style="width:100%;">
-        <label class="f-label">客服二维码文件名</label>
-        <input id="wxQrSvc" placeholder="img/…service_qr.png" style="width:100%;">
-        <label class="f-label">客服微信号</label>
-        <input id="wxWx" placeholder="微信号" style="width:100%;">
-        <label class="f-label">客服微信号（第二个，选填）</label>
-        <input id="wxWx2" placeholder="备用微信号" style="width:100%;">
-        <label class="f-label">备注文案</label>
-        <textarea id="wxNote" style="min-height:70px;" placeholder="前台展示的说明文案…"></textarea>
-        <div class="sec-note">保存后写入 app_data key=<b style="color:var(--gold);">contact</b> 的 value：{qr_mp, qr_service, wechat, wechat2, note}。保存后前台自动生效。</div>
-        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-          <button class="btn-gold" id="wxSave" type="button" title="先查 app_data 是否存在 contact 键，再 insert/update">💾 保存微信设置</button>
-          <span class="msg" id="wxMsg"></span>
-        </div>
-      </div>
-    </section>
+    
 
     <!-- ========== F. 数据库记录管理（通用表 + records 专属操作） ========== -->
     <section class="admSec" id="secDb">
@@ -652,10 +626,7 @@
           <span class="g">📧</span><h3><em>邮件设置</em></h3>
           <p>通知收件邮箱与 SMTP 发信配置<br>先查存在再 insert/update</p>
         </button>
-        <button class="card" type="button" data-sec="secWx" title="公众号/客服二维码文件名与客服微信号（app_data.contact，保存后前台自动生效）">
-          <span class="g">💬</span><h3><em>微信设置</em></h3>
-          <p>公众号/客服二维码文件名<br>客服微信号（可两个）与备注文案</p>
-        </button>
+
         <button class="card" type="button" data-sec="secCrystal" title="水晶知识库 CRUD：新增/编辑/删除/复制，生辰测石与星图志的数据源">
           <span class="g">💎</span><h3><em>水晶知识库</em></h3>
           <p>五行晶石 · 新增 / 编辑 / 删除 / 复制<br>生辰测石与星图志选材依据</p>
@@ -827,8 +798,8 @@
 
 <footer class="footer"><div class="wrap"><div class="disclaimer">© 予光 YUGUANG · 管理后台 · 仅供内部使用</div></div></footer>
 
-<script src="js/supabase-config.js?v=09041406"></script>
-<script src="js/main.js?v=09041406"></script>
+<script src="js/supabase-config.js?v=09041901"></script>
+<script src="js/main.js?v=09041901"></script>
 <script>
 (function () {
   'use strict';
@@ -925,7 +896,6 @@
     if (name === 'secGallery') loadGallery(true);
     if (name === 'secArticles') loadKws(true);
     if (name === 'secInbox') inboxOpen(true);
-    if (name === 'secWx') wxLoad();
     if (name === 'secRecycle') loadRecycle();
     if (name === 'secArchive') loadArchive();
   }
@@ -2402,7 +2372,7 @@
   }
 
   /* ============================================================
-     ⑦ 🛍️ 商品 secProducts / 🖼️ 光集 secGallery / 💬 微信设置 secWx
+     ⑦ 🛍️ 商品 secProducts / 🖼️ 光集 secGallery
      ============================================================ */
   /* —— 🛍️ 商品（secProducts） —— */
   var PR = { all: [], editId: null };
@@ -2616,45 +2586,6 @@
       gaResetForm();
       loadGallery(true);
     }).catch(function () { setMsg('gaMsg', '网络错误', 'bad'); });
-  }
-
-  /* —— 💬 微信设置（secWx → app_data.contact） —— */
-  function wxLoad() {
-    adm({ op: 'list', table: 'app_data', limit: 200 }).then(function (r) {
-      if (!r.ok) { setMsg('wxMsg', '读取失败：' + (r.error || ''), 'bad'); return; }
-      var row = null;
-      (r.rows || []).forEach(function (x) { if (x.key === 'contact') row = x; });
-      var v = row ? jsonValToObj(row.value) : null;
-      var o = (v && typeof v === 'object' && !Array.isArray(v)) ? v : {};
-      $('wxQrMp').value = o.qr_mp || '';
-      $('wxQrSvc').value = o.qr_service || '';
-      $('wxWx').value = o.wechat || '';
-      $('wxWx2').value = o.wechat2 || '';
-      $('wxNote').value = o.note || '';
-      setMsg('wxMsg', row ? '已读取 app_data.contact' : 'app_data 尚无 contact 键，保存后将新建', 'ok');
-    }).catch(function () { setMsg('wxMsg', '网络错误', 'bad'); });
-  }
-  function wxSave() {
-    var value = {
-      qr_mp: ($('wxQrMp').value || '').trim(),
-      qr_service: ($('wxQrSvc').value || '').trim(),
-      wechat: ($('wxWx').value || '').trim(),
-      wechat2: ($('wxWx2').value || '').trim(),
-      note: ($('wxNote').value || '').trim()
-    };
-    setMsg('wxMsg', '保存中…');
-    adm({ op: 'list', table: 'app_data', limit: 200 }).then(function (r) {
-      if (!r.ok) { setMsg('wxMsg', '读取 app_data 失败：' + (r.error || ''), 'bad'); return; }
-      var exists = false;
-      (r.rows || []).forEach(function (x) { if (x.key === 'contact') exists = true; });
-      var put = exists
-        ? adm({ op: 'update', table: 'app_data', id: 'contact', set: { value: value } })
-        : adm({ op: 'insert', table: 'app_data', row: { key: 'contact', value: value } });
-      return put.then(function (r2) {
-        if (r2.ok) setMsg('wxMsg', '✅ 已保存微信设置（app_data.contact，' + (exists ? '更新' : '新建') + '），前台自动生效', 'ok');
-        else setMsg('wxMsg', '保存失败：' + (r2.error || ''), 'bad');
-      });
-    }).catch(function () { setMsg('wxMsg', '网络错误', 'bad'); });
   }
 
   /* ============================================================
@@ -3192,10 +3123,6 @@
     document.querySelectorAll('input[name="ibRange"]').forEach(function (r) {
       r.addEventListener('change', inboxRangeSwitch);
     });
-
-    /* 微信设置 */
-    $('wxRefresh').addEventListener('click', wxLoad);
-    $('wxSave').addEventListener('click', wxSave);
 
     /* 发订阅邮件 */
     $('smRefresh').addEventListener('click', function () { loadSubscribers(true); });
