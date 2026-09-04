@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>予光 · 管理后台</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09040856">
+<link rel="stylesheet" href="css/style.css?v=09041406">
 <style>
   /* ============ 予光 · 管理后台（分区式） ============ */
   .adm{max-width:1280px;margin:0 auto;padding:132px 12px 90px;position:relative;z-index:5;}
@@ -153,6 +153,44 @@
   .ygCard textarea { max-width: 560px; }
   .ygCard .btn-row { margin-top: 16px; }
   .doc-pad textarea { max-width: 640px; }
+
+  /* —— 编辑区左右分栏（左表单 · 右实时预览） —— */
+  .edit-split{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px;align-items:start;margin-top:2px;}
+  .edit-split .edit-form{min-width:0;}
+  .edit-prev{min-width:0;position:sticky;top:96px;align-self:start;}
+  .prev-card{border:1px solid var(--line);border-radius:16px;background:linear-gradient(165deg,#131b30,#0b0e17);padding:16px;color:var(--moon);box-shadow:0 8px 24px rgba(0,0,0,.28);}
+  .prev-head{display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px dashed var(--line-soft);padding-bottom:8px;margin-bottom:12px;color:var(--gold);font-size:12px;letter-spacing:.14em;}
+  .prev-head .prev-vis{font-size:11px;color:var(--text-dim);letter-spacing:.06em;font-weight:400;}
+  .prev-img{position:relative;width:100%;height:200px;border-radius:12px;overflow:hidden;background:rgba(7,10,18,.7);border:1px solid var(--line-soft);display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+  .prev-img img{width:100%;height:100%;object-fit:cover;display:block;}
+  .prev-img .prev-ph{color:var(--text-dim);font-size:12px;letter-spacing:.18em;text-align:center;line-height:1.9;padding:0 10px;}
+  .prev-name{font-family:var(--serif);font-size:18px;letter-spacing:.12em;color:var(--moon);line-height:1.6;}
+  .prev-sub{color:var(--text-dim);font-size:12px;margin:2px 0 8px;}
+  .prev-badge{display:inline-block;border:1px solid var(--gold);color:var(--gold);border-radius:999px;padding:1px 10px;font-size:11px;letter-spacing:.12em;margin-bottom:10px;}
+  .prev-price{font-size:14px;margin:2px 0 6px;color:var(--moon);}
+  .prev-price .p-now{color:var(--gold);font-size:19px;letter-spacing:.04em;}
+  .prev-price .p-old{color:var(--text-dim);text-decoration:line-through;font-size:13px;margin-left:8px;}
+  .prev-quote{color:var(--text-dim);font-size:12px;line-height:1.9;border-top:1px dashed var(--line-soft);margin-top:10px;padding-top:8px;}
+  .prev-story{color:var(--text-dim);font-size:12px;line-height:1.9;white-space:pre-line;border-top:1px dashed var(--line-soft);margin-top:10px;padding-top:8px;}
+  .adm button.busy{opacity:.6;pointer-events:none;}
+  @media(max-width:920px){
+    .edit-split{grid-template-columns:1fr;}
+    .edit-prev{position:static;}
+  }
+
+  .prev-pane { float: right; width: 300px; margin: 2px 0 14px 18px; }
+  .prev-card { border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: linear-gradient(165deg, rgba(20,27,46,.6), rgba(11,14,23,.92)); }
+  .prev-tt { padding: 8px 12px; font-size: 11px; letter-spacing: .2em; color: var(--gold); border-bottom: 1px dashed var(--line-soft); }
+  .prev-img { min-height: 130px; background: rgba(7,10,18,.5); display: flex; align-items: center; justify-content: center; }
+  .prev-img img { width: 100%; max-height: 220px; object-fit: cover; display: block; }
+  .prev-ph { color: var(--text-dim); font-size: 12px; padding: 20px; text-align: center; }
+  .prev-nm { padding: 10px 12px 0; font-family: var(--serif); color: var(--moon); letter-spacing: .06em; }
+  .prev-tag { padding: 2px 12px; color: var(--gold); font-size: 11px; letter-spacing: .12em; }
+  .prev-price { padding: 4px 12px 10px; color: var(--moon); font-size: 15px; }
+  .prev-price b { color: var(--gold); }
+  .prev-price s { color: var(--text-dim); font-size: 12px; margin-right: 6px; }
+  .prev-q { padding: 0 12px 12px; color: var(--text-dim); font-size: 12px; line-height: 1.9; }
+  @media (max-width: 980px) { .prev-pane { float: none; width: 100%; margin: 0 0 12px; } }
 </style>
 </head>
 <body>
@@ -182,10 +220,7 @@
 
     <!-- ========== 首页 · 主卡（9）+ 快捷工具总入口 ========== -->
     <section id="admHome" class="admSec on">
-      <div style="display:flex;align-items:center;gap:12px;margin:0 0 2px;">
-        <a class="btn-line" href="index.html" title="返回予光主站首页">↩ 返回主界面</a>
-        <span class="who" id="hWho" style="flex:1;text-align:right;"></span>
-      </div>
+            <div style="text-align:center;margin-bottom:4px;"><span class="who" id="hWho"></span></div>
       <div class="adm-title">予光 · <span class="dot">管</span>理后台</div>
       <div class="adm-sub">YU GUANG ADMIN · 把光给你，我，就是光</div>
 
@@ -392,7 +427,8 @@
         <button class="btn-sm" id="prRefresh" type="button" title="重新读取 products 表">🔄 刷新</button>
       </div>
       <div class="doc-pad" id="prForm">
-        <div style="font-size:13px;color:var(--gold);letter-spacing:.1em;margin-bottom:8px;"><span id="prFormTitle">🛍️ 新增商品</span>（slug 与名称必填；表单在分区内新增/编辑）</div>
+        <div class="prev-pane" id="prPrev"></div>
+        <div style="font-size:13px;color:var(--gold);letter-spacing:.1em;margin-bottom:8px;"><span id="prFormTitle">🛍️ 新增商品</span>（slug 与名称必填；表单在分区内新增/编辑）<div class="hint">折后价需数据库列 discount_price：请先在 SQL Editor 执行 予光-SQL-折后价.sql（未建列前填折后价保存会失败）。</div></div>
         <div class="grid-2">
           <div>
             <label class="f-label">slug（唯一，如 sisi-liguang）*</label><input id="prSlug" placeholder="slug" style="width:100%;">
@@ -406,9 +442,9 @@
           <div>
             <label class="f-label">材质 / 链型 / 符文</label>
             <div style="display:flex;gap:8px;"><input id="prMetal" placeholder="材质" style="flex:1;"><input id="prChain" placeholder="链型" style="flex:1;"><input id="prGlyph" placeholder="符文" style="flex:1;"></div>
-            <label class="f-label">价格(元) / 排序</label>
-            <div style="display:flex;gap:8px;"><input id="prPrice" placeholder="699" type="number" min="0" style="flex:1;"><input id="prSort" placeholder="排序" style="flex:1;"></div>
-            <label class="f-label">图片文件名</label><input id="prImg" placeholder="客户图片/xx.jpg 或 img/customers/xx.jpg" style="width:100%;">
+            <label class="f-label">原价(元) / 折后价(元，选填) / 排序</label>
+            <div style="display:flex;gap:8px;"><input id="prPrice" placeholder="699" type="number" min="0" style="flex:1;"><input id="prDiscount" placeholder="折后价" type="number" min="0" style="flex:1;"><input id="prSort" placeholder="排序" style="flex:1;"></div>
+            <label class="f-label">图片文件名</label><input id="prImg" placeholder="图片文件名，如 示例图片.jpg（自动放入 客户图片/）" style="width:100%;">
             <label class="f-label">金句 quote</label><textarea id="prQuote" style="min-height:56px;" placeholder="金句文案…"></textarea>
             <label class="f-line"><input type="checkbox" id="prVisible" class="chk" checked> 对外可见 visible</label>
           </div>
@@ -431,12 +467,13 @@
         <button class="btn-sm" id="gaRefresh" type="button" title="重新读取 gallery 表（按 id 倒序）">🔄 刷新</button>
       </div>
       <div class="doc-pad" id="gaForm">
-        <div style="font-size:13px;color:var(--gold);letter-spacing:.1em;margin-bottom:8px;"><span id="gaFormTitle">🖼️ 上架新光集</span>（名称必填；新增默认 approved=否，需「已授权」后才对外展示）</div>
+        <div class="prev-pane" id="gaPrev"></div>
+        <div style="font-size:13px;color:var(--gold);letter-spacing:.1em;margin-bottom:8px;"><span id="gaFormTitle">🖼️ 上架新光集</span>（名称必填；需同时勾选「可见」与「已授权」，作品才会在前台光集与首页展示）</div>
         <div class="grid-2">
           <div>
             <label class="f-label">名称 *</label><input id="gaName" placeholder="作品名" style="width:100%;">
             <label class="f-label">标签 tag</label><input id="gaTag" placeholder="如：东方线 · 巳蛇" style="width:100%;">
-            <label class="f-label">图片文件名 image_url</label><input id="gaImg" placeholder="img/customers/xx.jpg" style="width:100%;">
+            <label class="f-label">图片文件名 image_url</label><input id="gaImg" placeholder="图片文件名，如 示例图片.jpg（自动放入 客户图片/）" style="width:100%;">
           </div>
           <div>
             <label class="f-label">故事 story</label><textarea id="gaStory" style="min-height:56px;" placeholder="作品故事…"></textarea>
@@ -790,8 +827,8 @@
 
 <footer class="footer"><div class="wrap"><div class="disclaimer">© 予光 YUGUANG · 管理后台 · 仅供内部使用</div></div></footer>
 
-<script src="js/supabase-config.js?v=09040856"></script>
-<script src="js/main.js?v=09040856"></script>
+<script src="js/supabase-config.js?v=09041406"></script>
+<script src="js/main.js?v=09041406"></script>
 <script>
 (function () {
   'use strict';
@@ -825,7 +862,28 @@
     return fetch(base, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-sess': token }, body: JSON.stringify(payload) })
       .then(function (r) { return r.json().catch(function () { return { ok: false, error: 'HTTP ' + r.status }; }); });
   }
-  function adm(payload) { return api(DAPI, payload); }
+  function im(v) {
+    v = String(v || '').trim();
+    if (!v) return '';
+    if (/^(https?:)?\/\//.test(v) || v.indexOf('img/') === 0 || v.indexOf('客户图片/') === 0) return v;
+    return '客户图片/' + v;
+  }
+  function imRow(o) {
+    if (!o || typeof o !== 'object') return o;
+    var out = Object.assign({}, o);
+    ['image_url', 'image_urls', 'cover', 'image'].forEach(function (k) {
+      if (out[k] !== undefined && out[k] !== null && String(out[k]) !== '') {
+        out[k] = String(out[k]).split(/[,，;；\n]+/).map(im).join(',');
+      }
+    });
+    return out;
+  }
+  function adm(payload) {
+    var p2 = payload;
+    if (p2 && p2.row) { p2 = Object.assign({}, p2); p2.row = imRow(p2.row); }
+    if (p2 && p2.set) { p2 = Object.assign({}, p2); p2.set = imRow(p2.set); }
+    return api(DAPI, p2);
+  }
   function acc(payload) { return api(AAPI, payload); }
   function setMsg(id, txt, cls) { var el = $(id); if (!el) return; el.textContent = txt; el.className = 'msg' + (cls ? ' ' + cls : ''); }
 
@@ -1825,7 +1883,7 @@
       '<div class="small-note" style="margin-bottom:8px;">流程：先生成官方码入库（records）→ 建一条 已发货(shipped) 订单写入该码 → 弹窗展示订单号+防伪码供复制。</div>' +
       '<label class="f-label">产品名 *</label><input id="uoName" placeholder="如：巳蛇 · 离光（红纹石）" style="width:100%;">' +
       '<label class="f-label">金额（元，选填）</label><input id="uoAmount" type="number" placeholder="如 699" style="width:100%;">' +
-      '<label class="f-label">图片文件名（选填，逗号分隔，随码入库 image_urls）</label><input id="uoImg" placeholder="img/customers/xx.jpg" style="width:100%;">' +
+      '<label class="f-label">图片文件名（选填，逗号分隔，随码入库 image_urls）</label><input id="uoImg" placeholder="图片文件名，如 示例图片.jpg（自动放入 客户图片/）" style="width:100%;">' +
       '<label class="f-label">光语（选填，随码入库 info.text，并写入订单备注）</label><textarea id="uoMsg" style="min-height:56px;"></textarea>' +
       '<div class="btn-row"><button class="btn-ghost" data-x type="button">取消</button><button class="btn-gold" data-ok type="button" title="生成码+建单，完成后弹窗展示订单号与码">✨ 生成码并加单</button></div>');
     bindModalClose(m);
@@ -2366,12 +2424,12 @@
     var rows = PR.all;
     var box = $('prBody');
     if (!rows.length) { box.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-dim);font-size:13px;">✦ 暂无商品，可在上方表单新增</div>'; return; }
-    var h = '<table class="tbl"><tr><th>名称</th><th>系列</th><th>价格(元)</th><th>图片</th><th>可见</th><th>操作</th></tr>';
+    var h = '<table class="tbl"><tr><th>名称</th><th>系列</th><th>价格 / 折后(元)</th><th>图片</th><th>可见</th><th>操作</th></tr>';
     rows.forEach(function (x) {
       h += '<tr' + (PR.editId && String(PR.editId) === String(x.id) ? ' style="background:rgba(227,196,124,.07);"' : '') + '>' +
         '<td>' + esc(x.name || '—') + (x.slug ? '<div class="dim" style="font-size:11px;">' + esc(x.slug) + (x.sub ? ' · ' + esc(x.sub) : '') + '</div>' : '') + '</td>' +
         '<td>' + esc(x.series || '—') + '</td>' +
-        '<td>' + (x.price_yuan === undefined || x.price_yuan === null || x.price_yuan === '' ? '—' : '¥' + esc(x.price_yuan)) + '</td>' +
+        '<td>' + (x.price_yuan === undefined || x.price_yuan === null || x.price_yuan === '' ? '—' : '¥' + esc(x.price_yuan)) + (x.discount_price && Number(x.discount_price) > 0 ? '<div style="color:var(--gold);font-size:11px;">折后 ¥' + esc(x.discount_price) + '</div>' : '') + '</td>' +
         '<td class="dim">' + esc(x.image_url || '—') + '</td>' +
         '<td><button class="btn-sm" data-prvis="' + x.id + '" data-v="' + (x.visible ? 'false' : 'true') + '" title="切换对外可见">' + (x.visible ? '可见' : '隐藏') + '</button></td>' +
         '<td style="white-space:nowrap;"><button class="btn-sm" data-predit="' + x.id + '" title="载入表单编辑该商品">✏️ 编辑</button>' +
@@ -2402,7 +2460,7 @@
   }
   function prResetForm() {
     PR.editId = null;
-    ['prSlug', 'prName', 'prSub', 'prMain', 'prAux', 'prMetal', 'prChain', 'prGlyph', 'prPrice', 'prSort', 'prImg', 'prQuote'].forEach(function (id) { var el = $(id); if (el) el.value = ''; });
+    ['prSlug', 'prName', 'prSub', 'prMain', 'prAux', 'prMetal', 'prChain', 'prGlyph', 'prPrice', 'prDiscount', 'prSort', 'prImg', 'prQuote'].forEach(function (id) { var el = $(id); if (el) el.value = ''; });
     var v = $('prVisible'); if (v) v.checked = true;
     var t = $('prFormTitle'); if (t) t.textContent = '🛍️ 新增商品';
     var c = $('prCancel'); if (c) c.style.display = 'none';
@@ -2419,6 +2477,7 @@
     });
     var s = $('prSeries'); if (s) s.value = x.series || 'east';
     var p = $('prPrice'); if (p) p.value = (x.price_yuan === undefined || x.price_yuan === null) ? '' : String(x.price_yuan);
+    var pd = $('prDiscount'); if (pd) pd.value = (x.discount_price === undefined || x.discount_price === null || Number(x.discount_price) <= 0) ? '' : String(x.discount_price);
     var so = $('prSort'); if (so) so.value = (x.sort === undefined || x.sort === null) ? '' : String(x.sort);
     var v = $('prVisible'); if (v) v.checked = x.visible !== false;
     var t = $('prFormTitle'); if (t) t.textContent = '✏️ 编辑商品（id ' + id + '）';
@@ -2435,6 +2494,8 @@
     map.forEach(function (p) { var v = ($(p[0]).value || '').trim(); if (v) row[p[1]] = v; });
     var price = num($('prPrice').value);
     if (price !== undefined) row.price_yuan = price;
+    var disc = num($('prDiscount').value);
+    if (disc !== undefined) row.discount_price = disc;
     var sort = num($('prSort').value);
     if (sort !== undefined) row.sort = sort;
     setMsg('prMsg', '保存中…');
@@ -3174,6 +3235,51 @@
     });
   }
 
+  function pvImgHtml(v) {
+    var u = im(v || '');
+    if (!u) return '<div class="prev-ph">图片区（未填文件名）</div>';
+    return '<img class="prev-real" src="' + esc(u) + '" alt="" loading="lazy">';
+  }
+  function bindPvErr(out) {
+    if (!out) return;
+    out.querySelectorAll('img.prev-real').forEach(function (im2) {
+      im2.addEventListener('error', function () {
+        if (im2.getAttribute('data-ph')) return;
+        im2.setAttribute('data-ph', '1');
+        var d = document.createElement('div');
+        d.className = 'prev-ph';
+        d.textContent = '图未就位 ✦ 请确认 客户图片/ 下有该文件';
+        if (im2.parentNode) im2.parentNode.replaceChild(d, im2);
+      });
+    });
+  }
+  function prPrevRender() {
+    var out = $('prPrev'); if (!out) return;
+    var n = $('prName'), i = $('prImg'), pr = $('prPrice'), pd = $('prDiscount'), q = $('prQuote'), se = $('prSeries');
+    out.innerHTML = '<div class="prev-card"><div class="prev-tt">实时预览</div>' +
+      '<div class="prev-img">' + pvImgHtml(i ? i.value : '') + '</div>' +
+      '<div class="prev-nm">' + esc((n && n.value) || '（商品名称）') + '</div>' +
+      '<div class="prev-tag">' + esc(se ? se.value : '') + '</div>' +
+      '<div class="prev-price">' + (pd && Number(pd.value) > 0 ? '<s>¥' + esc(pr ? pr.value : '') + '</s> <b>¥' + esc(pd.value) + '</b>' : ('¥' + esc(pr ? pr.value : ''))) + '</div>' +
+      ((q && q.value) ? '<div class="prev-q">' + esc(q.value) + '</div>' : '') + '</div>';
+    bindPvErr(out);
+  }
+  function gaPrevRender() {
+    var out = $('gaPrev'); if (!out) return;
+    var n = $('gaName'), i = $('gaImg'), t = $('gaTag'), q = $('gaQuote');
+    out.innerHTML = '<div class="prev-card"><div class="prev-tt">实时预览</div>' +
+      '<div class="prev-img">' + pvImgHtml(i ? i.value : '') + '</div>' +
+      '<div class="prev-nm">' + esc((n && n.value) || '（作品名）') + '</div>' +
+      '<div class="prev-tag">' + esc(t ? t.value : '') + '</div>' +
+      ((q && q.value) ? '<div class="prev-q">' + esc(q.value) + '</div>' : '') + '</div>';
+    bindPvErr(out);
+  }
+  function initPrev() {
+    ['prName', 'prImg', 'prPrice', 'prDiscount', 'prQuote', 'prSeries'].forEach(function (id) { var el = $(id); if (el) el.addEventListener('input', prPrevRender); });
+    ['gaName', 'gaImg', 'gaTag', 'gaQuote'].forEach(function (id) { var el = $(id); if (el) el.addEventListener('input', gaPrevRender); });
+    prPrevRender(); gaPrevRender();
+  }
+  initPrev();
   /* ===== 回收站 ===== */
   var R = { rows: [] };
   function rcSummary(p) {
