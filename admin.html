@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>予光 · 管理后台</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09040849">
+<link rel="stylesheet" href="css/style.css?v=09040856">
 <style>
   /* ============ 予光 · 管理后台（分区式） ============ */
   .adm{max-width:1280px;margin:0 auto;padding:132px 12px 90px;position:relative;z-index:5;}
@@ -144,6 +144,15 @@
   .acc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:4px 14px;border:1px dashed var(--line-soft);border-radius:10px;padding:10px 12px;margin:2px 0 10px;font-size:12px;max-height:240px;overflow:auto;}
   .acc-grid label{color:var(--moon);display:flex;gap:6px;align-items:center;cursor:pointer;line-height:1.9;}
   .acc-grid input{accent-color:var(--gold);margin:0;}
+
+  /* —— 输入布局均衡：字段不太窄、光语/正文不太宽 —— */
+  .adm input, .adm select { width: 100%; min-width: 0; }
+  .adm textarea { width: 100%; max-width: 640px; min-height: 74px; }
+  .adm .grid-2 { align-items: start; }
+  .ygCard input, .ygCard textarea, .ygCard select { width: 100%; min-width: 0; box-sizing: border-box; }
+  .ygCard textarea { max-width: 560px; }
+  .ygCard .btn-row { margin-top: 16px; }
+  .doc-pad textarea { max-width: 640px; }
 </style>
 </head>
 <body>
@@ -781,8 +790,8 @@
 
 <footer class="footer"><div class="wrap"><div class="disclaimer">© 予光 YUGUANG · 管理后台 · 仅供内部使用</div></div></footer>
 
-<script src="js/supabase-config.js?v=09040849"></script>
-<script src="js/main.js?v=09040849"></script>
+<script src="js/supabase-config.js?v=09040856"></script>
+<script src="js/main.js?v=09040856"></script>
 <script>
 (function () {
   'use strict';
@@ -1635,7 +1644,7 @@
       uFlushMsg(U.all.length ? ('共 ' + U.all.length + ' 个账号 · 显示 0（无匹配）') : '');
       return;
     }
-    var h = '<table class="tbl"><tr><th>账号</th><th>昵称</th><th>邮箱</th><th>手机</th><th>角色</th><th>注册时间</th><th>操作</th></tr>';
+    var h = '<table class="tbl"><tr><th>账号</th><th>昵称</th><th>邮箱</th><th>手机</th><th>角色</th><th>注册时间</th><th>最后活跃</th><th>操作</th></tr>';
     rows.forEach(function (u) {
       h += '<tr' + (U.active && String(U.active.id) === String(u.id) ? ' style="background:rgba(227,196,124,.06);"' : '') + '>' +
         '<td><div style="display:flex;align-items:center;gap:8px;"><span class="user-av">' + esc(((u.nickname || u.account || '光').trim().charAt(0))) + '</span><div><div>' + esc(u.account || '') + '</div>' +
@@ -1645,6 +1654,7 @@
         '<td>' + esc(u.phone || '') + '</td>' +
         '<td>' + uRoleBadge(u.role) + '</td>' +
         '<td class="dim">' + esc(fmtTime(u.created_at)) + '</td>' +
+        '<td class="dim">' + esc(fmtTime(u.last_active_at || u.last_login_at)) + '</td>' +
         '<td style="white-space:nowrap;"><button class="btn-sm" data-uview="' + u.id + '">' + (U.active && String(U.active.id) === String(u.id) ? '收起详情' : '查看详情') + '</button></td></tr>';
     });
     h += '</table>';
