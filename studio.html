@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>定制工坊 · 予光</title>
 <meta name="description" content="予光定制工坊——东方生肖五行、西方星座星盘、双人合盘，三分钟生成一枚属于你的光。把古老的星空语言做成你愿意戴在身上的光。">
-<link rel="stylesheet" href="css/style.css?v=09042041">
+<link rel="stylesheet" href="css/style.css?v=09042143">
 </head>
 <body>
 
@@ -86,6 +86,7 @@
 
       <!-- 左侧：选择与生成 -->
       <div>
+          <div class="bead-size-row" id="beadSizeRow"><span class="bs-t">珠径</span><button class="bs-btn active" type="button" data-mm="10">10mm · 18颗</button><button class="bs-btn" type="button" data-mm="8">8mm · 22颗</button></div>
 
         <!-- ===== 东方：生辰定制 / 摇卦定制 ===== -->
         <div class="panel active" id="panel-east">
@@ -131,19 +132,20 @@
           </div>
 
           <div class="subpane" id="subBirth" data-name="生辰定制">
-            <div class="field">
-              <label for="eastYear">出生年份（填了会自动推演出本命生肖与五行 · 也可直接选上面的生肖）</label>
-              <input type="text" id="eastYear" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="例如 1990">
+            <div class="ymd">
+              <div class="field"><label for="eastYear">出生年</label><input type="text" id="eastYear" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="如 1990"></div>
+              <div class="field"><label for="bzMonth">月</label><select id="bzMonth"></select></div>
+              <div class="field"><label for="bzDay">日</label><select id="bzDay"></select></div>
             </div>
             <div class="field">
               <label for="eastHour">出生时段或时辰（可选 · 默认午时）</label>
               <select id="eastHour"></select>
-              <div class="hint">若不确定，选「不确定」即可——时辰只是意象的表达，光依然会为你亮起。</div>
+
             </div>
             <div class="field">
               <label for="eastGua">再自选一个卦象（可选）</label>
               <select id="eastGua"></select>
-              <div class="hint">六十四卦是古老的文化意象；把此刻最想听的那句话挑出来，陪在你腕上。</div>
+
             </div>
             <button class="btn-gold gen-btn" id="eastGen" type="button">生成我的手串</button>
           </div>
@@ -255,7 +257,6 @@
         <div class="preview-rows" id="pRows">
           <div class="row"><span>主石</span><span id="rMain">红纹石（巳火）</span></div>
           <div class="row"><span>配石</span><span id="rAux">月光石</span></div>
-          <div class="row"><span>金属</span><span id="rMetal">18K 哑光金</span></div>
           <div class="row"><span>链型 / 扣饰</span><span id="rChain">生肖暗刻 · 手作</span></div>
           <div class="row"><span>卦 / 符号</span><span id="rGlyph">☲ 离</span></div>
         </div>
@@ -305,7 +306,7 @@
   </div>
 </footer>
 
-<script src="js/supabase-config.js?v=09042041"></script>
-<script src="js/main.js?v=09042041"></script>
+<script src="js/supabase-config.js?v=09042143"></script>
+<script src="js/main.js?v=09042143"></script>
 </body>
 </html>
