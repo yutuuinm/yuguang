@@ -557,6 +557,9 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   var genBusy = false;
   var shakeTimer = null;
   var lastHexName = '';
+  var curHex = null;                 // 当前结果卦（无卦=null）
+  var lastDesign = null;            // 最近一次设计卡 cfg
+  var flatMode = false;
   function st(txt, isErr) {
     var g = $('genStatus');
     if (g) { g.textContent = txt || ''; g.classList.toggle('err', !!isErr); }
@@ -586,7 +589,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     }
     return out;
   }
-  function drawBracelet(beads) {
+  function drawBracelet(beads, flat) {
     var cv = $('braceletCanvas');
     if (!cv || !beads || !beads.length) return;
     var w = 520, h = 176;
@@ -596,6 +599,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     var L = 36, R = w - 36;        // 串线两端（含扣点）
     var midY = 104;                // 弧线基准：中段略垂、两端上扬，呈手链自然弧度
     function arcY(x) {
+      if (flat) return midY;
       var t = (x - L) / (R - L);
       if (t < 0) t = 0;
       if (t > 1) t = 1;
@@ -662,6 +666,11 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   }
   function showDesign(cfg) {
     cfg = cfg || {};
+    lastDesign = cfg;
+    flatMode = false;
+    var hx = $('genHex'); if (hx) hx.style.display = curHex ? 'inline-flex' : 'none';
+    var hb = $('genHexBox'); if (hb) { hb.style.display = 'none'; hb.innerHTML = ''; }
+    var hf = $('genFlat'); if (hf) hf.textContent = '📿 整串平视图';
     if ($('pName')) $('pName').textContent = cfg.name || '予光 · 定制';
     if ($('pSub')) $('pSub').textContent = cfg.sub || '';
     if ($('rMain')) $('rMain').textContent = cfg.mainText || '';
@@ -700,6 +709,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       var auxList = ELEMENT_STONES[gua[2]];
       if (auxList && auxList[0]) aux = auxList[0];
     }
+    curHex = gua;
     var parts = [info.quote];
     if (hour) parts.push(hour[2]);
     if (gua) parts.push('卦象「' + gua[0] + '」：' + gua[3]);
@@ -755,6 +765,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   }
   function finishShake(hex, info) {
     lastHexName = hex[0];
+    curHex = hex;
     var list = ELEMENT_STONES[info.el];
     var main = list[0];
     var auxList = ELEMENT_STONES[hex[2]] || list;
@@ -782,6 +793,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   }
 
   function runWest() {
+    curHex = null;
     var sun = $('westSun') ? $('westSun').value : '';
     if (!sun) { st('请先选一个太阳星座 ✦', true); return; }
     var s = SUN[sun];
@@ -901,6 +913,22 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   if ($('shakeGen')) $('shakeGen').addEventListener('click', function () { runShake(false); });
   if ($('genRetry')) $('genRetry').addEventListener('click', retryLast);
   if ($('genSubmit')) $('genSubmit').addEventListener('click', submitGen);
+  if ($('genHex')) $('genHex').addEventListener('click', function () {
+    var box = $('genHexBox'); if (!box || !curHex) return;
+    if (box.style.display === 'block') { box.style.display = 'none'; return; }
+    var h = curHex;
+    var html = '<div class="gen-hex-inner"><div class="ghex-title">' + h[1] + '　' + h[0] + '</div>' +
+      '<p>' + (h[3] || '一卦意象') + '</p>' +
+      '<p>卦属「' + (h[2] || '—') + '」的意象：做设计时以此为引，主石取本命五行、配石取卦的用色方向，串成一枚随身的光。</p>' +
+      '<p class="ghex-dim">✦ 卦象与解读均来自传统文化意象，属文化的表达与陪伴，不构成任何断言。</p></div>';
+    box.innerHTML = html;
+    box.style.display = 'block';
+  });
+  if ($('genFlat')) $('genFlat').addEventListener('click', function () {
+    flatMode = !flatMode;
+    var b = $('genFlat'); if (b) b.textContent = flatMode ? '📿 回到弧面' : '📿 整串平视图';
+    if (lastDesign) drawBracelet(lastDesign.beads || [], flatMode);
+  });
 
   // 模式卡 → 对应表单（选择你想要的定制方式）
   root.querySelectorAll('.mode-card').forEach(function (card) {
@@ -1271,7 +1299,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       // 购买小按钮：带 data-buy 供 initBuy 委托打开下单弹窗；无定价商品不显示购买
       var buyBtn = hasPrice
         ? '<button class="buy-mini" type="button" data-buy data-buy-name="' + esc(p.name) +
-          '" data-buy-price="' + pr + '">🛒 购买</button>'
+          '" data-buy-price="' + pr + '" data-buy-sale="' + (p.discount_price && Number(p.discount_price) > 0 ? esc(String(p.discount_price)) : '') + '">' + (p.discount_price && Number(p.discount_price) > 0 ? '🛒 折后购' : '🛒 购买') + '</button>'
         : '';
       return '<div class="g-card reveal" style="transition-delay:' + Math.min(i, 6) * 70 + 'ms">' +
         '<div class="g-img">' +
@@ -1825,7 +1853,10 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
         var home = document.querySelector('.nav-brand');
         if (home) { home.click(); return; }
       }
-      if (document.referrer && history.length > 1) history.back();
+      var ref = document.referrer || '';
+      var same = false;
+      try { same = ref && (new URL(ref).origin === location.origin); } catch (e) { same = ref.indexOf(location.origin) === 0; }
+      if (same && history.length > 1) history.back();
       else location.href = 'index.html';
     }, 250);
   });
@@ -2092,7 +2123,8 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   var busy = false;                            // 订单提交中
   var qty = 1;                                 // 数量
   var discount = 0;                            // 本次订单已立减金额（¥）
-  var nameVal = '';                            // 当前商品名
+  var nameVal = '';
+  var saleVal = 0; // 折后单价（0=无折后）                            // 当前商品名
   var priceVal = 0;                            // 当前单价（元）
   var cfgCache = null;                         // 转盘配置 {tiers, probs}
   var cfgPromise = null;                       // 配置读取 Promise（惰性一次）
@@ -2217,7 +2249,8 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   }
 
   /* ---------- 金额/小计 ---------- */
-  function subTotal() { return Math.round(priceVal * qty * 100) / 100; }
+  function unit() { return saleVal > 0 ? saleVal : priceVal; }
+  function subTotal() { return Math.round(unit() * qty * 100) / 100; }
   function payTotal() {
     var p = Math.round((subTotal() - discount) * 100) / 100;
     return p < 1 ? 1 : p; // 低于 1 元按 1 元
@@ -2256,7 +2289,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       '<h3 class="buyTitle">确认这枚光</h3>' +
       '<div class="buyProd">' +
         '<div class="buyProdName">' + esc(nameVal) + '</div>' +
-        '<div class="buyProdPrice">' + yuan(priceVal) + ' <small>单价</small></div>' +
+        '<div class="buyProdPrice">' + (saleVal > 0 ? '<s>' + yuan(priceVal) + '</s> <b>' + yuan(saleVal) + '</b> <small>折后单价</small>' : yuan(priceVal) + ' <small>单价</small>') + '</div>' +
       '</div>' +
       '<div class="buyRow">' +
         '<span class="buyLbl buyLblRow">数量</span>' +
@@ -2271,8 +2304,12 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
         '<div class="buyAmtRow buyOff" id="buyOffRow" style="display:none;"><span>🎡 微光转盘立减</span><b id="buyOff"></b></div>' +
         '<div class="buyAmtRow buyTotal"><span>应付</span><b id="buyPay"></b></div>' +
       '</div>' +
-      '<label class="buyLbl" for="buyPhone">手机号（必填）</label>' +
-      '<input class="buyInput" id="buyPhone" type="text" autocomplete="tel" maxlength="80" placeholder="手机号（≥6 位数字）／微信号／邮箱">' +
+      '<label class="buyLbl" for="buyName">收件人</label>' +
+      '<input class="buyInput" id="buyName" type="text" maxlength="40" placeholder="收件人昵称（已登录自动带出）">' +
+      '<label class="buyLbl" for="buyPhone">联系方式（手机号 / 微信号，必填）</label>' +
+      '<input class="buyInput" id="buyPhone" type="text" autocomplete="tel" maxlength="80" placeholder="手机号／微信号／邮箱">' +
+      '<label class="buyLbl" for="buyAddr">收货地址（必填）</label>' +
+      '<textarea class="buyInput buyNoteArea" id="buyAddr" rows="2" placeholder="省市区 + 详细地址"></textarea>' +
       '<label class="buyLbl" for="buyNote">备注（选填）</label>' +
       '<textarea class="buyInput buyNoteArea" id="buyNote" rows="2" placeholder="送人生日、想要的光语、收货偏好等"></textarea>' +
       wheelZoneHtml() +
@@ -2357,6 +2394,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   }
   function openBuy(opts) {
     opts = opts || {};
+    saleVal = toPrice(opts.sale);
     var name = (opts.name != null && String(opts.name).trim()) ? String(opts.name).trim() : '';
     var price = toPrice(opts.price);
     if (!name || !price) {
@@ -2373,6 +2411,20 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     card.innerHTML = formHtml();
     wireForm(card);
     refreshAmount(false);
+    if (account()) {
+      try {
+        fetch((window.SUPABASE.url || '') + '/functions/v1/account-api', {
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'x-sess': localStorage.getItem('yg_token') || '' },
+          body: JSON.stringify({ op: 'me' })
+        }).then(function (r) { return r.json(); }).then(function (j) {
+          if (!isOpen || !j || !j.ok) return;
+          var nn = overlay && overlay.querySelector('#buyName');
+          if (nn && !(nn.value || '').trim() && (j.nickname || j.account)) nn.value = j.nickname || j.account;
+          var ph = overlay && overlay.querySelector('#buyPhone');
+          if (ph && !(ph.value || '').trim() && j.phone) ph.value = j.phone;
+        }).catch(function () {});
+      } catch (e) {}
+    }
     paintWheel(defaultCfg());                       // 先按默认档位落字
     ensureCfg().then(function (cfg) {               // 配置到达后刷新档位
       if (isOpen) paintWheel(cfg);
@@ -2463,14 +2515,23 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     if (!overlay || busy) return;
     var phoneEl = overlay.querySelector('#buyPhone');
     var noteEl = overlay.querySelector('#buyNote');
+    var nameEl = overlay.querySelector('#buyName');
+    var addrEl = overlay.querySelector('#buyAddr');
     var errEl = overlay.querySelector('#buyErr');
     var btn = overlay.querySelector('#buySubmit');
     var phone = (phoneEl && phoneEl.value || '').trim();
     var note = (noteEl && noteEl.value || '').trim();
+    var buyer = (nameEl && nameEl.value || '').trim() || (account() || '');
+    var addr = (addrEl && addrEl.value || '').trim();
     if (errEl) errEl.textContent = '';
     if (!validContact(phone)) {
       if (errEl) errEl.textContent = '请填写有效的手机号（≥6 位数字）、微信号或邮箱';
       if (phoneEl) phoneEl.focus();
+      return;
+    }
+    if (!addr) {
+      if (errEl) errEl.textContent = '请填写收货地址（省市区 + 详细地址）';
+      if (addrEl) addrEl.focus();
       return;
     }
     busy = true;
@@ -2478,14 +2539,17 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     var acct = account();
     var items = [{
       name: nameVal,
-      price: priceVal,
+      price: unit(),
       price_yuan: priceVal,
+      discount_price: saleVal > 0 ? saleVal : undefined,
       qty: qty,
       amount: subTotal()
     }];
     var fullNote = note;
     if (discount > 0) fullNote = (fullNote ? fullNote + '；' : '') + '微光转盘立减 ¥' + discount;
     var body = { phone: phone, items: items, amount: payTotal(), note: fullNote, status: 'new' };
+    if (buyer) body.receiver = buyer;
+    if (addr) body.address = addr;
     if (acct) body.account = acct;
     if (!window.sb) {
       if (errEl) errEl.textContent = '当前为离线版，无法在线下单，请微信联系客服 ✦';
@@ -2496,7 +2560,28 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     window.sb('orders', { method: 'POST', body: JSON.stringify(body) })
       .then(function () {
         if (!isOpen) return;
-        if (window.notifyEmail) { try { window.notifyEmail('orders', body); } catch (e) {} }
+        try {
+          var eurl = (window.SUPABASE && (window.SUPABASE.emailUrl || window.SUPABASE.url + '/functions/v1/email-send')) || '';
+          if (eurl) {
+            var flds = {
+              '订单商品': items.map(function (it) { return it.name + ' ×' + it.qty; }).join('、'),
+              '数量': qty,
+              '单价(原)': '¥' + priceVal,
+              '单价(折后)': saleVal > 0 ? '¥' + saleVal : '—',
+              '转盘立减': discount > 0 ? '¥' + discount : '—',
+              '应付合计': '¥' + payTotal(),
+              '收件人': buyer,
+              '联系方式': phone,
+              '收货地址': addr,
+              '备注': note || '—',
+              '下单账号': acct || '（未登录）'
+            };
+            fetch(eurl, {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ kind: 'order', subject: '【予光】新的下单通知', fields: flds })
+            }).catch(function () {});
+          }
+        } catch (e2) {}
         var card = overlay.querySelector('.buyCard');
         card.innerHTML = successHtml();
         var x2 = card.querySelector('.buyX');
@@ -2522,7 +2607,8 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     e.stopPropagation();   // 防止卡片/页面的点击穿透
     openBuy({
       name: trig.getAttribute('data-buy-name') || '',
-      price: trig.getAttribute('data-buy-price') || ''
+      price: trig.getAttribute('data-buy-price') || '',
+      sale: trig.getAttribute('data-buy-sale') || ''
     });
   });
 
@@ -2530,6 +2616,44 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   window.ygOpenBuy = function (opts) {
     openBuy((opts && typeof opts === 'object') ? opts : {});
   };
+})();
+
+/* ===== 首页「系列 · 把它带回家」商品区 ===== */
+(function initHomeShop() {
+  var grid = document.getElementById('hsGrid');
+  if (!grid) return;
+  function show(rows) {
+    if (!rows || !rows.length) { grid.innerHTML = '<p class="section-sub" style="text-align:center;color:var(--text-dim);">系列正在打磨 ✦ 稍后再来看看</p>'; return; }
+    grid.innerHTML = rows.map(function (x) {
+      var pr = x.price_yuan;
+      var disc = (x.discount_price && Number(x.discount_price) > 0) ? Number(x.discount_price) : 0;
+      var img = window.sbImg ? window.sbImg(x.image_url) : (x.image_url || '');
+      return '<div class="hs-card reveal">' +
+        '<div class="hs-img">' + (img ? '<img class="hs-real" src="' + esc(img) + '" alt="' + esc(x.name) + '" loading="lazy">' : '') +
+          '<div class="hs-ph"' + (img ? '' : ' style="display:flex;"') + '>图未就位 ✦</div></div>' +
+        '<div class="hs-name">' + esc(x.name || '') + '</div>' +
+        '<div class="hs-tag">' + esc(x.series || '') + '</div>' +
+        '<div class="hs-price">' + (disc > 0 ? '<s>¥' + esc(String(pr)) + '</s> <b>¥' + esc(String(disc)) + '</b>' : ('¥' + esc(String(pr === undefined || pr === null ? '—' : pr)))) + '</div>' +
+        (x.quote ? '<div class="hs-q">' + esc(x.quote) + '</div>' : '') +
+        '<button class="btn-gold hs-buy" type="button" data-buy data-buy-name="' + esc(x.name) + '" data-buy-price="' + esc(String(pr || '')) + '" data-buy-sale="' + (disc > 0 ? esc(String(disc)) : '') + '">选择这枚光</button></div>';
+    }).join('');
+    grid.querySelectorAll('img.hs-real').forEach(function (im) {
+      im.addEventListener('error', function () {
+        if (im.getAttribute('data-ph')) return;
+        im.setAttribute('data-ph', '1');
+        im.style.display = 'none';
+        var ph = im.parentNode ? im.parentNode.querySelector('.hs-ph') : null;
+        if (ph) ph.style.display = 'flex';
+      });
+    });
+    grid.querySelectorAll('.reveal').forEach(function (el) {
+      setTimeout(function () { el.classList.add('visible'); }, 60);
+    });
+  }
+  if (!window.sb) { show([]); return; }
+  window.sb('products?select=name,slug,series,price_yuan,discount_price,image_url,quote&visible=eq.true&order=sort.asc,id.desc&limit=8')
+    .then(function (r) { show((r && r.length) ? r : []); })
+    .catch(function () { show([]); });
 })();
 
 /* ============================================================
@@ -2790,4 +2914,20 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   var iv = setInterval(function () {
     if (localStorage.getItem('yg_token')) { beat(); clearInterval(iv); setInterval(beat, 60000); }
   }, 2500);
+})();
+
+/* ===== 标题与网址根 ===== */
+(function () {
+  if (document.title.indexOf('予光') === -1) document.title = '予光 · ' + document.title;
+  if (/^https?:$/.test(location.protocol)) {
+    setTimeout(function () {
+      try {
+        var base = '/';
+        if (location.pathname.indexOf('/yuguang/') === 0) base = '/yuguang/';
+        if (location.pathname !== base && location.search === '' && location.hash === '') {
+          history.replaceState(null, '', base);
+        }
+      } catch (e) {}
+    }, 700);
+  }
 })();
