@@ -2992,3 +2992,23 @@ html { overscroll-behavior-y: none; }
 .ygLightStory { color: var(--moon); font-size: 14px; line-height: 2; }
 .ygLightQuote { color: var(--gold); font-size: 13.5px; line-height: 2; margin-top: 6px; }
 .ygLightDim { color: var(--text-dim); font-size: 11.5px; margin-top: 10px; }
+
+/* 返回键最终定位：随导航栏（不再漂移到奇怪位置） */
+#ygBack { position: static !important; top: auto !important; left: auto !important; width: 36px !important; height: 36px !important; font-size: 22px !important; margin: 0 12px 0 2px !important; flex: none !important; }
+@media (max-width: 640px) { #ygBack { width: 32px !important; height: 32px !important; font-size: 20px !important; margin-right: 8px !important; } }
+/* 珠径选择 */
+.bead-size-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 14px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 12px; background: rgba(20, 27, 46, .5); }
+.bead-size-row .bs-t { color: var(--gold); font-size: 13px; letter-spacing: .2em; }
+.bs-btn { border: 1px solid var(--line); background: transparent; color: var(--moon); padding: 7px 16px; border-radius: 999px; font-size: 13px; cursor: pointer; }
+.bs-btn.active { border-color: var(--gold); color: var(--gold); box-shadow: 0 0 12px rgba(227, 196, 124, .22); }
+/* 小光对话：消息头像 + 星光氛围 */
+.ai-panel { background:
+  radial-gradient(2px 2px at 12% 18%, rgba(255, 246, 224, .85), transparent 60%),
+  radial-gradient(1.6px 1.6px at 84% 12%, rgba(255, 246, 224, .7), transparent 60%),
+  radial-gradient(2px 2px at 68% 34%, rgba(227, 196, 124, .6), transparent 60%),
+  radial-gradient(1.4px 1.4px at 26% 62%, rgba(255, 246, 224, .55), transparent 60%),
+  radial-gradient(2px 2px at 90% 70%, rgba(255, 246, 224, .5), transparent 60%),
+  linear-gradient(165deg, rgba(16, 24, 40, .97), rgba(8, 12, 22, .98)) !important; }
+.ai-msg.ai { position: relative; padding-left: 34px; }
+.ai-msg.ai::before { content: '🐰'; position: absolute; left: 0; top: 2px; width: 26px; height: 26px; border-radius: 50%; background: radial-gradient(circle at 32% 30%, #fff9e9, #e3c47c 70%); display: flex; align-items: center; justify-content: center; font-size: 13px; line-height: 1; box-shadow: 0 0 10px rgba(227, 196, 124, .35); }
+.ygLightX, .buyX { line-height: 1; }
