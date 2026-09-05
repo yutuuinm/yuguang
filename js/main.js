@@ -729,6 +729,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     }
     var gs2 = document.getElementById('genStatus');
     if (gs2 && !gs2.textContent) gs2.textContent = '✦ 设计已生成，可继续微调或提交定制意向';
+    try { window.setTimeout(function () { if (typeof autoRealImg === 'function') autoRealImg(); }, 420); } catch (e) {}
     if ($('pName')) $('pName').textContent = cfg.name || '予光 · 定制';
     if ($('pSub')) $('pSub').textContent = cfg.sub || '';
     if ($('rMain')) $('rMain').textContent = cfg.mainText || '';
@@ -933,52 +934,78 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
           return /[：:：]$|^[\u4e00-\u9fa5]{1,8}（/.test(ln) ? '<p style="color:var(--gold);">' + ln + '</p>' : '<p>' + ln + '</p>';
         }).join('') + '</div>';
       box.innerHTML = html;
-      try { appendPrompt(box, kind); } catch (e) {}
+
     }).catch(function () {
       if (!box.isConnected || done) return;
       box.innerHTML = '<div class="gen-hex-inner"><div class="ghex-title">' + title + '</div><p>详解服务连接失败，稍后可再点一次「🔍 详细解卦」✦</p></div>';
     });
   }
-    /* 生成真水晶商品图（DeepSeek 提示词 → 硅基流动，后台运行，无可见提示词） */
-  function appendPrompt(box) {
+    /* 配额：未登录 1 张/日，登录 2 张/日，管理员不限 */
+  function imgQuota() {
+    var role = localStorage.getItem('yg_role') || '';
+    if (role === 'root' || role === 'admin') return 999;
+    var ac = localStorage.getItem('yg_account') || '';
+    var key = 'yg_imgq_' + (ac ? String(ac).replace(/[^0-9a-zA-Z]/g, '') : 'anon');
+    var max = ac ? 2 : 1;
+    var rec = { d: '', n: 0 };
+    try { rec = JSON.parse(localStorage.getItem(key) || '{"d":"","n":0}'); } catch (e) { rec = { d: '', n: 0 }; }
+    var today = new Date().toDateString();
+    if (rec.d !== today) rec = { d: today, n: 0 };
+    return { key: key, max: max, left: Math.max(0, max - (rec.n || 0)), rec: rec };
+  }
+  function imgUseUp() {
+    var q = imgQuota();
+    q.rec.n = (q.rec.n || 0) + 1;
+    try { localStorage.setItem(q.key, JSON.stringify(q.rec)); } catch (e) {}
+  }
+  function ensureImgBox() {
+    var box = document.getElementById('previewImg');
+    if (box) return box;
+    var host = document.createElement('div');
+    host.id = 'previewImg';
+    var stage = document.querySelector('#preview .bracelet-stage');
+    if (stage && stage.parentNode) stage.parentNode.insertBefore(host, stage.nextSibling);
+    else {
+      var pc = document.getElementById('preview');
+      if (pc) pc.appendChild(host);
+    }
+    return host;
+  }
+  function autoRealImg() {
+    var box = ensureImgBox();
     if (!box) return;
-    var wrap = document.createElement('div');
-    wrap.className = 'gen-imgbox';
+    var role = localStorage.getItem('yg_role') || '';
+    var cfg2 = window.SUPABASE || {};
+    var aiUrl = cfg2.aiUrl || (cfg2.url ? cfg2.url + '/functions/v1/ai-assistant' : '');
+    var q = imgQuota();
+    if (q.left <= 0) {
+      box.innerHTML = '<p class="ghex-dim">今日出图额度已用完 ✦ 未登录每日 1 张，登录后每日 2 张（管理员不限），明日再来</p>';
+      return;
+    }
+    if (!aiUrl) { box.innerHTML = '<p class="ghex-dim">AI 服务未配置 ✦</p>'; return; }
     var mmNow = Number(window.__bs || 10);
     var cnt = mmNow >= 10 ? 18 : 22;
     var mainName = (function () { var m = document.getElementById('rMain'); return m ? String(m.textContent || '').trim() : ''; })();
     var stoneName = String(mainName || '').split(/[（(]/)[0] || '天然水晶';
+    var nm = (function () { var m = document.getElementById('pName'); return m ? m.textContent : ''; })();
     var glyph = (function () { var m = document.getElementById('rGlyph'); return m ? String(m.textContent || '').trim() : ''; })();
     var quote = (function () { var m = document.getElementById('pLight'); return m ? String(m.textContent || '').trim() : ''; })();
-    wrap.innerHTML = '<button type="button" class="btn-gold" data-gimg>🖼️ 生成真水晶商品图</button>' +
-      '<div class="ghex-dim" style="margin-top:4px;">提示词由 DeepSeek 在后台生成，自动交给硅基流动出图（需后台已配置 img_key）</div>' +
-      '<div class="gen-img-out" style="display:none;margin-top:8px;"></div>';
-    box.appendChild(wrap);
-    wrap.querySelector('[data-gimg]').addEventListener('click', function () {
-      var btn = this;
-      var out = wrap.querySelector('.gen-img-out');
-      btn.disabled = true; btn.textContent = '出图中…（约 10-30 秒）';
-      out.style.display = 'block';
-      out.innerHTML = '<p class="ghex-dim"><span class="yg-loading"></span> 正在生成真实感水晶商品图…</p>';
-      var cfg2 = window.SUPABASE || {};
-      var aiUrl = cfg2.aiUrl || (cfg2.url ? cfg2.url + '/functions/v1/ai-assistant' : '');
-      if (!aiUrl) { out.innerHTML = '<p class="ghex-dim">AI 服务未配置 ✦</p>'; btn.disabled = false; btn.textContent = '🖼️ 生成真水晶商品图'; return; }
-      fetch(aiUrl, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          mode: 'product_img',
-          design: { name: (function () { var m = document.getElementById('pName'); return m ? m.textContent : ''; })(), stone: stoneName, mm: mmNow, count: cnt, color: window.__mainC || '#e3c47c', glyph: glyph, quote: quote }
-        })
-      }).then(function (r) { return r.json(); }).then(function (j) {
-        btn.disabled = false; btn.textContent = '🖼️ 重新生成';
-        if (!j || !j.ok) { out.innerHTML = '<p class="ghex-dim">' + (String((j && j.error) || '出图失败') ) + '</p>'; return; }
-        var src = j.url || ('data:image/png;base64,' + (j.b64 || ''));
-        out.innerHTML = '<img src="' + src + '" alt="生成的真水晶商品图" style="width:100%;border-radius:14px;border:1px solid var(--line);">' +
-          '<p class="ghex-dim">已生成（DeepSeek 提示词 → 硅基流动）。如需作为商品图：管理员可在后台商品“编辑”把图片填为 <b style="color:var(--gold);">' + (j.url ? '该存储链接' : '下载后上传') + '</b> ✦</p>';
-      }).catch(function () {
-        btn.disabled = false; btn.textContent = '🖼️ 生成真水晶商品图';
-        out.innerHTML = '<p class="ghex-dim">生成请求失败，请稍后再试 ✦</p>';
-      });
+    box.innerHTML = '<p class="ghex-dim" style="margin:6px 0 2px;"><span class="yg-loading"></span> 小光正在为你生成真水晶商品图…（10-30 秒）</p>';
+    fetch(aiUrl, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'product_img', design: { name: nm, stone: stoneName, mm: mmNow, count: cnt, color: window.__mainC || '#e3c47c', glyph: glyph, quote: quote } })
+    }).then(function (r) { return r.json(); }).then(function (j) {
+      if (!j || !j.ok) {
+        box.innerHTML = '<p class="ghex-dim">' + (String((j && j.error) || '出图失败')) + '</p>';
+        return;
+      }
+      imgUseUp();
+      var src = j.url || ('data:image/png;base64,' + (j.b64 || ''));
+      var left = imgQuota().left;
+      box.innerHTML = '<img src="' + src + '" alt="生成的真水晶商品图" style="width:100%;border-radius:14px;border:1px solid var(--line);margin-top:6px;">' +
+        (left >= 0 && role !== 'root' && role !== 'admin' ? '<p class="ghex-dim">本日还可生成 ' + left + ' 张 ✦ 登录后每日 2 张</p>' : '');
+    }).catch(function () {
+      box.innerHTML = '<p class="ghex-dim">生成请求失败，请稍后再试 ✦</p>';
     });
   }
     function runWest() {
