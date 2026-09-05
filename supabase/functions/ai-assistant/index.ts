@@ -114,7 +114,8 @@ Deno.serve(async (req) => {
       const d = body.design || {};
       const designLine = [
         "品名：" + String(d.name || '予光手串'),
-        "主石材质意向：" + String(d.stone || '天然水晶'),
+        "主石材质意向：" + String(d.stone || '天然水晶') + (d.aux ? "；配石点缀：" + String(d.aux) : ""),
+        "双色：" + String(d.color || '#e3c47c') + " 与 " + String(d.accent || '同色') + " 等径交替成串",
         "珠径：" + (d.mm || 10) + "mm，颗数：" + (d.count || 18),
         "主色：" + String(d.color || '#e3c47c'),
         "符号/刻印：" + String(d.glyph || ''),
@@ -125,7 +126,7 @@ Deno.serve(async (req) => {
       const dmodel = Deno.env.get("AI_MODEL") || dbAi.model || "deepseek-chat";
       if (!dk) return Response.json({ ok: false, error: "后台 AI 密钥未配置（settings.ai）" }, { headers: corsHeaders });
       const styleSys = "You write concise English e-commerce product-photo prompts for real crystal bead bracelets. Output ONLY the prompt, no preamble.";
-      const styleUser = "Design:\n" + designLine + "\n\nWrite one refined English prompt (under 150 words) for a high-end luxury jewelry brand editorial product photograph of the bracelet: genuine polished AA-grade translucent crystal beads with beautiful natural inner texture and soft sparkle (photoreal, absolutely not illustration), beads arranged in an elegant neat ring, on a deep navy-to-black gradient studio background with soft umbrella lighting and a subtle warm golden accent, crisp macro focus, premium minimal composition like a flagship jewelry e-commerce hero image, no text, no watermark, no props, 4k.";
+      const styleUser = "Design:\n" + designLine + "\n\nWrite one refined English prompt (under 150 words) for a high-end luxury jewelry brand editorial product photograph of the bracelet: genuine polished AA-grade translucent crystal beads in two complementary tones alternating evenly at equal size, with beautiful natural inner texture and soft sparkle (photoreal, absolutely not illustration), beads arranged in an elegant neat ring, on a deep navy-to-black gradient studio background with soft umbrella lighting and a subtle warm golden accent, crisp macro focus, premium minimal composition like a flagship jewelry e-commerce hero image, no text, no watermark, no props, 4k.";
       const pr1 = await fetch("https://api.deepseek.com/chat/completions", {
         method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + dk },
         body: JSON.stringify({ model: dmodel, messages: [{ role: "system", content: styleSys }, { role: "user", content: styleUser }], temperature: 0.7, max_tokens: 400 })
