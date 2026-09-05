@@ -145,6 +145,8 @@ Deno.serve(async (req) => {
         return Response.json({ ok: false, error: "出图失败：" + String((ij && (ij.message || (ij.error && (ij.error.message || JSON.stringify(ij.error))))) || ir.status) }, { headers: corsHeaders });
       }
       const b64 = ij.data[0].b64_json || "";
+      const remoteUrl = ij.data[0].url || "";
+      if (!b64 && remoteUrl) return Response.json({ ok: true, url: remoteUrl, b64: "" }, { headers: { ...corsHeaders, "Content-Type": "application/json" } });
       let url = "";
       if (b64) {
         const ts = Date.now();
