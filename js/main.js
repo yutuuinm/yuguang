@@ -933,10 +933,38 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
           return /[：:：]$|^[\u4e00-\u9fa5]{1,8}（/.test(ln) ? '<p style="color:var(--gold);">' + ln + '</p>' : '<p>' + ln + '</p>';
         }).join('') + '</div>';
       box.innerHTML = html;
+      try { appendPrompt(box, kind); } catch (e) {}
     }).catch(function () {
       if (!box.isConnected || done) return;
       box.innerHTML = '<div class="gen-hex-inner"><div class="ghex-title">' + title + '</div><p>详解服务连接失败，稍后可再点一次「🔍 详细解卦」✦</p></div>';
     });
+  }
+    /* 文生图提示词（真水晶商品图，可复制） */
+  function appendPrompt(box, kind) {
+    if (!box) return;
+    var mmNow = Number(window.__bs || 10);
+    var cnt = mmNow >= 10 ? 18 : 22;
+    var mainC = window.__mainC || '#e3c47c';
+    var mainName = (function () { var m = document.getElementById('rMain'); return m ? String(m.textContent || '').trim() : ''; })();
+    var stoneWord = String(mainName || '').split(/[（(]/)[0] || 'crystal beads';
+    var zh = '真实感水晶手串商品摄影图：' + cnt + ' 颗 ' + mmNow + 'mm 圆珠，材质意向：' + stoneWord + '，主色接近 ' + mainC + '，深空夜蓝渐变背景，柔光棚拍微距，珠体冰透、带自然纹理与细碎闪光，珠串自然环形摆放，金色细链点缀，低调高级珠宝感，画面干净无文字，4K 电商产品图。';
+    var en = 'macro product photo of a real polished translucent crystal bead bracelet, ' + cnt + ' round beads ' + mmNow + 'mm, hue around ' + mainC + ', arranged in a neat ring on a deep navy-to-black gradient studio background, soft golden rim light, crisp realistic reflections and inner texture, fine gold chain accents, premium jewelry e-commerce photography, clean, no text, 4k';
+    var div = document.createElement('div');
+    div.className = 'gen-prompt';
+    div.innerHTML = '<div class="ghex-title">🖼️ 文生图提示词（真水晶商品图 · 可复制）</div>' +
+      '<textarea class="gen-prompt-ta" rows="5" readonly></textarea>' +
+      '<button type="button" class="btn-sm" data-cp>📋 复制提示词</button>' +
+      '<div class="ghex-dim">粘贴到 硅基流动(FLUX) / 即梦 / 通义万相 等出图工具，即可生成可直接当商品图用的真水晶珠串摄影图 ✦</div>';
+    var ta = div.querySelector('.gen-prompt-ta');
+    ta.value = zh + '\n\n' + en;
+    var cp = div.querySelector('[data-cp]');
+    cp.addEventListener('click', function () {
+      ta.select(); ta.setSelectionRange(0, 999999);
+      try { if (document.execCommand) document.execCommand('copy'); } catch (e) {}
+      if (navigator.clipboard && navigator.clipboard.writeText) { try { navigator.clipboard.writeText(ta.value); } catch (e) {} }
+      cp.textContent = '✓ 已复制';
+    });
+    box.appendChild(div);
   }
     function runWest() {
     curHex = null;
