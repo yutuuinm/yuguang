@@ -152,6 +152,12 @@ Deno.serve(async (req) => {
         const ts = Date.now();
         const path = "gen/" + ts + "-" + Math.floor(Math.random() * 1e6) + ".png";
         try {
+          try { await fetch(SB_URL + "/storage/v1/bucket/assets", { method: "GET", headers: { apikey: SK, Authorization: "Bearer " + SK } }); }
+          catch (e) {}
+          const chk = await fetch(SB_URL + "/storage/v1/bucket/assets", { headers: { apikey: SK, Authorization: "Bearer " + SK } });
+          if (chk.status === 404 || chk.status === 400) {
+            await fetch(SB_URL + "/storage/v1/bucket", { method: "POST", headers: { apikey: SK, Authorization: "Bearer " + SK, "Content-Type": "application/json" }, body: JSON.stringify({ id: "assets", name: "assets", public: true }) }).catch(() => {});
+          }
           const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
           const up = await fetch(SB_URL + "/storage/v1/object/assets/" + path, {
             method: "POST", headers: { apikey: SK, Authorization: "Bearer " + SK, "Content-Type": "image/png" }, body: bytes
