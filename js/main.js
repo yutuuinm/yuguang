@@ -721,6 +721,14 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     var hx = $('genHex'); if (hx) hx.style.display = curHex ? 'inline-flex' : 'none';
     var hb = $('genHexBox'); if (hb) { hb.style.display = 'none'; hb.innerHTML = ''; }
     var hf = $('genFlat'); if (hf) hf.textContent = '📿 俯视图';
+    var pc = document.getElementById('preview');
+    if (pc) {
+      pc.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      pc.classList.remove('gen-flash'); void pc.offsetWidth; pc.classList.add('gen-flash');
+      setTimeout(function () { pc.classList.remove('gen-flash'); }, 1600);
+    }
+    var gs2 = document.getElementById('genStatus');
+    if (gs2 && !gs2.textContent) gs2.textContent = '✦ 设计已生成，可继续微调或提交定制意向';
     if ($('pName')) $('pName').textContent = cfg.name || '予光 · 定制';
     if ($('pSub')) $('pSub').textContent = cfg.sub || '';
     if ($('rMain')) $('rMain').textContent = cfg.mainText || '';
@@ -3181,5 +3189,94 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
         { role: '配珠', name: aux[0], color: aux[1], mm: Number(window.__bs || 10) }
       ]
     });
+  });
+})();
+
+/* ===== 定制结果：DeepSeek 高级文案 / 高清商品图导出 ===== */
+(function () {
+  var deep = document.getElementById('genDeep');
+  var png = document.getElementById('genPng');
+  if (!deep && !png) return;
+  var escS = function (x) { return String(x == null ? '' : x); };
+  function curDesign() {
+    var o = {};
+    o.name = document.getElementById('pName') ? document.getElementById('pName').textContent : '';
+    o.quote = document.getElementById('pLight') ? document.getElementById('pLight').textContent : '';
+    o.main = document.getElementById('rMain') ? document.getElementById('rMain').textContent : '';
+    o.aux = document.getElementById('rAux') ? document.getElementById('rAux').textContent : '';
+    o.chain = document.getElementById('rChain') ? document.getElementById('rChain').textContent : '';
+    o.glyph = document.getElementById('rGlyph') ? document.getElementById('rGlyph').textContent : '';
+    o.beads = window.__lastBeads || [];
+    return o;
+  }
+  function gs(t) { var g = document.getElementById('genStatus'); if (g) g.textContent = t || ''; }
+  if (deep) deep.addEventListener('click', function () {
+    var d = curDesign();
+    gs('DeepSeek 正在撰写一版上架文案…');
+    deep.disabled = true;
+    var need = '作品「' + d.name + '」，主石' + d.main + '，配石' + d.aux + '，链式' + d.chain + '，符号' + d.glyph + '。请给我一版可以直接用作商品页的文案：一个10字内的品名（如已有品名则润色）、一句亮点卖点、一句予光风格的光语，共3行，语言温柔克制。';
+    var req = (window.sbAI ? window.sbAI({ mode: 'stones', need: need }) : Promise.reject(new Error('no-sbAI')));
+    req.then(function (r) {
+      deep.disabled = false;
+      if (!r || !r.ok) { gs('DeepSeek 暂时没空（后台需配置 AI）✦ 简易版依然可用'); return; }
+      var txt = escS(r.answer || '');
+      var l = document.getElementById('pLight');
+      if (l) l.textContent = txt.split(/\n/).join('　');
+      gs('✦ DeepSeek 已生成上架文案（可再点一次重新生成）');
+      var pc = document.getElementById('preview');
+      if (pc) { pc.classList.remove('gen-flash'); void pc.offsetWidth; pc.classList.add('gen-flash'); setTimeout(function () { pc.classList.remove('gen-flash'); }, 1600); }
+    }).catch(function () { deep.disabled = false; gs('DeepSeek 请求失败，请稍后再试 ✦ 简易版依然可用'); });
+  });
+  if (png) png.addEventListener('click', function () {
+    var d = curDesign();
+    var W = 1500, H = 1500;
+    var cv = document.createElement('canvas');
+    cv.width = W; cv.height = H;
+    var ctx = cv.getContext('2d');
+    var bg = ctx.createLinearGradient(0, 0, W, H);
+    bg.addColorStop(0, '#101a33'); bg.addColorStop(0.55, '#0b0f1d'); bg.addColorStop(1, '#05070d');
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+    for (var i = 0; i < 90; i++) {
+      ctx.globalAlpha = 0.25 + Math.random() * 0.5;
+      ctx.fillStyle = Math.random() > 0.5 ? '#fff6e0' : '#e3c47c';
+      ctx.beginPath(); ctx.arc(Math.random() * W, Math.random() * H * 0.9, Math.random() * 2.2 + 0.4, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#e3c47c';
+    ctx.font = '300 ' + Math.round(W * 0.035) + 'px serif';
+    ctx.fillText('予 光 · YUGUANG', W / 2, H * 0.1);
+    ctx.fillStyle = '#f4efe6';
+    ctx.font = '600 ' + Math.round(W * 0.07) + 'px serif';
+    ctx.fillText(d.name || '予光 · 定制', W / 2, H * 0.2);
+    var beads = d.beads && d.beads.length ? d.beads : [{ color: '#e3c47c', mm: 10 }, { color: '#8fa3d9', mm: 10 }];
+    var n = Math.min(beads.length, 22);
+    var cx0 = W * 0.5, cy = H * 0.62, R = W * 0.3;
+    ctx.lineWidth = W * 0.008;
+    ctx.strokeStyle = 'rgba(227,196,124,.5)';
+    ctx.beginPath(); ctx.arc(cx0, cy, R, 0, Math.PI * 2); ctx.stroke();
+    for (var b = 0; b < n; b++) {
+      var a = -Math.PI / 2 + (b / n) * Math.PI * 2;
+      var bx = cx0 + Math.cos(a) * R, by = cy + Math.sin(a) * R;
+      var rr = R * 0.18;
+      var g = ctx.createRadialGradient(bx - rr * 0.35, by - rr * 0.4, rr * 0.1, bx, by, rr);
+      var col = beads[b] && beads[b].color ? beads[b].color : '#e3c47c';
+      g.addColorStop(0, '#fff6e0'); g.addColorStop(0.35, col); g.addColorStop(1, '#1a1f2e');
+      ctx.beginPath(); ctx.arc(bx, by, rr, 0, Math.PI * 2);
+      ctx.fillStyle = g; ctx.fill();
+      ctx.strokeStyle = 'rgba(244,239,230,.55)'; ctx.lineWidth = rr * 0.12; ctx.stroke();
+    }
+    ctx.fillStyle = '#e3c47c';
+    ctx.font = '400 ' + Math.round(W * 0.032) + 'px serif';
+    var q = (d.quote || '黑暗中总有光伴你前行').slice(0, 60);
+    ctx.fillText(q, W / 2, H * 0.82);
+    ctx.fillStyle = 'rgba(244,239,230,.55)';
+    ctx.font = '300 ' + Math.round(W * 0.024) + 'px sans-serif';
+    ctx.fillText('天然水晶 · 手工定制 · 文化意象的表达', W / 2, H * 0.9);
+    var url = cv.toDataURL('image/png');
+    var a = document.createElement('a');
+    a.href = url; a.download = '予光-' + (d.name || '设计') + '.png';
+    document.body.appendChild(a); a.click(); a.remove();
+    gs('🖼️ 高清商品图已导出（1500×1500 PNG）');
   });
 })();
