@@ -45,7 +45,8 @@ async function deepseekChat(apiKey, model, messages) {
   });
   const data = await res.json();
   if (!res.ok) throw new Error((data.error && data.error.message) || ("HTTP " + res.status));
-  const text = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+  const msg = data.choices && data.choices[0] && data.choices[0].message || null;
+  const text = msg ? (msg.content || msg.reasoning_content || "") : "";
   return (text || "").trim();
 }
 
@@ -122,7 +123,7 @@ Deno.serve(async (req) => {
         const sysP = ['你是予光设计师：根据以下信息，用中文输出一版可直接用于设计文案的分析（不要用任何 * 星号、不要用markdown标记）：', '1)一句五行喜用方向；2)推荐主石与配石（具体晶石名）；3)设计中应出现的配色3-4种，以 #HEX 表示；4)设计理念（100字内温柔短文）；5)一句光语。', '信息：' + ctx].join('');
         try {
           const pa = await fetch("https://api.deepseek.com/chat/completions", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + dk }, body: JSON.stringify({ model: dmodel, messages: [{ role: "system", content: sysP }], temperature: 0.7, max_tokens: 700 }) }).then(r=>r.json()).catch(()=>null);
-          if (pa && pa.choices && pa.choices[0]) analysis = String(pa.choices[0].message.content || "").split("*").join("").trim();
+          if (pa && pa.choices && pa.choices[0]) analysis = String((pa.choices[0].message && (pa.choices[0].message.content || pa.choices[0].message.reasoning_content)) || "").split("*").join("").trim();
           const hm = String(analysis).match(/#[0-9a-fA-F]{6}/g);
           if (hm) extraHexes = hm.slice(0, 4);
         } catch (e) {}
@@ -151,7 +152,7 @@ Deno.serve(async (req) => {
         body: JSON.stringify({ model: dmodel, messages: [{ role: "system", content: styleSys }, { role: "user", content: styleUser }], temperature: 0.7, max_tokens: 400 })
       }).then(r => r.json()).catch(() => null);
       if (!pr1 || !pr1.choices || !pr1.choices[0]) return Response.json({ ok: false, error: "DeepSeek 提示词生成失败" }, { headers: corsHeaders });
-      const promptTxt = String(pr1.choices[0].message.content || "").trim();
+      const promptTxt = String((pr1.choices[0].message && (pr1.choices[0].message.content || pr1.choices[0].message.reasoning_content)) || "").trim();
       const imgKey = dbAi.img_key || Deno.env.get("SILICON_KEY") || "";
       const imgBase = dbAi.img_base || "https://api.siliconflow.cn/v1";
       const imgModel = dbAi.img_model || "black-forest-labs/FLUX.1-dev";
