@@ -116,6 +116,10 @@ Deno.serve(async (req) => {
       const bz = body.bazi || null;
       const hx = body.hex || null;
       // 1) DeepSeek 结构化分析（八字/卦）：给出五行喜用、主配石、多色配色与设计理念（无星号）
+      const dbAi = await getDbAi(SB_URL, SK) || {};
+      const dk = Deno.env.get("AI_API_KEY") || dbAi.key || "";
+      const dmodel = Deno.env.get("AI_MODEL") || dbAi.model || "deepseek-chat";
+      if (!dk) return Response.json({ ok: false, error: "后台 AI 密钥未配置（settings.ai）" }, { headers: corsHeaders });
       let analysis = "";
       let extraHexes = [];
       if (bz || hx) {
@@ -141,10 +145,6 @@ Deno.serve(async (req) => {
         "符号/刻印：" + String(d.glyph || ''),
         "光语：" + String(d.quote || '')
       ].join("\n");
-      const dbAi = await getDbAi(SB_URL, SK) || {};
-      const dk = Deno.env.get("AI_API_KEY") || dbAi.key || "";
-      const dmodel = Deno.env.get("AI_MODEL") || dbAi.model || "deepseek-chat";
-      if (!dk) return Response.json({ ok: false, error: "后台 AI 密钥未配置（settings.ai）" }, { headers: corsHeaders });
       const styleSys = "You write concise English e-commerce product-photo prompts for real crystal bead bracelets. Output ONLY the prompt, no preamble.";
       const styleUser = "Design:\n" + designLine + "\n\nWrite one refined English prompt (under 150 words) for a high-end luxury jewelry brand editorial product photograph of the bracelet: real polished translucent crystal beads in the exact multi-tone palette specified by the design (main tone dominant, 1-3 accent tones strictly per the listed hex colors), beautiful natural inner texture and soft sparkle (photoreal, absolutely not illustration), beads arranged in an elegant neat ring, on a deep navy-to-black gradient studio background with soft umbrella lighting and a subtle warm golden accent, crisp macro focus, premium minimal composition like a flagship jewelry e-commerce hero image, no text, no watermark, no props, 4k.";
       const pr1 = await fetch("https://api.deepseek.com/chat/completions", {
