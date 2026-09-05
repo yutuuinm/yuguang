@@ -1030,7 +1030,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     var cnt = mmNow >= 10 ? 18 : 22;
     var mainName = (function () { var m = document.getElementById('rMain'); return m ? String(m.textContent || '').trim() : ''; })();
     var stoneName = String(mainName || '').split(/[（(]/)[0] || '天然水晶';
-    var auxName = (function () { var m = document.getElementById('rAux'); var t = m ? String(m.textContent || '') : ''; return t ? String(t.split(/[（(]/)[0]).trim() : ''; })() || '';
+    var auxName = (function () { var m = document.getElementById('rAux'); var t = m ? String(m.textContent || '') : ''; return t ? t.split(/[（(]/)[0].trim() : ''; })() || '';
     var nm = (function () { var m = document.getElementById('pName'); return m ? m.textContent : ''; })();
     var glyph = (function () { var m = document.getElementById('rGlyph'); return m ? String(m.textContent || '').trim() : ''; })();
     var quote = (function () { var m = document.getElementById('pLight'); return m ? String(m.textContent || '').trim() : ''; })();
@@ -1060,9 +1060,16 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
       var role = localStorage.getItem('yg_role') || '';
       var left = imgQuota().left;
       var ideaHtml = '';
-      if (j.analysis) { var clean = String(j.analysis).replace(/*/g, ''); ideaHtml = '<div class="ghex-title">✦ 设计理念</div>' + clean.split(/
-+/).map(function (ln) { ln = ln.trim(); if (!ln) return ''; return /[：:]$/.test(ln) ? '<p style="color:var(--gold);">' + ln + '</p>' : '<p>' + ln + '</p>'; }).join('') + '<hr style="border:none;border-top:1px dashed var(--line-soft);margin:6px 0;">'; }
-      outWrap.innerHTML = '<div class="ghex-title">真水晶预览 ✦</div>' +
+      if (j.analysis) {
+        var c2 = String(j.analysis).split('*').join('');
+        var lines = c2.split(String.fromCharCode(10));
+        ideaHtml = '<div class="ghex-title">✦ 设计理念</div>' + lines.map(function (ln) {
+          ln = String(ln || '').trim();
+          if (!ln) return '';
+          return /[：:]$/.test(ln) ? '<p style="color:var(--gold);">' + ln + '</p>' : '<p>' + ln + '</p>';
+        }).join('') + '<hr style="border:none;border-top:1px dashed var(--line-soft);margin:6px 0;">';
+      }
+      outWrap.innerHTML = ideaHtml + '<div class="ghex-title">真水晶预览 ✦</div>' +
         '<img src="' + src + '" alt="生成的真水晶商品图" style="width:100%;border-radius:14px;border:1px solid var(--line);">' +
         ((role !== 'root' && role !== 'admin') ? '<p class="ghex-dim">本日还可生成 ' + left + ' 张 ✦ 登录后每日 2 张</p>' : '');
       var box2 = document.getElementById('previewImg');
