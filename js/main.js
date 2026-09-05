@@ -837,7 +837,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       ]
     });
     st('生辰设计已生成 ✦ 下方按钮可带上光语一起提交');
-    autoDetail('bazi', { zod: zodEl ? zodEl.value : '', el: info.el, year: yearEl ? String(yearEl.value || '').trim() : '', month: bm || '', day: bd || '', hour: hour ? hour[0] : '', gua: gua ? gua[0] : null });
+    try { autoDetail('bazi', { zod: zodEl ? zodEl.value : '', el: info.el, year: yearEl ? String(yearEl.value || '').trim() : '', month: bm || '', day: bd || '', hour: hour ? hour[0] : '', gua: gua ? gua[0] : null }); } catch (e) {}
   }
 
   function runShake(forceNew) {
@@ -899,14 +899,14 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       ]
     });
     st('摇卦完成 ✦ 得「' + hex[0] + '」。可再摇，也可带着卦象与光语提交');
-    autoDetail('hex', { name: hex[0], sym: hex[1], wu: hex[2], idea: hex[3] });
+    try { autoDetail('hex', { name: hex[0], sym: hex[1], wu: hex[2], idea: hex[3] }); } catch (e) {}
   }
 
   /* 全量详解：调用后台 DeepSeek（ai-assistant，settings.ai 配置 v4-flash），渲染进详情箱并默认展开 */
   function autoDetail(kind, payload) {
     var box = document.getElementById('genHexBox');
     if (!box) return;
-    var title = kind === 'bazi' ? '✦ 八字 · 全量详解' : '✦ 卦 · 全量详解';
+    var title = kind === 'bazi' ? '✦ 生辰 · 设计理念' : '✦ 卦 · 设计理念';
     box.style.display = 'block';
     box.innerHTML = '<div class="gen-hex-inner"><div class="ghex-title">' + title + '</div><p class="ghex-dim">让小光为你详解（正在展开…）</p></div>';
     var q = '';
