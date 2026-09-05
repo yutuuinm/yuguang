@@ -972,16 +972,13 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     return host;
   }
   function autoRealImg() {
-    var detailBox = document.getElementById('genHexBox');
-    var host = (detailBox && detailBox.style.display === 'block') ? detailBox : ensureImgBox();
-    var box = host || ensureImgBox();
+    var box = ensureImgBox();
     if (!box) return;
-    var outWrap = box.querySelector('.gen-img-out');
-    if (outWrap) outWrap.remove();
-    outWrap = document.createElement('div');
+    var oldWrap = box.querySelector('.gen-img-out');
+    if (oldWrap) oldWrap.remove();
+    var outWrap = document.createElement('div');
     outWrap.className = 'gen-img-out';
     box.appendChild(outWrap);
-    var role = localStorage.getItem('yg_role') || '';
     var cfg2 = window.SUPABASE || {};
     var aiUrl = cfg2.aiUrl || (cfg2.url ? cfg2.url + '/functions/v1/ai-assistant' : '');
     var q = imgQuota();
@@ -989,7 +986,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       outWrap.innerHTML = '<p class="ghex-dim">今日出图额度已用完 ✦ 未登录每日 1 张，登录后每日 2 张（管理员不限），明日再来</p>';
       return;
     }
-    if (!aiUrl) { box.innerHTML = '<p class="ghex-dim">AI 服务未配置 ✦</p>'; return; }
+    if (!aiUrl) { outWrap.innerHTML = '<p class="ghex-dim">AI 服务未配置 ✦</p>'; return; }
     var mmNow = Number(window.__bs || 10);
     var cnt = mmNow >= 10 ? 18 : 22;
     var mainName = (function () { var m = document.getElementById('rMain'); return m ? String(m.textContent || '').trim() : ''; })();
@@ -997,25 +994,29 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     var nm = (function () { var m = document.getElementById('pName'); return m ? m.textContent : ''; })();
     var glyph = (function () { var m = document.getElementById('rGlyph'); return m ? String(m.textContent || '').trim() : ''; })();
     var quote = (function () { var m = document.getElementById('pLight'); return m ? String(m.textContent || '').trim() : ''; })();
-    box.innerHTML = '<p class="ghex-dim" style="margin:6px 0 2px;"><span class="yg-loading"></span> 小光正在为你生成真水晶商品图…（10-30 秒）</p>';
+    outWrap.innerHTML = '<div class="ghex-title">真水晶预览 ✦</div><p class="ghex-dim" style="margin:2px 0 6px;"><span class="yg-loading"></span> 小光正在生成真水晶商品图…（10-30 秒）</p>';
     fetch(aiUrl, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ mode: 'product_img', design: { name: nm, stone: stoneName, mm: mmNow, count: cnt, color: window.__mainC || '#e3c47c', glyph: glyph, quote: quote } })
     }).then(function (r) { return r.json(); }).then(function (j) {
       if (!j || !j.ok) {
-        outWrap.innerHTML = '<p class="ghex-dim">' + (String((j && j.error) || '出图失败')) + '</p>';
+        outWrap.innerHTML = '<p class="ghex-dim">' + String((j && j.error) || '出图失败') + '</p>';
         return;
       }
-      imgUseUp();
+      try { imgUseUp(); } catch (e) {}
       var src = j.url || ('data:image/png;base64,' + (j.b64 || ''));
+      var role = localStorage.getItem('yg_role') || '';
       var left = imgQuota().left;
-      outWrap.innerHTML = '<div class="ghex-title" style="margin-top:8px;">真水晶预览 ✦</div><img src="' + src + '" alt="生成的真水晶商品图" style="width:100%;border-radius:14px;border:1px solid var(--line);margin-top:4px;">' +
-        (left >= 0 && role !== 'root' && role !== 'admin' ? '<p class="ghex-dim">本日还可生成 ' + left + ' 张 ✦ 登录后每日 2 张</p>' : '');
-    }).catch(function () {
+      outWrap.innerHTML = '<div class="ghex-title">真水晶预览 ✦</div>' +
+        '<img src="' + src + '" alt="生成的真水晶商品图" style="width:100%;border-radius:14px;border:1px solid var(--line);">' +
+        ((role !== 'root' && role !== 'admin') ? '<p class="ghex-dim">本日还可生成 ' + left + ' 张 ✦ 登录后每日 2 张</p>' : '');
+      var box2 = document.getElementById('previewImg');
+      if (box2) { box2.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+    }).catch(function (e) {
       outWrap.innerHTML = '<p class="ghex-dim">生成请求失败，请稍后再试 ✦</p>';
     });
   }
-    function runWest() {
+  function runWest() {
     curHex = null;
     var sun = $('westSun') ? $('westSun').value : '';
     if (!sun) { st('请先选一个太阳星座 ✦', true); return; }
