@@ -729,7 +729,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     }
     var gs2 = document.getElementById('genStatus');
     if (gs2 && !gs2.textContent) gs2.textContent = '✦ 设计已生成，可继续微调或提交定制意向';
-    try { window.setTimeout(function () { if (typeof autoRealImg === 'function') autoRealImg(); }, 420); } catch (e) {}
+    try { seedImgWait(); } catch (e) {}
     try { window.setTimeout(function () { if (typeof localIdea === 'function') localIdea(); }, 160); } catch (e) {}
     if ($('pName')) $('pName').textContent = cfg.name || '予光 · 定制';
     if ($('pSub')) $('pSub').textContent = cfg.sub || '';
@@ -994,6 +994,22 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     box.innerHTML = html;
     box.style.display = 'block';
   }
+    var WAIT_QUOTES = [
+    '黑暗中总有光伴你前行，虽微弱，但足够照亮。',
+    '先照亮自己，再谈遇见。',
+    '云聚时我备好伞，雨落时我接住光。',
+    '你若先亮，黑夜自会退半步。'
+  ];
+  function seedImgWait() {
+    var box = ensureImgBox();
+    if (!box) return;
+    var q = WAIT_QUOTES[Math.floor(Math.random() * WAIT_QUOTES.length)];
+    box.innerHTML = '<div class="ghex-title">真水晶预览 ✦</div>' +
+      '<p class="ghex-dim" style="margin:2px 0 8px;">✦ ' + q + '</p>' +
+      '<button type="button" class="btn-gold" data-gr style="font-size:13px;">🖼️ 生成真水晶商品图（按张计费）</button>';
+    var b = box.querySelector('[data-gr]');
+    if (b) b.addEventListener('click', function () { if (typeof autoRealImg === 'function') autoRealImg(); });
+  }
     function autoRealImg() {
     var box = ensureImgBox();
     if (!box) return;
@@ -1017,7 +1033,8 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     var nm = (function () { var m = document.getElementById('pName'); return m ? m.textContent : ''; })();
     var glyph = (function () { var m = document.getElementById('rGlyph'); return m ? String(m.textContent || '').trim() : ''; })();
     var quote = (function () { var m = document.getElementById('pLight'); return m ? String(m.textContent || '').trim() : ''; })();
-    outWrap.innerHTML = '<div class="ghex-title">真水晶预览 ✦</div><p class="ghex-dim" style="margin:2px 0 6px;"><span class="yg-loading"></span> 小光正在生成真水晶商品图…（10-30 秒）</p>';
+    var wq = WAIT_QUOTES[Math.floor(Math.random() * WAIT_QUOTES.length)];
+    outWrap.innerHTML = '<div class="ghex-title">真水晶预览 ✦</div><p class="ghex-dim" style="margin:2px 0 6px;"><span class="yg-loading"></span> 小光正在生成真水晶商品图…（10-30 秒）</p><p class="ghex-dim">✦ ' + wq + '</p>';
     fetch(aiUrl, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ mode: 'product_img', design: { name: nm, stone: stoneName, mm: mmNow, count: cnt, color: window.__mainC || '#e3c47c', glyph: glyph, quote: quote } })
