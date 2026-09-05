@@ -730,6 +730,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     var gs2 = document.getElementById('genStatus');
     if (gs2 && !gs2.textContent) gs2.textContent = '✦ 设计已生成，可继续微调或提交定制意向';
     try { window.setTimeout(function () { if (typeof autoRealImg === 'function') autoRealImg(); }, 420); } catch (e) {}
+    try { window.setTimeout(function () { if (typeof localIdea === 'function') localIdea(); }, 160); } catch (e) {}
     if ($('pName')) $('pName').textContent = cfg.name || '予光 · 定制';
     if ($('pSub')) $('pSub').textContent = cfg.sub || '';
     if ($('rMain')) $('rMain').textContent = cfg.mainText || '';
@@ -743,6 +744,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     syncOrderItem();
   }
   var beadSize = 10;
+  var NURT = { 水: '金', 木: '水', 火: '木', 土: '火', 金: '土' }; // 生我滋养 · 五行平和
   window.__beads = function (mainC) {
     var mm = Number(window.__bs || 10);
     var n = mm >= 10 ? 18 : 22;
@@ -813,10 +815,15 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     var guaIdx = Number($('eastGua') ? $('eastGua').value : '') - 1;
     var gua = (guaIdx >= 0 && HEXES[guaIdx]) ? HEXES[guaIdx] : null;
     var aux = list[1];
+    var nur = NURT[info.el];
+    var nurName = '';
+    if (!gua && nur && ELEMENT_STONES[nur] && ELEMENT_STONES[nur][0]) { aux = ELEMENT_STONES[nur][0]; nurName = nur; }
     if (gua) {
       var auxList = ELEMENT_STONES[gua[2]];
-      if (auxList && auxList[0]) aux = auxList[0];
+      if (auxList && auxList[0]) { aux = auxList[0]; nurName = ''; }
     }
+    var yangNote = '';
+    try { var yv = parseInt(String(yearEl ? yearEl.value || '' : ''), 10); if (yv) yangNote = '（' + (yv % 2 === 0 ? '阴' : '阳') + '年）'; } catch (e) {}
     curHex = gua;
     var parts = [info.quote];
     if (hour) parts.push(hour[2]);
@@ -824,8 +831,8 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     showDesign({
       name: gua ? (z + ' · ' + gua[0]) : (z + ' · 生辰'),
       sub: 'EAST · 生辰定制' + (gua ? ' · ' + gua[1] : ''),
-      mainText: main[0] + '（本命' + info.el + ' · 主石 10mm）',
-      auxText: aux[0] + '（' + (gua ? '随卦' + gua[2] + '系意象 · ' : info.el + '色系辅光 · ') + '配石 8mm）',
+      mainText: main[0] + '（本命' + info.el + yangNote + ' · 主石 10mm）',
+      auxText: aux[0] + '（' + (gua ? '随卦' + gua[2] + '系意象' : (nurName ? nurName + '生' + info.el + ' · 取五行平和' : info.el + '系辅光')) + ' · 配石 8mm）',
       metal: $('metalEast') ? $('metalEast').value : '',
       chain: gua ? (gua[0] + ' · 手作') : '生肖暗刻 · 手作',
       glyph: (bm && bd ? (bm + '/' + bd + ' · ') : '') + (gua ? (gua[1] + ' ' + gua[0]) : (hour ? hour[0] + '时' : '生辰')),
@@ -971,7 +978,23 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     }
     return host;
   }
-  function autoRealImg() {
+  function localIdea() {
+    var box = document.getElementById('genHexBox');
+    if (!box) return;
+    function txt(id) { var e = document.getElementById(id); return e ? String(e.textContent || '').trim() : ''; }
+    var nm = txt('pName'), sub = txt('pSub'), main = txt('rMain'), aux = txt('rAux'), chain = txt('rChain'), glyph = txt('rGlyph'), light = txt('pLight');
+    var mmNow = Number(window.__bs || 10);
+    var html = '<div class="gen-hex-inner"><div class="ghex-title">✦ 设计理念</div>' +
+      '<p><b style="color:var(--gold);">' + (nm || '予光 · 定制') + '</b> · ' + (sub || '') + '</p>' +
+      '<p>主石｜' + (main || '—') + '</p>' +
+      '<p>配石｜' + (aux || '—') + '（以意象平衡为本，五行平和、阴阳相济）</p>' +
+      '<p>串形｜' + (chain || '—') + ' · ' + mmNow + 'mm × ' + (mmNow >= 10 ? 18 : 22) + ' 颗' + (glyph ? ' · ' + glyph : '') + '</p>' +
+      (light ? '<p>光语｜' + light + '</p>' : '') +
+      '<p class="ghex-dim">✦ 设计理念为文化意象的表达与陪伴；生辰/卦象可自动展开更完整的详解。</p></div>';
+    box.innerHTML = html;
+    box.style.display = 'block';
+  }
+    function autoRealImg() {
     var box = ensureImgBox();
     if (!box) return;
     var oldWrap = box.querySelector('.gen-img-out');
@@ -3396,4 +3419,11 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     document.body.appendChild(a); a.click(); a.remove();
     gs('🖼️ 高清商品图已导出（1500×1500 PNG）');
   });
+})();
+
+/* ===== 定制工坊：未生成时的等待提示 ===== */
+(function () {
+  if (!document.getElementById('genStatus')) return;
+  var st0 = document.getElementById('genStatus');
+  if (st0 && !st0.textContent) st0.textContent = '✦ 请选择定制方式并生成，设计卡与设计理念会显示在这里';
 })();
