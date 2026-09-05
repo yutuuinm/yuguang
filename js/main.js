@@ -742,11 +742,11 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     syncOrderItem();
   }
   var beadSize = 10;
-  window.__beads = function (mainC, auxC) {
+  window.__beads = function (mainC) {
     var mm = Number(window.__bs || 10);
     var n = mm >= 10 ? 18 : 22;
     var arr = [];
-    for (var i = 0; i < n; i++) arr.push({ color: (i % 5 === 2) ? mainC : auxC, mm: mm });
+    for (var i = 0; i < n; i++) arr.push({ color: mainC, mm: mm });
     return arr;
   };
   function initBeadRow() {
