@@ -112,10 +112,26 @@ Deno.serve(async (req) => {
 
     if (mode === "product_img") {
       const d = body.design || {};
+      const bz = body.bazi || null;
+      const hx = body.hex || null;
+      // 1) DeepSeek 结构化分析（八字/卦）：给出五行喜用、主配石、多色配色与设计理念（无星号）
+      let analysis = "";
+      let extraHexes = [];
+      if (bz || hx) {
+        const ctx = bz ? ("生辰：" + bz.year + "年" + bz.month + "月" + bz.day + "日" + (bz.hour || "?") + "时，生肖" + (bz.zod || "") + "，本命" + (bz.el || "") + (bz.gua ? "，另取卦" + bz.gua : "")) : ("卦：" + hx.name + "（" + hx.sym + "），" + (hx.idea || "") + "，五行属" + (hx.wu || ""));
+        const sysP = "你是予光设计师：根据以下信息，用中文输出一版可直接用于设计文案的分析（不要用任何 * 星号、不要用markdown标记）：1)一句五行喜用方向；2)推荐主石与配石（具体晶石名）；3)设计中应出现的配色3-4种，以 #HEX 表示；4)设计理念（100字内温柔短文）；5)一句光语。
+信息：" + ctx;
+        try {
+          const pa = await fetch("https://api.deepseek.com/chat/completions", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + dk }, body: JSON.stringify({ model: dmodel, messages: [{ role: "system", content: sysP }], temperature: 0.7, max_tokens: 700 }) }).then(r=>r.json()).catch(()=>null);
+          if (pa && pa.choices && pa.choices[0]) analysis = String(pa.choices[0].message.content || "").replace(/*/g, "").trim();
+          const hm = String(analysis).match(/#[0-9a-fA-F]{6}/g);
+          if (hm) extraHexes = hm.slice(0, 4);
+        } catch (e) {}
+      }
       const designLine = [
         "品名：" + String(d.name || '予光手串'),
         "主石材质意向：" + String(d.stone || '天然水晶') + (d.aux ? "；配石点缀：" + String(d.aux) : ""),
-        "双色：" + String(d.color || '#e3c47c') + " 与 " + String(d.accent || '同色') + " 等径交替成串",
+        "双色：" + String(d.color || '#e3c47c') + " 与 " + String(d.accent || '同色') + " 等径交替成串" + (extraHexes.length ? "；分析配色：" + extraHexes.join(",") : ""),
         "珠径：" + (d.mm || 10) + "mm，颗数：" + (d.count || 18),
         "主色：" + String(d.color || '#e3c47c'),
         "符号/刻印：" + String(d.glyph || ''),
@@ -126,7 +142,7 @@ Deno.serve(async (req) => {
       const dmodel = Deno.env.get("AI_MODEL") || dbAi.model || "deepseek-chat";
       if (!dk) return Response.json({ ok: false, error: "后台 AI 密钥未配置（settings.ai）" }, { headers: corsHeaders });
       const styleSys = "You write concise English e-commerce product-photo prompts for real crystal bead bracelets. Output ONLY the prompt, no preamble.";
-      const styleUser = "Design:\n" + designLine + "\n\nWrite one refined English prompt (under 150 words) for a high-end luxury jewelry brand editorial product photograph of the bracelet: genuine polished AA-grade translucent crystal beads in two complementary tones alternating evenly at equal size, with beautiful natural inner texture and soft sparkle (photoreal, absolutely not illustration), beads arranged in an elegant neat ring, on a deep navy-to-black gradient studio background with soft umbrella lighting and a subtle warm golden accent, crisp macro focus, premium minimal composition like a flagship jewelry e-commerce hero image, no text, no watermark, no props, 4k.";
+      const styleUser = "Design:\n" + designLine + "\n\nWrite one refined English prompt (under 150 words) for a high-end luxury jewelry brand editorial product photograph of the bracelet: real polished translucent crystal beads in the exact multi-tone palette specified by the design (main tone dominant, 1-3 accent tones strictly per the listed hex colors), beautiful natural inner texture and soft sparkle (photoreal, absolutely not illustration), beads arranged in an elegant neat ring, on a deep navy-to-black gradient studio background with soft umbrella lighting and a subtle warm golden accent, crisp macro focus, premium minimal composition like a flagship jewelry e-commerce hero image, no text, no watermark, no props, 4k.";
       const pr1 = await fetch("https://api.deepseek.com/chat/completions", {
         method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + dk },
         body: JSON.stringify({ model: dmodel, messages: [{ role: "system", content: styleSys }, { role: "user", content: styleUser }], temperature: 0.7, max_tokens: 400 })
@@ -167,7 +183,7 @@ Deno.serve(async (req) => {
         } catch (e) { /* 回退 b64 */ }
       }
       await recordUsage(SB_URL, SK, 'product_img', String(d.name || ''));
-      return Response.json({ ok: true, url: url, b64: url ? "" : b64 }, { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return Response.json({ ok: true, url: url, b64: url ? "" : b64, analysis: analysis, colors: extraHexes }, { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
     const question = String(body.question || "").trim();
     if (!question) return Response.json({ ok: false, error: "缺少问题内容" }, { headers: corsHeaders });
