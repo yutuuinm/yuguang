@@ -921,7 +921,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       if (!box.isConnected) return;
       done = true;
       if (!r || !r.ok) {
-        box.innerHTML = '<div class="gen-hex-inner"><div class="ghex-title">' + title + '</div>' + (kind === 'hex'
+        outWrap.innerHTML = '<div class="gen-hex-inner"><div class="ghex-title">' + title + '</div>' + (kind === 'hex'
           ? '<p>卦象「' + payload.name + '（' + payload.sym + '）」属' + (payload.wu || '') + '系的意象：' + (payload.idea || '') + '。取其意境做配色与主石之引，让它成为一枚随身的光。</p>'
           : '<p>' + payload.zod + '属' + payload.el + '，以' + payload.el + '系晶石的意象作底色，把时节与时辰的光收进腕间。</p>') + '<p class="ghex-dim">✦ 详解服务暂不可用（后台 AI 需配置），以上为本地意象说明。</p></div>';
         return;
@@ -933,11 +933,11 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
           if (!ln) return '';
           return /[：:：]$|^[\u4e00-\u9fa5]{1,8}（/.test(ln) ? '<p style="color:var(--gold);">' + ln + '</p>' : '<p>' + ln + '</p>';
         }).join('') + '</div>';
-      box.innerHTML = html;
+      outWrap.innerHTML = html;
 
     }).catch(function () {
       if (!box.isConnected || done) return;
-      box.innerHTML = '<div class="gen-hex-inner"><div class="ghex-title">' + title + '</div><p>详解服务连接失败，稍后可再点一次「🔍 详细解卦」✦</p></div>';
+      outWrap.innerHTML = '<div class="gen-hex-inner"><div class="ghex-title">' + title + '</div><p>详解服务连接失败，稍后可再点一次「🔍 详细解卦」✦</p></div>';
     });
   }
     /* 配额：未登录 1 张/日，登录 2 张/日，管理员不限 */
@@ -972,14 +972,21 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     return host;
   }
   function autoRealImg() {
-    var box = ensureImgBox();
+    var detailBox = document.getElementById('genHexBox');
+    var host = (detailBox && detailBox.style.display === 'block') ? detailBox : ensureImgBox();
+    var box = host || ensureImgBox();
     if (!box) return;
+    var outWrap = box.querySelector('.gen-img-out');
+    if (outWrap) outWrap.remove();
+    outWrap = document.createElement('div');
+    outWrap.className = 'gen-img-out';
+    box.appendChild(outWrap);
     var role = localStorage.getItem('yg_role') || '';
     var cfg2 = window.SUPABASE || {};
     var aiUrl = cfg2.aiUrl || (cfg2.url ? cfg2.url + '/functions/v1/ai-assistant' : '');
     var q = imgQuota();
     if (q.left <= 0) {
-      box.innerHTML = '<p class="ghex-dim">今日出图额度已用完 ✦ 未登录每日 1 张，登录后每日 2 张（管理员不限），明日再来</p>';
+      outWrap.innerHTML = '<p class="ghex-dim">今日出图额度已用完 ✦ 未登录每日 1 张，登录后每日 2 张（管理员不限），明日再来</p>';
       return;
     }
     if (!aiUrl) { box.innerHTML = '<p class="ghex-dim">AI 服务未配置 ✦</p>'; return; }
@@ -996,16 +1003,16 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       body: JSON.stringify({ mode: 'product_img', design: { name: nm, stone: stoneName, mm: mmNow, count: cnt, color: window.__mainC || '#e3c47c', glyph: glyph, quote: quote } })
     }).then(function (r) { return r.json(); }).then(function (j) {
       if (!j || !j.ok) {
-        box.innerHTML = '<p class="ghex-dim">' + (String((j && j.error) || '出图失败')) + '</p>';
+        outWrap.innerHTML = '<p class="ghex-dim">' + (String((j && j.error) || '出图失败')) + '</p>';
         return;
       }
       imgUseUp();
       var src = j.url || ('data:image/png;base64,' + (j.b64 || ''));
       var left = imgQuota().left;
-      box.innerHTML = '<div class="ghex-title" style="margin-top:8px;">真水晶预览 ✦</div><img src="' + src + '" alt="生成的真水晶商品图" style="width:100%;border-radius:14px;border:1px solid var(--line);margin-top:4px;">' +
+      outWrap.innerHTML = '<div class="ghex-title" style="margin-top:8px;">真水晶预览 ✦</div><img src="' + src + '" alt="生成的真水晶商品图" style="width:100%;border-radius:14px;border:1px solid var(--line);margin-top:4px;">' +
         (left >= 0 && role !== 'root' && role !== 'admin' ? '<p class="ghex-dim">本日还可生成 ' + left + ' 张 ✦ 登录后每日 2 张</p>' : '');
     }).catch(function () {
-      box.innerHTML = '<p class="ghex-dim">生成请求失败，请稍后再试 ✦</p>';
+      outWrap.innerHTML = '<p class="ghex-dim">生成请求失败，请稍后再试 ✦</p>';
     });
   }
     function runWest() {
