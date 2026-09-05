@@ -1036,9 +1036,20 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     var quote = (function () { var m = document.getElementById('pLight'); return m ? String(m.textContent || '').trim() : ''; })();
     var wq = WAIT_QUOTES[Math.floor(Math.random() * WAIT_QUOTES.length)];
     outWrap.innerHTML = '<div class="ghex-title">真水晶预览 ✦</div><p class="ghex-dim" style="margin:2px 0 6px;"><span class="yg-loading"></span> 小光正在生成真水晶商品图…（10-30 秒）</p><p class="ghex-dim">✦ ' + wq + '</p>';
+    var ctxB = null, ctxH = null;
+    try {
+      if (curHex) { ctxH = { name: curHex[0], sym: curHex[1], wu: curHex[2], idea: curHex[3] }; }
+      else {
+        var yel = document.getElementById('eastYear');
+        var bm2 = document.getElementById('bzMonth'), bd2 = document.getElementById('bzDay'), hr2 = document.getElementById('eastHour');
+        var zo2 = document.getElementById('eastZodiac');
+        var el2 = zo2 && zo2.value ? ZODIAC[zo2.value] : null;
+        ctxB = { year: (yel && yel.value) || '', month: (bm2 && bm2.value) || '', day: (bd2 && bd2.value) || '', hour: (hr2 && hr2.value) || '', zod: (zo2 && zo2.value) || '', el: (el2 && el2.el) || '', gua: '' };
+      }
+    } catch (e) {}
     fetch(aiUrl, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mode: 'product_img', design: { name: nm, stone: stoneName, aux: auxName, mm: mmNow, count: cnt, color: window.__mainC || '#e3c47c', accent: window.__auxC || '', glyph: glyph, quote: quote } })
+body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { name: nm, stone: stoneName, aux: auxName, mm: mmNow, count: cnt, color: window.__mainC || '#e3c47c', accent: window.__auxC || '', glyph: glyph, quote: quote } })
     }).then(function (r) { return r.json(); }).then(function (j) {
       if (!j || !j.ok) {
         outWrap.innerHTML = '<p class="ghex-dim">' + String((j && j.error) || '出图失败') + '</p>';
@@ -1048,6 +1059,9 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       var src = j.url || ('data:image/png;base64,' + (j.b64 || ''));
       var role = localStorage.getItem('yg_role') || '';
       var left = imgQuota().left;
+      var ideaHtml = '';
+      if (j.analysis) { var clean = String(j.analysis).replace(/*/g, ''); ideaHtml = '<div class="ghex-title">✦ 设计理念</div>' + clean.split(/
++/).map(function (ln) { ln = ln.trim(); if (!ln) return ''; return /[：:]$/.test(ln) ? '<p style="color:var(--gold);">' + ln + '</p>' : '<p>' + ln + '</p>'; }).join('') + '<hr style="border:none;border-top:1px dashed var(--line-soft);margin:6px 0;">'; }
       outWrap.innerHTML = '<div class="ghex-title">真水晶预览 ✦</div>' +
         '<img src="' + src + '" alt="生成的真水晶商品图" style="width:100%;border-radius:14px;border:1px solid var(--line);">' +
         ((role !== 'root' && role !== 'admin') ? '<p class="ghex-dim">本日还可生成 ' + left + ' 张 ✦ 登录后每日 2 张</p>' : '');
