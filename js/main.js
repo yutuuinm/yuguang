@@ -939,32 +939,47 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       box.innerHTML = '<div class="gen-hex-inner"><div class="ghex-title">' + title + '</div><p>详解服务连接失败，稍后可再点一次「🔍 详细解卦」✦</p></div>';
     });
   }
-    /* 文生图提示词（真水晶商品图，可复制） */
-  function appendPrompt(box, kind) {
+    /* 生成真水晶商品图（DeepSeek 提示词 → 硅基流动，后台运行，无可见提示词） */
+  function appendPrompt(box) {
     if (!box) return;
+    var wrap = document.createElement('div');
+    wrap.className = 'gen-imgbox';
     var mmNow = Number(window.__bs || 10);
     var cnt = mmNow >= 10 ? 18 : 22;
-    var mainC = window.__mainC || '#e3c47c';
     var mainName = (function () { var m = document.getElementById('rMain'); return m ? String(m.textContent || '').trim() : ''; })();
-    var stoneWord = String(mainName || '').split(/[（(]/)[0] || 'crystal beads';
-    var zh = '真实感水晶手串商品摄影图：' + cnt + ' 颗 ' + mmNow + 'mm 圆珠，材质意向：' + stoneWord + '，主色接近 ' + mainC + '，深空夜蓝渐变背景，柔光棚拍微距，珠体冰透、带自然纹理与细碎闪光，珠串自然环形摆放，金色细链点缀，低调高级珠宝感，画面干净无文字，4K 电商产品图。';
-    var en = 'macro product photo of a real polished translucent crystal bead bracelet, ' + cnt + ' round beads ' + mmNow + 'mm, hue around ' + mainC + ', arranged in a neat ring on a deep navy-to-black gradient studio background, soft golden rim light, crisp realistic reflections and inner texture, fine gold chain accents, premium jewelry e-commerce photography, clean, no text, 4k';
-    var div = document.createElement('div');
-    div.className = 'gen-prompt';
-    div.innerHTML = '<div class="ghex-title">🖼️ 文生图提示词（真水晶商品图 · 可复制）</div>' +
-      '<textarea class="gen-prompt-ta" rows="5" readonly></textarea>' +
-      '<button type="button" class="btn-sm" data-cp>📋 复制提示词</button>' +
-      '<div class="ghex-dim">粘贴到 硅基流动(FLUX) / 即梦 / 通义万相 等出图工具，即可生成可直接当商品图用的真水晶珠串摄影图 ✦</div>';
-    var ta = div.querySelector('.gen-prompt-ta');
-    ta.value = zh + '\n\n' + en;
-    var cp = div.querySelector('[data-cp]');
-    cp.addEventListener('click', function () {
-      ta.select(); ta.setSelectionRange(0, 999999);
-      try { if (document.execCommand) document.execCommand('copy'); } catch (e) {}
-      if (navigator.clipboard && navigator.clipboard.writeText) { try { navigator.clipboard.writeText(ta.value); } catch (e) {} }
-      cp.textContent = '✓ 已复制';
+    var stoneName = String(mainName || '').split(/[（(]/)[0] || '天然水晶';
+    var glyph = (function () { var m = document.getElementById('rGlyph'); return m ? String(m.textContent || '').trim() : ''; })();
+    var quote = (function () { var m = document.getElementById('pLight'); return m ? String(m.textContent || '').trim() : ''; })();
+    wrap.innerHTML = '<button type="button" class="btn-gold" data-gimg>🖼️ 生成真水晶商品图</button>' +
+      '<div class="ghex-dim" style="margin-top:4px;">提示词由 DeepSeek 在后台生成，自动交给硅基流动出图（需后台已配置 img_key）</div>' +
+      '<div class="gen-img-out" style="display:none;margin-top:8px;"></div>';
+    box.appendChild(wrap);
+    wrap.querySelector('[data-gimg]').addEventListener('click', function () {
+      var btn = this;
+      var out = wrap.querySelector('.gen-img-out');
+      btn.disabled = true; btn.textContent = '出图中…（约 10-30 秒）';
+      out.style.display = 'block';
+      out.innerHTML = '<p class="ghex-dim"><span class="yg-loading"></span> 正在生成真实感水晶商品图…</p>';
+      var cfg2 = window.SUPABASE || {};
+      var aiUrl = cfg2.aiUrl || (cfg2.url ? cfg2.url + '/functions/v1/ai-assistant' : '');
+      if (!aiUrl) { out.innerHTML = '<p class="ghex-dim">AI 服务未配置 ✦</p>'; btn.disabled = false; btn.textContent = '🖼️ 生成真水晶商品图'; return; }
+      fetch(aiUrl, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'product_img',
+          design: { name: (function () { var m = document.getElementById('pName'); return m ? m.textContent : ''; })(), stone: stoneName, mm: mmNow, count: cnt, color: window.__mainC || '#e3c47c', glyph: glyph, quote: quote }
+        })
+      }).then(function (r) { return r.json(); }).then(function (j) {
+        btn.disabled = false; btn.textContent = '🖼️ 重新生成';
+        if (!j || !j.ok) { out.innerHTML = '<p class="ghex-dim">' + (String((j && j.error) || '出图失败') ) + '</p>'; return; }
+        var src = j.url || ('data:image/png;base64,' + (j.b64 || ''));
+        out.innerHTML = '<img src="' + src + '" alt="生成的真水晶商品图" style="width:100%;border-radius:14px;border:1px solid var(--line);">' +
+          '<p class="ghex-dim">已生成（DeepSeek 提示词 → 硅基流动）。如需作为商品图：管理员可在后台商品“编辑”把图片填为 <b style="color:var(--gold);">' + (j.url ? '该存储链接' : '下载后上传') + '</b> ✦</p>';
+      }).catch(function () {
+        btn.disabled = false; btn.textContent = '🖼️ 生成真水晶商品图';
+        out.innerHTML = '<p class="ghex-dim">生成请求失败，请稍后再试 ✦</p>';
+      });
     });
-    box.appendChild(div);
   }
     function runWest() {
     curHex = null;
