@@ -127,6 +127,10 @@ Deno.serve(async (req) => {
           const hm = String(analysis).match(/#[0-9a-fA-F]{6}/g);
           if (hm) extraHexes = hm.slice(0, 4);
         } catch (e) {}
+      if (!analysis) {
+        analysis = "五行意象｜主石 " + (d.stone || "天然水晶") + (d.aux ? "，配石 " + d.aux : "") + "；配色｜" + (d.color || "#e3c47c") + " 与 " + (d.accent || d.color || "#e3c47c") + "；设计理念｜依本命五行与卦意取阴阳平和、五行相生之石，作日常陪伴的一枚光。";
+      }
+      if (!extraHexes.length && d.color) { extraHexes = [String(d.color)]; if (d.accent) extraHexes.push(String(d.accent)); }
       }
       const designLine = [
         "品名：" + String(d.name || '予光手串'),
