@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>予光 · 管理后台</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09051454">
+<link rel="stylesheet" href="css/style.css?v=09051504">
 <style>
   /* ============ 予光 · 管理后台（分区式） ============ */
   .adm{max-width:1280px;margin:0 auto;padding:132px 12px 90px;position:relative;z-index:5;}
@@ -760,6 +760,14 @@
         <label class="f-label">密钥（不显示明文）</label>
         <div class="small-note" style="margin-bottom:4px;">状态：<b style="color:var(--gold);" id="aiKeyStat">未配置</b></div>
         <input id="aiKey" type="password" autocomplete="new-password" placeholder="已配置：留空保持不变 / 未配置：输入新密钥" style="width:100%;">
+        <div class="sec-note" style="margin-top:6px;">🖼️ 出图服务（生成真水晶商品图：DeepSeek 写提示词 → 硅基流动出图）</div>
+        <label class="f-label">出图地址 img_base（留空默认 siliconflow）</label>
+        <input id="aiImgBase" placeholder="https://api.siliconflow.cn/v1" style="width:100%;">
+        <label class="f-label">出图模型 img_model</label>
+        <input id="aiImgModel" placeholder="black-forest-labs/FLUX.1-dev" style="width:100%;">
+        <label class="f-label">出图密钥 img_key（硅基流动 Key，不显示明文）</label>
+        <div class="small-note" style="margin-bottom:4px;">状态：<b style="color:var(--gold);" id="aiImgKeyStat">未配置</b></div>
+        <input id="aiImgKey" type="password" autocomplete="new-password" placeholder="已配置：留空保持不变 / 未配置：输入硅基流动 Key" style="width:100%;">
         <div class="sec-note">保存 = 先查 settings 是否已有 key=ai，再 insert/update，value 为 {enabled, model, funcUrl, prompt, 密钥…}；密钥仅显示「已配置/未配置」，绝不回显明文。</div>
         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
           <button class="btn-gold" id="aiSave" type="button" title="先查 settings 是否存在 ai 键再 insert/update">💾 保存 AI 设置</button>
@@ -798,8 +806,8 @@
 
 <footer class="footer"><div class="wrap"><div class="disclaimer">© 予光 YUGUANG · 管理后台 · 仅供内部使用</div></div></footer>
 
-<script src="js/supabase-config.js?v=09051454"></script>
-<script src="js/main.js?v=09051454"></script>
+<script src="js/supabase-config.js?v=09051504"></script>
+<script src="js/main.js?v=09051504"></script>
 <script>
 (function () {
   'use strict';
@@ -3030,6 +3038,10 @@
       var st = $('aiKeyStat');
       if (st) st.textContent = secretName ? '已配置（不明文回显；留空则保持原值）' : '未配置（填写后保存为密钥）';
       var kv = $('aiKey'); if (kv) kv.value = '';
+      var ib = $('aiImgBase'); if (ib) ib.value = obj.img_base || '';
+      var im2 = $('aiImgModel'); if (im2) im2.value = obj.img_model || '';
+      var iks = $('aiImgKeyStat'); if (iks) iks.textContent = (obj.img_key && String(obj.img_key) !== '') ? '已配置（不明文回显；留空保持原值）' : '未配置';
+      var ikv = $('aiImgKey'); if (ikv) ikv.value = '';
       setMsg('aiMsg', '已读取 settings.ai' + (row ? '' : '（尚无 ai 键，保存后将新建）') + '；密钥不明文显示', 'ok');
     }).catch(function () { setMsg('aiMsg', '网络错误', 'bad'); });
   }
@@ -3039,6 +3051,10 @@
     obj.model = ($('aiModel').value || '').trim();
     obj.funcUrl = ($('aiFuncUrl').value || '').trim();
     obj.prompt = ($('aiPrompt').value || '').trim();
+    obj.img_base = ($('aiImgBase').value || '').trim();
+    obj.img_model = ($('aiImgModel').value || '').trim();
+    var ikN = ($('aiImgKey').value || '').trim();
+    if (ikN) obj.img_key = ikN;
     // 保留未在表单内的历史键（如 temperature / baseUrl 等）
     Object.keys(AI_ORIG || {}).forEach(function (k) {
       if (['enabled', 'model', 'funcUrl', 'prompt'].indexOf(k) > -1) return;
