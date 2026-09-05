@@ -119,11 +119,10 @@ Deno.serve(async (req) => {
       let extraHexes = [];
       if (bz || hx) {
         const ctx = bz ? ("生辰：" + bz.year + "年" + bz.month + "月" + bz.day + "日" + (bz.hour || "?") + "时，生肖" + (bz.zod || "") + "，本命" + (bz.el || "") + (bz.gua ? "，另取卦" + bz.gua : "")) : ("卦：" + hx.name + "（" + hx.sym + "），" + (hx.idea || "") + "，五行属" + (hx.wu || ""));
-        const sysP = "你是予光设计师：根据以下信息，用中文输出一版可直接用于设计文案的分析（不要用任何 * 星号、不要用markdown标记）：1)一句五行喜用方向；2)推荐主石与配石（具体晶石名）；3)设计中应出现的配色3-4种，以 #HEX 表示；4)设计理念（100字内温柔短文）；5)一句光语。
-信息：" + ctx;
+        const sysP = ['你是予光设计师：根据以下信息，用中文输出一版可直接用于设计文案的分析（不要用任何 * 星号、不要用markdown标记）：', '1)一句五行喜用方向；2)推荐主石与配石（具体晶石名）；3)设计中应出现的配色3-4种，以 #HEX 表示；4)设计理念（100字内温柔短文）；5)一句光语。', '信息：' + ctx].join('');
         try {
           const pa = await fetch("https://api.deepseek.com/chat/completions", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + dk }, body: JSON.stringify({ model: dmodel, messages: [{ role: "system", content: sysP }], temperature: 0.7, max_tokens: 700 }) }).then(r=>r.json()).catch(()=>null);
-          if (pa && pa.choices && pa.choices[0]) analysis = String(pa.choices[0].message.content || "").replace(/*/g, "").trim();
+          if (pa && pa.choices && pa.choices[0]) analysis = String(pa.choices[0].message.content || "").split("*").join("").trim();
           const hm = String(analysis).match(/#[0-9a-fA-F]{6}/g);
           if (hm) extraHexes = hm.slice(0, 4);
         } catch (e) {}
