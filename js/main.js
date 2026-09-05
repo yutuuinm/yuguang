@@ -836,6 +836,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       ]
     });
     st('生辰设计已生成 ✦ 下方按钮可带上光语一起提交');
+    autoDetail('bazi', { zod: zodEl ? zodEl.value : '', el: info.el, year: yearEl ? String(yearEl.value || '').trim() : '', month: bm || '', day: bd || '', hour: hour ? hour[0] : '', gua: gua ? gua[0] : null });
   }
 
   function runShake(forceNew) {
@@ -897,9 +898,47 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       ]
     });
     st('摇卦完成 ✦ 得「' + hex[0] + '」。可再摇，也可带着卦象与光语提交');
+    autoDetail('hex', { name: hex[0], sym: hex[1], wu: hex[2], idea: hex[3] });
   }
 
-  function runWest() {
+  /* 全量详解：调用后台 DeepSeek（ai-assistant，settings.ai 配置 v4-flash），渲染进详情箱并默认展开 */
+  function autoDetail(kind, payload) {
+    var box = document.getElementById('genHexBox');
+    if (!box) return;
+    var title = kind === 'bazi' ? '✦ 八字 · 全量详解' : '✦ 卦 · 全量详解';
+    box.style.display = 'block';
+    box.innerHTML = '<div class="gen-hex-inner"><div class="ghex-title">' + title + '</div><p class="ghex-dim">让小光为你详解（正在展开…）</p></div>';
+    var q = '';
+    if (kind === 'hex') {
+      q = '请用中文，给「' + payload.name + '（' + payload.sym + '）」一份完整详细的卦象详解：先讲卦名与卦形意象，再讲它在“事业/感情/心境”三方面各自的文化意象提示，最后给一句适合做成手串的温柔光语。要求：全程按文化意象的表达来写，不做任何预测与保证，语气温暖克制，总分不超过600字，用简短小标题分行。';
+    } else {
+      q = '请用中文，根据以下信息给一份完整详细的“生辰意象”解读：生肖' + payload.zod + '（本命五行' + payload.el + '），出生' + (payload.year || '?') + '年' + (payload.month || '?') + '月' + (payload.day || '?') + '日' + (payload.hour || '？') + '时' + (payload.gua ? '，另取卦「' + payload.gua + '」' : '') + '。要求：1)五行与时节意象 2)主石/配石建议理由 3)三行左右的日常佩戴提示 4)一句予光风格的光语。全程按文化意象的表达来写，不做任何预测与保证，总分不超过700字，用简短小标题分行。';
+    }
+    var done = false;
+    var req = (window.sbAI) ? window.sbAI({ mode: 'chat', question: q }) : Promise.reject(new Error('noai'));
+    req.then(function (r) {
+      if (!box.isConnected) return;
+      done = true;
+      if (!r || !r.ok) {
+        box.innerHTML = '<div class="gen-hex-inner"><div class="ghex-title">' + title + '</div>' + (kind === 'hex'
+          ? '<p>卦象「' + payload.name + '（' + payload.sym + '）」属' + (payload.wu || '') + '系的意象：' + (payload.idea || '') + '。取其意境做配色与主石之引，让它成为一枚随身的光。</p>'
+          : '<p>' + payload.zod + '属' + payload.el + '，以' + payload.el + '系晶石的意象作底色，把时节与时辰的光收进腕间。</p>') + '<p class="ghex-dim">✦ 详解服务暂不可用（后台 AI 需配置），以上为本地意象说明。</p></div>';
+        return;
+      }
+      var txt = String((r.answer || '').replace(/^#+\s*/gm, '').trim());
+      var html = '<div class="gen-hex-inner"><div class="ghex-title">' + title + '</div>' +
+        txt.split(/\n+/).map(function (ln) {
+          ln = ln.trim();
+          if (!ln) return '';
+          return /[：:：]$|^[\u4e00-\u9fa5]{1,8}（/.test(ln) ? '<p style="color:var(--gold);">' + ln + '</p>' : '<p>' + ln + '</p>';
+        }).join('') + '</div>';
+      box.innerHTML = html;
+    }).catch(function () {
+      if (!box.isConnected || done) return;
+      box.innerHTML = '<div class="gen-hex-inner"><div class="ghex-title">' + title + '</div><p>详解服务连接失败，稍后可再点一次「🔍 详细解卦」✦</p></div>';
+    });
+  }
+    function runWest() {
     curHex = null;
     var sun = $('westSun') ? $('westSun').value : '';
     if (!sun) { st('请先选一个太阳星座 ✦', true); return; }
