@@ -110,6 +110,56 @@ Deno.serve(async (req) => {
       return Response.json({ ok: true, answer: out }, { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    if (mode === "product_img") {
+      const d = body.design || {};
+      const designLine = [
+        "品名：" + String(d.name || '予光手串'),
+        "主石材质意向：" + String(d.stone || '天然水晶'),
+        "珠径：" + (d.mm || 10) + "mm，颗数：" + (d.count || 18),
+        "主色：" + String(d.color || '#e3c47c'),
+        "符号/刻印：" + String(d.glyph || ''),
+        "光语：" + String(d.quote || '')
+      ].join("\n");
+      const dbAi = await getDbAi(SB_URL, SK) || {};
+      const dk = Deno.env.get("AI_API_KEY") || dbAi.key || "";
+      const dmodel = Deno.env.get("AI_MODEL") || dbAi.model || "deepseek-chat";
+      if (!dk) return Response.json({ ok: false, error: "后台 AI 密钥未配置（settings.ai）" }, { headers: corsHeaders });
+      const styleSys = "You write concise English e-commerce product-photo prompts for real crystal bead bracelets. Output ONLY the prompt, no preamble.";
+      const styleUser = "Design:\n" + designLine + "\n\nWrite one English prompt (under 160 words) for a REAL macro product photograph of the bracelet: genuine polished translucent crystal beads (not illustration), deep navy-to-black gradient studio background, soft golden rim light, natural inner texture and subtle sparkle, beads arranged in a neat ring, fine gold chain accents, premium jewelry look, clean, no text.";
+      const pr1 = await fetch("https://api.deepseek.com/chat/completions", {
+        method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + dk },
+        body: JSON.stringify({ model: dmodel, messages: [{ role: "system", content: styleSys }, { role: "user", content: styleUser }], temperature: 0.7, max_tokens: 400 })
+      }).then(r => r.json()).catch(() => null);
+      if (!pr1 || !pr1.choices || !pr1.choices[0]) return Response.json({ ok: false, error: "DeepSeek 提示词生成失败" }, { headers: corsHeaders });
+      const promptTxt = String(pr1.choices[0].message.content || "").trim();
+      const imgKey = dbAi.img_key || Deno.env.get("SILICON_KEY") || "";
+      const imgBase = dbAi.img_base || "https://api.siliconflow.cn/v1";
+      const imgModel = dbAi.img_model || "black-forest-labs/FLUX.1-dev";
+      if (!imgKey) return Response.json({ ok: false, error: "硅基流动出图密钥未配置：请到后台 AI 设计填 img_key" }, { headers: corsHeaders });
+      const ir = await fetch(imgBase.replace(/\/$/, "") + "/images/generations", {
+        method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + imgKey },
+        body: JSON.stringify({ model: imgModel, prompt: promptTxt, image_size: "1024x1024", num_images: 1 })
+      });
+      const ij = await ir.json().catch(() => null);
+      if (!ir.ok || !ij || !ij.data || !ij.data[0]) {
+        return Response.json({ ok: false, error: "出图失败：" + String((ij && (ij.message || (ij.error && (ij.error.message || JSON.stringify(ij.error))))) || ir.status) }, { headers: corsHeaders });
+      }
+      const b64 = ij.data[0].b64_json || "";
+      let url = "";
+      if (b64) {
+        const ts = Date.now();
+        const path = "gen/" + ts + "-" + Math.floor(Math.random() * 1e6) + ".png";
+        try {
+          const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+          const up = await fetch(SB_URL + "/storage/v1/object/assets/" + path, {
+            method: "POST", headers: { apikey: SK, Authorization: "Bearer " + SK, "Content-Type": "image/png" }, body: bytes
+          });
+          if (up.ok) url = SB_URL + "/storage/v1/object/public/assets/" + path;
+        } catch (e) { /* 回退 b64 */ }
+      }
+      await recordUsage(SB_URL, SK, 'product_img', String(d.name || ''));
+      return Response.json({ ok: true, url: url, b64: url ? "" : b64 }, { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
     const question = String(body.question || "").trim();
     if (!question) return Response.json({ ok: false, error: "缺少问题内容" }, { headers: corsHeaders });
     const history = Array.isArray(body.history) ? body.history : [];
