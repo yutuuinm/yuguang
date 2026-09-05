@@ -745,11 +745,11 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   }
   var beadSize = 10;
   var NURT = { 水: '金', 木: '水', 火: '木', 土: '火', 金: '土' }; // 生我滋养 · 五行平和
-  window.__beads = function (mainC) {
+  window.__beads = function (mainC, auxC) {
     var mm = Number(window.__bs || 10);
     var n = mm >= 10 ? 18 : 22;
     var arr = [];
-    for (var i = 0; i < n; i++) arr.push({ color: mainC, mm: mm });
+    for (var i = 0; i < n; i++) arr.push({ color: (i % 2 === 0) ? mainC : (auxC || mainC), mm: mm });
     return arr;
   };
   function initBeadRow() {
@@ -918,9 +918,9 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     box.innerHTML = '<div class="gen-hex-inner"><div class="ghex-title">' + title + '</div><p class="ghex-dim">让小光为你详解（正在展开…）</p></div>';
     var q = '';
     if (kind === 'hex') {
-      q = '请用中文，给「' + payload.name + '（' + payload.sym + '）」一份完整详细的卦象详解：先讲卦名与卦形意象，再讲它在“事业/感情/心境”三方面各自的文化意象提示，最后给一句适合做成手串的温柔光语。要求：全程按文化意象的表达来写，不做任何预测与保证，语气温暖克制，总分不超过600字，用简短小标题分行。';
+      q = '请用中文，给「' + payload.name + '（' + payload.sym + '）」一份完整详细的卦象详解：先讲卦名与卦形意象，再讲它在“事业/感情/心境”三方面各自的文化意象提示，最后给一句适合做成手串的温柔光语。要求：全程按文化意象的表达来写，不做任何预测与保证，语气温暖克制，总量不超过500字，像一条温柔耐读、可直接分享的短文（不要提任何平台名），可分小段并在结尾给出2-3个话题词。';
     } else {
-      q = '请用中文，根据以下信息给一份完整详细的“生辰意象”解读：生肖' + payload.zod + '（本命五行' + payload.el + '），出生' + (payload.year || '?') + '年' + (payload.month || '?') + '月' + (payload.day || '?') + '日' + (payload.hour || '？') + '时' + (payload.gua ? '，另取卦「' + payload.gua + '」' : '') + '。要求：1)五行与时节意象 2)主石/配石建议理由 3)三行左右的日常佩戴提示 4)一句予光风格的光语。全程按文化意象的表达来写，不做任何预测与保证，总分不超过700字，用简短小标题分行。';
+      q = '请用中文，根据以下信息给一份完整详细的“生辰意象”解读：生肖' + payload.zod + '（本命五行' + payload.el + '），出生' + (payload.year || '?') + '年' + (payload.month || '?') + '月' + (payload.day || '?') + '日' + (payload.hour || '？') + '时' + (payload.gua ? '，另取卦「' + payload.gua + '」' : '') + '。要求：1)五行与时节意象 2)主石/配石建议理由 3)三行左右的日常佩戴提示 4)一句予光风格的光语。全程按文化意象的表达来写，不做任何预测与保证，总量不超过550字，像一条温柔耐读、可直接分享的短文（不要提任何平台名），先讲意象与主配石选择，再给佩戴提示与一句光语，可分小段并给出话题词。';
     }
     var done = false;
     var req = (window.sbAI) ? window.sbAI({ mode: 'chat', question: q }) : Promise.reject(new Error('noai'));
@@ -1030,6 +1030,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     var cnt = mmNow >= 10 ? 18 : 22;
     var mainName = (function () { var m = document.getElementById('rMain'); return m ? String(m.textContent || '').trim() : ''; })();
     var stoneName = String(mainName || '').split(/[（(]/)[0] || '天然水晶';
+    var auxName = (function () { var m = document.getElementById('rAux'); var t = m ? String(m.textContent || '') : ''; return t ? String(t.split(/[（(]/)[0]).trim() : ''; })() || '';
     var nm = (function () { var m = document.getElementById('pName'); return m ? m.textContent : ''; })();
     var glyph = (function () { var m = document.getElementById('rGlyph'); return m ? String(m.textContent || '').trim() : ''; })();
     var quote = (function () { var m = document.getElementById('pLight'); return m ? String(m.textContent || '').trim() : ''; })();
@@ -1037,7 +1038,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     outWrap.innerHTML = '<div class="ghex-title">真水晶预览 ✦</div><p class="ghex-dim" style="margin:2px 0 6px;"><span class="yg-loading"></span> 小光正在生成真水晶商品图…（10-30 秒）</p><p class="ghex-dim">✦ ' + wq + '</p>';
     fetch(aiUrl, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mode: 'product_img', design: { name: nm, stone: stoneName, mm: mmNow, count: cnt, color: window.__mainC || '#e3c47c', glyph: glyph, quote: quote } })
+      body: JSON.stringify({ mode: 'product_img', design: { name: nm, stone: stoneName, aux: auxName, mm: mmNow, count: cnt, color: window.__mainC || '#e3c47c', accent: window.__auxC || '', glyph: glyph, quote: quote } })
     }).then(function (r) { return r.json(); }).then(function (j) {
       if (!j || !j.ok) {
         outWrap.innerHTML = '<p class="ghex-dim">' + String((j && j.error) || '出图失败') + '</p>';
@@ -2139,6 +2140,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     ev.preventDefault();
     document.body.classList.add('yg-exit');
     setTimeout(function () {
+      if (/admin\.html$/.test(location.pathname)) { location.href = 'index.html'; return; }
       if (singleMode) {
         var home = document.querySelector('.nav-brand');
         if (home) { home.click(); return; }
