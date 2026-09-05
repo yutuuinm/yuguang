@@ -1002,7 +1002,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       imgUseUp();
       var src = j.url || ('data:image/png;base64,' + (j.b64 || ''));
       var left = imgQuota().left;
-      box.innerHTML = '<img src="' + src + '" alt="生成的真水晶商品图" style="width:100%;border-radius:14px;border:1px solid var(--line);margin-top:6px;">' +
+      box.innerHTML = '<div class="ghex-title" style="margin-top:8px;">真水晶预览 ✦</div><img src="' + src + '" alt="生成的真水晶商品图" style="width:100%;border-radius:14px;border:1px solid var(--line);margin-top:4px;">' +
         (left >= 0 && role !== 'root' && role !== 'admin' ? '<p class="ghex-dim">本日还可生成 ' + left + ' 张 ✦ 登录后每日 2 张</p>' : '');
     }).catch(function () {
       box.innerHTML = '<p class="ghex-dim">生成请求失败，请稍后再试 ✦</p>';
