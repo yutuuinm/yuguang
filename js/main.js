@@ -498,11 +498,12 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       var pnl = $('panel-' + btn.dataset.panel);
       if (pnl) pnl.classList.add('active');
       if (location.hash.slice(1) === btn.dataset.panel) {
-        setTimeout(() => root.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+        setTimeout(function () { var g = document.querySelector('.studio-grid'); if (g) g.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80);
       }
     });
   });
   var hashPanel = { east: 'east', west: 'west', union: 'union' }[location.hash.slice(1)];
+  setTimeout(function () { var g = document.querySelector('.studio-grid'); if (g) g.scrollIntoView({ block: 'start' }); }, 60);
   if (hashPanel) {
     var hb = document.querySelector('.tab-btn[data-panel="' + hashPanel + '"]');
     if (hb) hb.click();
@@ -1009,7 +1010,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     var box = ensureImgBox();
     if (!box) return;
     var q = WAIT_QUOTES[Math.floor(Math.random() * WAIT_QUOTES.length)];
-    box.innerHTML = '<div class="ghex-title">真水晶预览 ✦</div>' +
+    box.innerHTML = '<div class="ghex-title">水晶预览 ✦</div>' +
       '<p class="ghex-dim" style="margin:2px 0 8px;">✦ ' + q + '</p>' +
       '<button type="button" class="btn-gold" data-gr style="font-size:13px;">🖼️ 生成水晶图</button>';
     var b = box.querySelector('[data-gr]');
@@ -1040,7 +1041,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     var glyph = (function () { var m = document.getElementById('rGlyph'); return m ? String(m.textContent || '').trim() : ''; })();
     var quote = (function () { var m = document.getElementById('pLight'); return m ? String(m.textContent || '').trim() : ''; })();
     var wq = WAIT_QUOTES[Math.floor(Math.random() * WAIT_QUOTES.length)];
-    outWrap.innerHTML = '<div class="ghex-title">真水晶预览 ✦</div><p class="ghex-dim" style="margin:2px 0 6px;"><span class="yg-loading"></span> 小光正在生成真水晶商品图…（10-30 秒）</p><p class="ghex-dim">✦ ' + wq + '</p>';
+    outWrap.innerHTML = '<div class="ghex-title">水晶预览 ✦</div><p class="ghex-dim" style="margin:2px 0 6px;"><span class="yg-loading"></span> 小光正在生成水晶图…（10-30 秒）</p><p class="ghex-dim">✦ ' + wq + '</p>';
     var ctxB = null, ctxH = null;
     try {
       if (curHex) { ctxH = { name: curHex[0], sym: curHex[1], wu: curHex[2], idea: curHex[3] }; }
@@ -1074,8 +1075,8 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
           return /[：:]$/.test(ln) ? '<p style="color:var(--gold);">' + ln + '</p>' : '<p>' + ln + '</p>';
         }).join('') + '<hr style="border:none;border-top:1px dashed var(--line-soft);margin:6px 0;">';
       }
-      outWrap.innerHTML = ideaHtml + '<div class="ghex-title">真水晶预览 ✦</div>' +
-        '<img src="' + src + '" alt="生成的真水晶商品图" style="width:100%;border-radius:14px;border:1px solid var(--line);">' +
+      outWrap.innerHTML = ideaHtml + '<div class="ghex-title">水晶预览 ✦</div>' +
+        '<img src="' + src + '" alt="生成的水晶图" style="width:100%;border-radius:14px;border:1px solid var(--line);">' +
         ((role !== 'root' && role !== 'admin') ? '<p class="ghex-dim">本日还可生成 ' + left + ' 张 ✦ 登录后每日 2 张</p>' : '');
       var box2 = document.getElementById('previewImg');
       if (box2) { box2.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
@@ -2164,6 +2165,7 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
   }
   stkPush();
   window.addEventListener('load', function () { document.body.classList.remove('yg-exit'); });
+  window.addEventListener('pageshow', function () { document.body.classList.remove('yg-exit'); });
   b.addEventListener('click', function (ev) {
     ev.preventDefault();
     document.body.classList.add('yg-exit');
@@ -3490,7 +3492,7 @@ window.__askDesign = function (kind, info) {
     if (stage && stage.parentNode) stage.parentNode.insertBefore(host, stage.nextSibling); else { var pc = document.getElementById('preview'); if (pc) pc.appendChild(host); }
     return host;
   })();
-  if (imgHost) imgHost.innerHTML = '<p class="ghex-dim" style="margin-top:6px;"><span class="yg-loading"></span> 正在生成真水晶图…</p>';
+  if (imgHost) imgHost.innerHTML = '<p class="ghex-dim" style="margin-top:6px;"><span class="yg-loading"></span> 正在生成水晶图…</p>';
   var q = (typeof imgQuota === 'function') ? imgQuota() : { left: 999 };
   var doImg = q.left > 0;
   fetch(aiUrl, {
@@ -3507,7 +3509,7 @@ window.__askDesign = function (kind, info) {
     if (imgHost) {
       if (j.url) {
         try { if (doImg && typeof imgUseUp === 'function') imgUseUp(); } catch (e) {}
-        imgHost.innerHTML = '<div class="ghex-title">真水晶预览 ✦</div><img src="' + j.url + '" alt="定制水晶手串" style="width:100%;border-radius:14px;border:1px solid var(--line);">';
+        imgHost.innerHTML = '<div class="ghex-title">水晶预览 ✦</div><img src="' + j.url + '" alt="定制水晶手串" style="width:100%;border-radius:14px;border:1px solid var(--line);">';
         try { imgHost.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
       } else if (!doImg) {
         imgHost.innerHTML = '<p class="ghex-dim">今日出图额度已用完 ✦ 设计理念已给出，明日再生成图</p>';
