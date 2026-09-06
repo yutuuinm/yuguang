@@ -3038,3 +3038,39 @@ html { overscroll-behavior-y: none; }
   .yg-share-card { padding: 12px; }
   .yg-share-img { width: 62px; height: 62px; }
 }
+
+/* ============ 作品验真结果卡（仿白桦顾客卡 · 夜蓝金） ============ */
+.verify-card { text-align: center; border: 1px solid var(--line); border-radius: 18px; padding: 22px 18px 18px;
+  background: linear-gradient(165deg, rgba(20,27,46,.62), rgba(10,13,22,.95)); box-shadow: 0 10px 30px rgba(0,0,0,.32); }
+.vg-top { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 14px; }
+.vg-ico { width: 44px; height: 44px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 32% 28%, #f2dcae, #c9a24f 78%); color: #131022; font-size: 21px; font-weight: 700;
+  box-shadow: 0 0 0 1px rgba(227,196,124,.4), 0 0 18px rgba(227,196,124,.35); }
+.vg-tt { font-family: var(--serif); font-size: 18px; letter-spacing: .18em; color: var(--gold); }
+.vg-st { color: var(--text-dim); font-size: 11.5px; letter-spacing: .1em; margin-top: 2px; }
+.vg-imgs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin: 0 0 14px; }
+.vg-imgs figure { flex: 0 0 auto; width: 200px; margin: 0; border-radius: 12px; overflow: hidden; border: 1px solid var(--line-soft);
+  background: rgba(7,10,18,.7); }
+.vg-imgs img { width: 100%; height: 200px; object-fit: cover; display: block; }
+.vg-name { font-family: var(--serif); font-size: 21px; letter-spacing: .16em; color: var(--moon); margin: 4px 0 12px; word-break: break-all; }
+.vg-meta { max-width: 420px; margin: 0 auto 6px; font-size: 13px; line-height: 2.2; }
+.vg-meta .row { display: flex; justify-content: space-between; gap: 14px; border-bottom: 1px dashed var(--line-soft); padding: 5px 2px; }
+.vg-meta .row b { color: var(--gold); font-weight: 400; white-space: nowrap; }
+.vg-meta .row span { color: var(--moon); word-break: break-all; text-align: right; }
+.vg-meta .row span.code { font-family: "Courier New", monospace; letter-spacing: .08em; }
+.vg-quote { max-width: 430px; margin: 14px auto 4px; border-left: 2px solid var(--gold); background: rgba(11,17,30,.65);
+  border-radius: 0 12px 12px 0; padding: 12px 14px; text-align: left; }
+.vg-quote .ql { color: var(--gold); font-size: 11px; letter-spacing: .3em; margin-bottom: 6px; }
+.vg-quote p { color: var(--moon); font-size: 13.5px; line-height: 2; margin: 0; }
+.vg-acts { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 18px 0 4px; }
+.vg-acts .btn-line { text-decoration: none; }
+.vg-note { color: var(--text-dim); font-size: 11px; line-height: 1.9; margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--line-soft); }
+.verify-input { display: flex; gap: 8px; justify-content: center; margin: 12px auto 4px; max-width: 460px; flex-wrap: wrap; }
+.verify-input input { flex: 1; min-width: 220px; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(244,239,230,.2);
+  background: rgba(11,17,30,.85); color: var(--moon); font-size: 14px; outline: none; font-family: "Courier New", monospace; letter-spacing: .05em; }
+.verify-input input:focus { border-color: var(--gold); }
+/* 通用描边按钮（站点页用） */
+.btn-line { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid rgba(227,196,124,.5);
+  color: var(--moon); border-radius: 999px; padding: 8px 18px; font-size: 13px; cursor: pointer; letter-spacing: .08em;
+  background: transparent; transition: all .25s; }
+.btn-line:hover { border-color: var(--gold); color: var(--gold); box-shadow: 0 0 14px rgba(227,196,124,.25); }
