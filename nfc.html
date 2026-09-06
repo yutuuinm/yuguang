@@ -5,19 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>轻触之光 · 予光 NFC</title>
 <meta name="description" content="予光作品 NFC 轻触页——抽一下、答案之书、反馈立减与光语分享。愿每一次轻触，都有一段光被想起。">
-<link rel="stylesheet" href="css/style.css?v=09062036">
+<link rel="stylesheet" href="css/style.css?v=09062105">
 <style>
   .nf-wrap { max-width: 640px; margin: 0 auto; }
-  .nf-card { display: flex; gap: 16px; align-items: flex-start; border: 1px solid var(--line); border-radius: 18px; padding: 18px;
-    background: linear-gradient(165deg, rgba(20,27,46,.62), rgba(10,13,22,.94)); box-shadow: 0 10px 30px rgba(0,0,0,.35); }
-  .nf-img { width: 150px; height: 150px; flex: none; border-radius: 14px; overflow: hidden; border: 1px solid rgba(227,196,124,.4);
-    background: #0b0f1d; display:flex; align-items:center; justify-content:center; color: var(--text-dim); font-size: 40px; }
+  .page-hero.nfHero { padding: 26px 14px 2px !important; }
+  .page-hero.nfHero h1 { font-size: clamp(21px, 4.6vw, 27px) !important; margin: 0 !important; }
+  .page-hero.nfHero p { font-size: 12.5px; margin: 5px 0 0 !important; letter-spacing: .14em; }
+  .nf-mini { padding: 15px 16px 13px !important; margin: 8px auto 0; }
+  .nf-bar { display: flex; gap: 13px; align-items: center; border: 1px solid var(--line); border-radius: 16px;
+    padding: 12px 14px; background: linear-gradient(165deg, rgba(20,27,46,.62), rgba(10,13,22,.94));
+    box-shadow: 0 8px 24px rgba(0,0,0,.3); }
+  .nf-img { width: 62px; height: 62px; flex: none; border-radius: 12px; overflow: hidden; border: 1px solid rgba(227,196,124,.4);
+    background: #0b0f1d; display: flex; align-items: center; justify-content: center; color: var(--text-dim); font-size: 24px; }
   .nf-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .nf-meta { flex: 1; min-width: 0; }
-  .nf-name { color: var(--gold); font-size: 20px; letter-spacing: .12em; margin-bottom: 6px; font-family: var(--serif); }
-  .nf-sub { color: var(--moon); font-size: 13px; letter-spacing: .08em; margin: 4px 0; word-break: break-all; }
-  .nf-sub b { color: var(--gold); font-weight: 500; margin-right: 6px; }
-  .nf-idea { color: var(--moon); font-size: 13px; line-height: 1.9; margin-top: 8px; opacity: .9; }
+  .nf-meta { flex: 1; min-width: 0; text-align: left; }
+  .nf-name { color: var(--gold); font-size: 18px; letter-spacing: .12em; margin: 0; font-family: var(--serif); word-break: break-all; }
+  .nf-sub { color: var(--moon); font-size: 12.5px; letter-spacing: .08em; margin: 3px 0 0; word-break: break-all; }
+  .nf-bar-tip { color: var(--text-dim); font-size: 11px; letter-spacing: .04em; margin-top: 4px; }
   .nf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 18px; }
   .nf-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-align: center;
     padding: 18px 10px 14px; border: 1px solid var(--line); border-radius: 16px; color: var(--moon); text-decoration: none; cursor: pointer;
@@ -57,9 +61,10 @@
   .nf-state.bad { color: #ffb3a0; }
   .nf-prize { color: var(--gold); font-size: 26px; letter-spacing: .1em; margin: 6px 0 10px; }
   @media (max-width: 520px) {
-    .nf-card { flex-direction: column; align-items: center; text-align: center; }
-    .nf-img { width: 120px; height: 120px; }
     .nf-grid { grid-template-columns: 1fr 1fr; }
+    .nf-btn { padding: 14px 8px 11px; }
+    .nf-btn .ic { font-size: 22px; }
+    .nf-btn b { font-size: 14px; }
   }
 </style>
 </head>
@@ -87,45 +92,40 @@
 </header>
 
 <main>
-  <section class="page-hero">
+  <section class="page-hero nfHero">
     <h1 class="reveal visible">轻触之光</h1>
-    <p class="reveal visible">碰一碰作品上的感应区，或输入礼盒内验证码 · 属于这一件作品的时刻</p>
+    <p class="reveal visible">予光 NFC · 轻触作品感应区</p>
   </section>
 
   <section class="section">
     <div class="wrap nf-wrap">
 
-      <div class="doc-block" id="nfLoading" style="text-align:center;">
-        <p><span class="yg-loading"></span> 正在读取作品信息…</p>
+      <div class="doc-block nf-mini" id="nfLoading" style="text-align:center;display:none;">
+        <p><span class="yg-loading"></span> 正在读取作品…</p>
       </div>
 
-      <div class="doc-block" id="nfEntry" style="display:none;text-align:center;">
-        <h3 style="text-align:center;">这件作品在这里等你</h3>
-        <p>把手机靠近作品随附卡片的感应区（NFC），或扫卡片上的二维码；也可以手动输入卡上的验证码。</p>
-        <input class="nf-in" id="nfManual" placeholder="输入验证码，如 YG-2609-XXXXXX" autocomplete="off">
+      <div class="doc-block nf-mini" id="nfEntry" style="text-align:center;">
+        <h3 style="text-align:center;margin-top:0;">碰一碰，开始</h3>
+        <p>把手机背面贴近作品随附卡片上的感应区，轻触即达——抽一下、答案之书、反馈立减与光语分享。</p>
         <div class="nf-btns">
-          <button class="btn-gold" id="nfGo" type="button">查 看 这 件 作 品</button>
-          <button class="nf-plain" id="nfScan" type="button">📱 碰一碰 · 读取 NFC</button>
+          <button class="btn-gold" id="nfScan" type="button">📱 碰一碰 · 读取 NFC</button>
         </div>
         <div class="nf-state" id="nfEntryState"></div>
-        <p style="margin-top:12px;color:var(--text-dim);font-size:12px;">没有 NFC？也可以去 <a href="verify.html" style="color:var(--gold);">作品验真页</a> 输入同一枚验证码核验。</p>
       </div>
 
-      <div class="doc-block" id="nfErr" style="display:none;text-align:center;">
-        <h3 style="text-align:center;">未找到这件作品</h3>
-        <p>请核对验证码后重试；若仍有疑问，可联系客服人工核验（谨防仿冒渠道）。</p>
-        <button class="nf-plain" id="nfBackEntry" type="button" style="margin-top:10px;">重新输入 / 碰一碰</button>
+      <div class="doc-block nf-mini" id="nfErr" style="display:none;text-align:center;">
+        <h3 style="text-align:center;margin-top:0;">没有读到作品</h3>
+        <p>请把手机贴近感应区重试，或稍后再试一次。</p>
+        <button class="nf-plain" id="nfBackEntry" type="button" style="margin-top:8px;">再 碰 一 次</button>
       </div>
 
       <div id="nfItem" style="display:none;">
-        <div class="nf-card">
+        <div class="nf-bar">
           <div class="nf-img" id="nfImgBox">🪨</div>
           <div class="nf-meta">
             <div class="nf-name" id="nfName"></div>
-            <div class="nf-sub" id="nfBatch" style="display:none;"><b>定制编号</b><span></span></div>
-            <div class="nf-sub" id="nfCodeRow"><b>防伪码</b><span id="nfCode"></span></div>
-            <div class="nf-sub" id="nfDate" style="opacity:.7;"></div>
-            <div class="nf-idea" id="nfIdea"></div>
+            <div class="nf-sub" id="nfBatch" style="display:none;"></div>
+            <div class="nf-bar-tip">轻触这件作品 · 抽一份小立减，也写下一句光语</div>
           </div>
         </div>
 
@@ -163,7 +163,6 @@
         <h5>服务</h5>
         <a href="studio.html">定制工坊</a>
         <a href="faq.html">常见问题</a>
-        <a href="verify.html">作品验真</a>
         <a href="index.html#playSec">互动</a>
       </div>
     </div>
@@ -241,8 +240,8 @@
   </div>
 </div>
 
-<script src="js/supabase-config.js?v=09062036"></script>
-<script src="js/main.js?v=09062036"></script>
+<script src="js/supabase-config.js?v=09062105"></script>
+<script src="js/main.js?v=09062105"></script>
 <script>
 /* ==================== NFC 落地页逻辑（轻触之光） ==================== */
 (function () {
@@ -252,6 +251,7 @@
   var TCFG = null;
   var spinGoBusy = false;
   var wheelRot = 0;
+  var autoOpened = false;
 
   function $(id) { return document.getElementById(id); }
   function show(id) { var el = $(id); if (el) el.classList.add('show'); }
@@ -285,7 +285,6 @@
   }
 
   function renderItem(r) {
-    var info = recInfo(r);
     var name = String(r.product_ref || '').trim() || '予光定制作品';
     var batch = String(r.batch_no || '').trim();
     var img = firstImg(r);
@@ -294,21 +293,16 @@
     if (img && window.sbImg) {
       imgBox.innerHTML = '<img src="' + esc(window.sbImg(img)) + '" alt="作品图" loading="lazy" onerror="this.outerHTML=\'🪨\';">';
     } else imgBox.innerHTML = '🪨';
-    if (batch) {
-      $('nfBatch').style.display = '';
-      $('nfBatch').querySelector('span').textContent = batch;
-    } else $('nfBatch').style.display = 'none';
-    $('nfCode').textContent = r.code || '';
-    $('nfIdea').textContent = info.text ? String(info.text) : '愿这串光，陪你走一段夜路。';
-    var d = new Date();
-    $('nfDate').textContent = '轻触时间：' + d.toLocaleString('zh-CN');
+    var bEl = $('nfBatch');
+    if (batch) { bEl.style.display = ''; bEl.textContent = '定制编号 · ' + batch; }
+    else bEl.style.display = 'none';
   }
 
   function loadCode(code) {
     CODE = String(code || '').trim().replace(/\s+/g, '');
     if (!CODE) { showEntry(''); return; }
     if (!window.sb) {
-      showEntry('离线版无法读取作品信息，请联网或到验真页联系客服。');
+      showEntry('离线版无法读取作品信息，请联网后再试。');
       return;
     }
     $('nfLoading').style.display = 'block';
@@ -327,7 +321,6 @@
       renderItem(r);
       $('nfLoading').style.display = 'none';
       $('nfItem').style.display = 'block';
-      try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) {}
       if (window.__ygShareWall) {
         window.__ygShareWall($('shareWall'), {
           code: CODE,
@@ -337,6 +330,10 @@
           empty: '这件作品还没有光语分享 ✦ 转动幸运转盘，写下第一句吧。'
         });
       }
+      // NFC 直达体验：读取到作品后，直接落到「反馈立减」幸运转盘
+      setTimeout(function () {
+        if (!autoOpened) { autoOpened = true; openWheel(); }
+      }, 650);
     }).catch(function () {
       $('nfLoading').style.display = 'none';
       $('nfErr').style.display = 'block';
@@ -344,18 +341,16 @@
   }
 
   /* ——— 入口按钮 ——— */
-  $('nfGo').addEventListener('click', function () { loadCode($('nfManual').value); });
-  $('nfManual').addEventListener('keydown', function (e) { if (e.key === 'Enter') loadCode($('nfManual').value); });
   $('nfBackEntry').addEventListener('click', function () { showEntry(''); });
   $('nfScan').addEventListener('click', tryNfc);
 
   /* 原生 NFC 读取（安卓 Chrome / Edge 等支持 Web NFC 的浏览器） */
   function tryNfc() {
     if (!('NDEFReader' in window)) {
-      state('nfEntryState', '当前浏览器不支持 NFC 读取，请用手机浏览器（Chrome/Edge）打开，或直接输入验证码。', 'bad');
+      state('nfEntryState', '当前浏览器不支持 NFC，请换用支持 NFC 的手机浏览器打开本页后靠近感应区。', 'bad');
       return;
     }
-    state('nfEntryState', '请把手机背面靠近作品卡片的感应区…');
+    state('nfEntryState', '请把手机背面贴近作品感应区…');
     try {
       var reader = new NDEFReader();
       reader.scan().then(function () {
@@ -378,11 +373,11 @@
             }
           } catch (e3) {}
           if (found) loadCode(found);
-          else state('nfEntryState', '感应区内容里没有找到验证码，可改用输入。', 'bad');
+          else state('nfEntryState', '感应区里没有读到作品标识，请靠近后重试。', 'bad');
         };
-        reader.onerror = function () { state('nfEntryState', '读取失败，可尝试调整位置后重试。', 'bad'); };
+        reader.onerror = function () { state('nfEntryState', '读取失败，可调整位置后重试。', 'bad'); };
       }).catch(function (err) {
-        state('nfEntryState', 'NFC 读取被拒绝或不可用：' + String((err && err.message) || err) + '（也可直接输入验证码）', 'bad');
+        state('nfEntryState', 'NFC 读取被拒绝或不可用：' + String((err && err.message) || err) + '，请靠近感应区重试。', 'bad');
       });
     } catch (err2) {
       state('nfEntryState', 'NFC 初始化失败：' + String((err2 && err2.message) || err2), 'bad');
@@ -568,7 +563,7 @@
   var autoCode = '';
   try { autoCode = new URLSearchParams(location.search).get('c') || ''; } catch (e) {}
   if (autoCode) loadCode(autoCode);
-  else showEntry('把手机靠近卡片感应区，或输入验证码查看这件作品。');
+  else showEntry('');
 })();
 </script>
 </body>
