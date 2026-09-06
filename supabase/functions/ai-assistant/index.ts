@@ -137,14 +137,13 @@ Deno.serve(async (req) => {
         "2) 设计理念：以「串为……量身定制」开篇，谈季节调候与五行喜忌，逐石点题（与上面石料一致），缀饰与整体意象，共约150-220字；",
         "3) 诗曰：四句七言收尾。",
         "用户信息：" + userInfo
-      ].join("
-");
+      ].join(String.fromCharCode(10));
       const pa2 = await fetch("https://api.deepseek.com/chat/completions", {
         method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + dk2 },
         body: JSON.stringify({ model: dmodel2, messages: [{ role: "system", content: sysP2 }], temperature: 0.7, max_tokens: 1200 })
       }).then(r => r.json()).catch(() => null);
       const rawTxt = pa2 && pa2.choices && pa2.choices[0] && pa2.choices[0].message
-        ? String((pa2.choices[0].message.content || pa2.choices[0].message.reasoning_content) || "").replace(/*/g, "").trim()
+        ? String((pa2.choices[0].message.content || pa2.choices[0].message.reasoning_content) || "").split("*").join("").trim()
         : "";
       let analysis = rawTxt;
       let stones = [];
