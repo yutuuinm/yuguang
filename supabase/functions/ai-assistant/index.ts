@@ -176,7 +176,7 @@ Deno.serve(async (req) => {
       let url = "";
       if (imgKey2) {
         const orderDesc = stones.map(function (s) { return s.name + " x" + s.count + " (" + s.color + ")"; }).join(", ");
-        const promptTxt2 = "High-end luxury jewelry brand editorial product photograph of a " + mm + "mm " + count + "-bead real polished crystal bracelet, beads in sequence per design: " + orderDesc + ", photoreal AA-grade crystals with natural inner texture and soft sparkle, elegant neat ring on deep navy-to-black gradient studio background, soft golden rim light, crisp macro focus, premium minimal composition, no text, no watermark, 4k.";
+        const promptTxt2 = "High-end luxury jewelry brand editorial product photograph of a " + mm + "mm " + count + "-bead real polished crystal bracelet, beads in sequence per design: " + orderDesc + ", photoreal AA-grade crystals with natural inner texture and soft sparkle, elegant neat ring on deep navy-to-black gradient studio background, soft golden rim light, crisp macro focus, against a premium deep space backdrop in the house style: deep navy-to-black gradient with a soft golden vignette and faint stardust glow around the beads, elegant high-end jewelry campaign lighting, crisp macro focus, refined luxury mood, no text, no watermark, 4k.";
         const ir2 = await fetch(imgBase2.replace(/\/$/, "") + "/images/generations", {
           method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + imgKey2 },
           body: JSON.stringify({ model: imgModel2, prompt: promptTxt2, image_size: "1024x1024", num_images: 1 })
