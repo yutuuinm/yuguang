@@ -147,6 +147,7 @@ Deno.serve(async (req) => {
         : "";
       // 取“最终成文”：优先最后一个『设计理念』段；否则取最后石行之后
       var analysis = rawTxt;
+      var stones = [];
       {
         var NLf2 = String.fromCharCode(10);
         var from = -1;
