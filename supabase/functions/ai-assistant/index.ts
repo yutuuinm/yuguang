@@ -140,7 +140,7 @@ Deno.serve(async (req) => {
       ].join(String.fromCharCode(10));
       const pa2 = await fetch("https://api.deepseek.com/chat/completions", {
         method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + dk2 },
-        body: JSON.stringify({ model: dmodel2, messages: [{ role: "system", content: sysP2 }], temperature: 0.7, max_tokens: 3200 })
+        body: JSON.stringify({ model: dmodel2, messages: [{ role: "system", content: sysP2 }], temperature: 0.7, max_tokens: 3200, thinking: { type: "disabled" } })
       }).then(r => r.json()).catch(() => null);
       const rawTxt = pa2 && pa2.choices && pa2.choices[0] && pa2.choices[0].message
         ? String((pa2.choices[0].message.content || pa2.choices[0].message.reasoning_content) || "").split("*").join("").trim()
