@@ -716,6 +716,9 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   }
   function showDesign(cfg) {
     cfg = cfg || {};
+    var mmNow = Number(window.__bs || 10);
+    if (cfg && cfg.legend) { cfg.legend.forEach(function (l) { if (l) l.mm = mmNow; }); }
+    if (cfg && cfg.beads) { cfg.beads.forEach(function (b) { if (b) b.mm = mmNow; }); }
     lastDesign = cfg;
     flatMode = false;
     var hx = $('genHex'); if (hx) hx.style.display = curHex ? 'inline-flex' : 'none';
@@ -787,7 +790,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     });
     window.addEventListener('pointerup', function () { down = false; });
   })();
-  ['metalEast', 'metalEastZ', 'metalWest', 'metalUnion'].forEach(function (id) {
+  ['metalEast', 'metalEastZ', 'metalWest', 'metalUnion', 'eastGua'].forEach(function (id) {
     var el = document.getElementById(id);
     if (el) { var fd = el.closest ? el.closest('.field') : null; if (fd) fd.style.display = 'none'; else el.style.display = 'none'; }
   });
@@ -1006,7 +1009,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     var q = WAIT_QUOTES[Math.floor(Math.random() * WAIT_QUOTES.length)];
     box.innerHTML = '<div class="ghex-title">真水晶预览 ✦</div>' +
       '<p class="ghex-dim" style="margin:2px 0 8px;">✦ ' + q + '</p>' +
-      '<button type="button" class="btn-gold" data-gr style="font-size:13px;">🖼️ 生成真水晶商品图（按张计费）</button>';
+      '<button type="button" class="btn-gold" data-gr style="font-size:13px;">🖼️ 生成水晶图</button>';
     var b = box.querySelector('[data-gr]');
     if (b) b.addEventListener('click', function () { if (typeof autoRealImg === 'function') autoRealImg(); });
   }
