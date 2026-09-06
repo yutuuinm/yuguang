@@ -147,6 +147,7 @@ Deno.serve(async (req) => {
         : "";
       // 裁掉思考前言：只保留“最终交付文案”起始（石行/设计理念/串为…）
       var analysis = rawTxt;
+      var stones = [];
       {
         var NLf = String.fromCharCode(10);
         var cands = [NLf + '设计理念', NLf + '串为', NLf + '石:', NLf + '石：'];
