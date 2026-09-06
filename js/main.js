@@ -1637,6 +1637,15 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
   var btn = document.getElementById('verifyBtn');
   var res = document.getElementById('verifyRes');
   if (!inp || !btn || !res) return;
+  // 支持扫防伪卡二维码直达：verify.html?c=YG-…（或 ?code=）→ 自动填入并核验
+  try {
+    var qp = new URLSearchParams(location.search);
+    var autoCode = (qp.get('c') || qp.get('code') || '').trim();
+    if (autoCode) {
+      inp.value = autoCode;
+      setTimeout(function () { btn.click(); }, 260);
+    }
+  } catch (e) {}
   btn.addEventListener('click', function () {
     var code = (inp.value || '').trim();
     if (!code) { res.innerHTML = '请输入作品背面/证书上的验证码。'; return; }
@@ -3509,7 +3518,28 @@ window.__askDesign = function (kind, info) {
     if (imgHost) {
       if (j.url) {
         try { if (doImg && typeof imgUseUp === 'function') imgUseUp(); } catch (e) {}
-        imgHost.innerHTML = '<div class="ghex-title">水晶预览 ✦</div><img src="' + j.url + '" alt="定制水晶手串" style="width:100%;border-radius:14px;border:1px solid var(--line);">';
+        imgHost.innerHTML = '<div class="ghex-title">水晶预览 ✦</div><img id="genRealImg" src="' + j.url + '" alt="定制水晶手串" style="width:100%;border-radius:14px;border:1px solid var(--line);">' +
+          '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px;">' +
+          '<button type="button" class="ygSaveImg" style="border:1px solid rgba(227,196,124,.55);color:var(--gold);background:transparent;border-radius:999px;padding:8px 16px;font-size:13px;cursor:pointer;">⤓ 保存水晶图</button>' +
+          '<span class="ghex-dim" style="font-size:12px;">手机端长按图片也可保存</span></div>';
+        var svBtn = imgHost.querySelector('.ygSaveImg');
+        if (svBtn) svBtn.addEventListener('click', function () {
+          var src = (document.getElementById('genRealImg') || {}).src || j.url;
+          svBtn.textContent = '正在保存…';
+          fetch(src).then(function (r) {
+            if (!r.ok) throw new Error('bad');
+            return r.blob();
+          }).then(function (blob) {
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = '予光-水晶图-' + (String(kind || 'custom')) + '-' + Date.now() + '.jpg';
+            document.body.appendChild(a); a.click(); setTimeout(function () { a.remove(); URL.revokeObjectURL(a.href); }, 800);
+            svBtn.textContent = '✓ 已保存';
+          }).catch(function () {
+            window.open(j.url, '_blank');
+            svBtn.textContent = '⤓ 保存水晶图';
+          });
+        });
         try { imgHost.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
       } else if (!doImg) {
         imgHost.innerHTML = '<p class="ghex-dim">今日出图额度已用完 ✦ 设计理念已给出，明日再生成图</p>';
@@ -3519,3 +3549,129 @@ window.__askDesign = function (kind, info) {
     if (box) box.innerHTML = '<div class="gen-hex-inner"><p class="ghex-dim">请求失败，请稍后再试 ✦</p></div>';
   });
 };
+
+/* ============================================================
+   光语分享墙（NFC 落地页 / 互动区 / 光集 共用）
+   - __ygShareWall(host, opt)：按 opt.code 过滤或全局拉取 shares 表渲染
+   - __ygShareSubmit(p)：写入 shares 表 + 自动发授权回执邮件（收件人取后台邮件设置）
+   ============================================================ */
+(function shareWallHelpers() {
+  function swEsc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function swTime(v) {
+    if (!v) return '';
+    var d = new Date(String(v).replace(' ', 'T'));
+    if (isNaN(d.getTime())) return String(v).slice(0, 10);
+    var y = d.getFullYear(), m = d.getMonth() + 1, dd = d.getDate();
+    return y + '-' + (m < 10 ? '0' + m : m) + '-' + (dd < 10 ? '0' + dd : dd);
+  }
+  window.__ygShareEsc = swEsc;
+
+  /* 渲染分享列表到 host；opt: {code, limit, empty} */
+  window.__ygShareWall = function (host, opt) {
+    if (!host) return;
+    opt = opt || {};
+    if (!window.sb) { host.style.display = 'none'; return; }
+    var q = 'shares?select=*&order=created_at.desc&limit=' + (opt.limit || 12);
+    if (opt.code) q += '&code=eq.' + encodeURIComponent(opt.code);
+    window.sb(q).then(function (rows) {
+      rows = rows || [];
+      var title = opt.title || host.getAttribute('data-title') || '';
+      var sub = opt.sub || host.getAttribute('data-sub') || '';
+      var emptyTxt = opt.empty || host.getAttribute('data-empty') || '还没有光语分享 ✦ 愿你是写下第一句的人。';
+      var hideEmpty = opt.hideEmpty || host.hasAttribute('data-hide-empty');
+      if (!rows.length) {
+        host.style.display = hideEmpty ? 'none' : '';
+        host.innerHTML = '<p class="yg-share-none">' + emptyTxt + '</p>';
+        return;
+      }
+      host.style.display = '';
+      var cards = rows.map(function (s) {
+        var img = '';
+        if (s.img && window.sbImg) {
+          var u = window.sbImg(String(s.img).split(/[,，;]/)[0]);
+          img = '<div class="yg-share-img"><img src="' + swEsc(u) + '" alt="作品图" loading="lazy" onerror="this.parentNode.style.display=\'none\';"></div>';
+        }
+        var line = [s.name, s.batch, s.code].filter(Boolean).join(' · ');
+        return '<div class="yg-share-card">' + img +
+          '<div class="yg-share-main">' +
+          (line ? '<div class="yg-share-name">' + swEsc(line) + '</div>' : '') +
+          (s.idea ? '<div class="yg-share-idea">' + swEsc(String(s.idea).slice(0, 120)) + '</div>' : '') +
+          (s.comment ? '<div class="yg-share-cmt">「' + swEsc(String(s.comment).slice(0, 200)) + '」</div>' : '') +
+          '<div class="yg-share-foot">' +
+          (Number(s.discount) > 0 ? '<span class="yg-share-disc">立减 ¥' + Number(s.discount) + '</span>' : '<span class="yg-share-tag">已授权分享</span>') +
+          '<span class="yg-share-date">' + swTime(s.created_at) + '</span></div>' +
+          '</div></div>';
+      }).join('');
+      host.innerHTML =
+        (title ? '<div class="yg-share-head"><h3>' + title + '</h3>' + (sub ? '<span>' + sub + '</span>' : '') + '</div>' : '') +
+        '<div class="yg-share-grid">' + cards + '</div>';
+    }).catch(function () { host.style.display = 'none'; });
+  };
+
+  /* 同意授权分享：p={code,name,batch,idea,img,comment,discount,contact,page}
+     → 写入 shares 表 + 向后台邮箱发授权回执；返回 Promise<{ok,error?}> */
+  window.__ygShareSubmit = function (p) {
+    p = p || {};
+    var row = {
+      code: String(p.code || '').trim(),
+      name: String(p.name || '').trim(),
+      batch: String(p.batch || '').trim(),
+      idea: String(p.idea || '').trim(),
+      img: String(p.img || '').trim(),
+      comment: String(p.comment || '').trim(),
+      discount: Number(p.discount) > 0 ? Number(p.discount) : null,
+      contact: String(p.contact || '').trim(),
+      consent: true
+    };
+    var mailOk = false, dbOk = false;
+    function tryMail() {
+      var cfg = window.SUPABASE || {};
+      if (!cfg.emailUrl) return Promise.resolve();
+      var fields = {};
+      fields['防伪码'] = row.code || '—';
+      if (row.name) fields['品名'] = row.name;
+      if (row.batch) fields['专属编号'] = row.batch;
+      if (row.idea) fields['设计理念'] = row.idea;
+      if (row.img) fields['图片文件名'] = row.img;
+      fields['客户评论'] = row.comment || '（未填写）';
+      fields['立减金额'] = row.discount ? ('¥' + row.discount) : '—';
+      if (row.contact) fields['顾客联系方式'] = row.contact;
+      fields['授权时间'] = new Date().toLocaleString('zh-CN');
+      fields['作品验真链接'] = location.origin + location.pathname.replace(/[^/]*$/, '') + 'verify.html?c=' + encodeURIComponent(row.code);
+      return fetch(cfg.emailUrl, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kind: 'share', subject: '【予光】光语分享 · 顾客授权回执（NFC 反馈立减）', fields: fields })
+      }).then(function (r) { mailOk = r.ok; return r.json().catch(function () { return {}; }); })
+        .catch(function () { mailOk = false; });
+    }
+    function tryDb() {
+      if (!window.sb) return Promise.resolve();
+      return window.sb('shares', { method: 'POST', body: JSON.stringify(row) })
+        .then(function (rows) { dbOk = true; row.id = rows && rows[0] && rows[0].id; })
+        .catch(function (e) { dbOk = false; });
+    }
+    return Promise.all([tryMail(), tryDb()]).then(function () {
+      return { ok: dbOk || mailOk, db: dbOk, mail: mailOk, row: row };
+    });
+  };
+
+  /* 自动挂载页面里 [data-yg-share-wall] 容器 */
+  function autoMount() {
+    document.querySelectorAll('[data-yg-share-wall]').forEach(function (el) {
+      window.__ygShareWall(el, {
+        code: (el.getAttribute('data-code') || '') || null,
+        limit: Number(el.getAttribute('data-limit')) || 12,
+        title: el.getAttribute('data-title') || '',
+        sub: el.getAttribute('data-sub') || '',
+        empty: el.getAttribute('data-empty') || '还没有光语分享 ✦ 愿你是写下第一句的人。',
+        hideEmpty: el.hasAttribute('data-hide-empty')
+      });
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', autoMount);
+  else autoMount();
+})();
