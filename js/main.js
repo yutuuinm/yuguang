@@ -118,6 +118,9 @@ function fillSelect(sel, options) {
     .join('');
 }
 
+/* 珠径 → 颗数：8mm=22颗，10mm=18颗（全串同径） */
+function beadCountOf(mm) { mm = Number(mm); return mm === 8 ? 22 : 18; }
+
 /* ---------- 全站星夜底图（自动注入，换图只需改这里） ---------- */
 const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件名即可全站生效
 
@@ -568,6 +571,43 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   if (zodEl) zodEl.addEventListener('change', updateZodiacHint);
   updateZodiacHint();   // 初始展示本命五行与主石建议
 
+  /* ---------- 生辰：公历 / 农历 切换（农历经 lunar-javascript 换算为公历） ---------- */
+  var calType = 'solar';
+  (function initCalRow() {
+    var row = document.getElementById('calRow');
+    if (!row) return;
+    var btns = row.querySelectorAll('.bs-btn');
+    function paint() {
+      btns.forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-cal') === calType); });
+    }
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        calType = b.getAttribute('data-cal') === 'lunar' ? 'lunar' : 'solar';
+        paint();
+        if (calType === 'lunar' && !window.Lunar) loadLunarLib();
+      });
+    });
+    paint();
+  })();
+  function loadLunarLib() {
+    if (window.Lunar) return;
+    var s = document.createElement('script');
+    s.src = 'js/lunar.min.js';
+    s.onerror = function () { var h = $('eastElement'); if (h) h.textContent = (h.textContent || '') + '（农历换算组件加载失败，暂按公历计算）'; };
+    document.head.appendChild(s);
+  }
+  function solarOfBirth() {
+    var y = parseInt(String(yearEl ? yearEl.value || '' : ''), 10);
+    var m = parseInt(String(bzMEl ? bzMEl.value || '' : ''), 10);
+    var d = parseInt(String(bzDEl ? bzDEl.value || '' : ''), 10);
+    if (calType !== 'lunar' || !window.Lunar || !isFinite(y) || !isFinite(m) || !isFinite(d)) return { y: y, m: m, d: d };
+    try {
+      var lun = window.Lunar.fromYmd(y, m, d);
+      var sol = lun.getSolar();
+      return { y: sol.getYear(), m: sol.getMonth(), d: sol.getDay() };
+    } catch (e) { return { y: y, m: m, d: d }; }
+  }
+
   /* ---------- 结果卡与珠串画布 ---------- */
   var genBusy = false;
   var shakeTimer = null;
@@ -751,6 +791,8 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     if ($('rMetal')) $('rMetal').textContent = cfg.metal || '—';
     if ($('rChain')) $('rChain').textContent = cfg.chain || '';
     if ($('rGlyph')) $('rGlyph').textContent = cfg.glyph || '';
+    var rs = document.getElementById('rSize');
+    if (rs) rs.textContent = mmNow + 'mm × ' + beadCountOf(mmNow) + '颗';
     if ($('pLight')) $('pLight').textContent = cfg.quote || '';
     drawBracelet(cfg.beads || []);
     setLegend(cfg.legend || []);
@@ -760,7 +802,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   var NURT = { 水: '金', 木: '水', 火: '木', 土: '火', 金: '土' }; // 生我滋养 · 五行平和
   window.__beads = function (mainC, auxC) {
     var mm = Number(window.__bs || 10);
-    var n = mm >= 10 ? 18 : 22;
+    var n = beadCountOf(mm);
     var arr = [];
     for (var i = 0; i < n; i++) arr.push({ color: (i % 2 === 0) ? mainC : (auxC || mainC), mm: mm });
     return arr;
@@ -844,8 +886,8 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     showDesign({
       name: gua ? (z + ' · ' + gua[0]) : (z + ' · 生辰'),
       sub: 'EAST · 生辰定制' + (gua ? ' · ' + gua[1] : ''),
-      mainText: main[0] + '（本命' + info.el + yangNote + ' · 主石 10mm）',
-      auxText: aux[0] + '（' + (gua ? '随卦' + gua[2] + '系意象' : (nurName ? nurName + '生' + info.el + ' · 取五行平和' : info.el + '系辅光')) + ' · 配石 8mm）',
+      mainText: main[0] + '（本命' + info.el + yangNote + '）',
+      auxText: aux[0] + '（' + (gua ? '随卦' + gua[2] + '系意象' : (nurName ? nurName + '生' + info.el + ' · 取五行平和' : info.el + '系辅光')) + '）',
       metal: $('metalEast') ? $('metalEast').value : '',
       chain: gua ? (gua[0] + ' · 手作') : '生肖暗刻 · 手作',
       glyph: (bm && bd ? (bm + '/' + bd + ' · ') : '') + (gua ? (gua[1] + ' ' + gua[0]) : (hour ? hour[0] + '时' : '生辰')),
@@ -857,7 +899,8 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       ]
     });
     st('生辰信息已汇总 ✦ 小光正在为你整理设计…');
-    try { window.__askDesign('bazi', { year: yearEl ? String(yearEl.value || '').trim() : '', month: bm || '', day: bd || '', hour: hour ? hour[0] : '', zod: zodEl ? zodEl.value : '', el: info.el, gua: gua ? gua[0] : '' }); } catch (e) {}
+    var sol = solarOfBirth();
+    try { window.__askDesign('bazi', { year: (sol && sol.y) ? String(sol.y) : (yearEl ? String(yearEl.value || '').trim() : ''), month: (sol && sol.m) ? String(sol.m) : bm, day: (sol && sol.d) ? String(sol.d) : bd, hour: hour ? hour[0] : '', zod: zodEl ? zodEl.value : '', el: info.el, gua: gua ? gua[0] : '' }); } catch (e) {}
   }
 
   function runShake(forceNew) {
@@ -906,8 +949,8 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     showDesign({
       name: info.el + '行 · ' + hex[0],
       sub: 'EAST · 摇卦定制 · 得 ' + hex[1],
-      mainText: main[0] + '（本命' + info.el + ' · 主石 10mm）',
-      auxText: aux[0] + '（随「' + hex[0] + '」' + hex[2] + '系意象 · 配石 8mm）',
+      mainText: main[0] + '（本命' + info.el + '）',
+      auxText: aux[0] + '（随「' + hex[0] + '」' + hex[2] + '系意象）',
       metal: $('metalEast') ? $('metalEast').value : '',
       chain: hex[0] + ' · 手作',
       glyph: hex[1] + ' ' + hex[0],
@@ -963,7 +1006,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
       '<p><b style="color:var(--gold);">' + (nm || '予光 · 定制') + '</b> · ' + (sub || '') + '</p>' +
       '<p>主石｜' + (main || '—') + '</p>' +
       '<p>配石｜' + (aux || '—') + '（以意象平衡为本，五行平和、阴阳相济）</p>' +
-      '<p>串形｜' + (chain || '—') + ' · ' + mmNow + 'mm × ' + (mmNow >= 10 ? 18 : 22) + ' 颗' + (glyph ? ' · ' + glyph : '') + '</p>' +
+      '<p>串形｜' + (chain || '—') + ' · ' + mmNow + 'mm × ' + beadCountOf(mmNow) + ' 颗' + (glyph ? ' · ' + glyph : '') + '</p>' +
       (light ? '<p>光语｜' + light + '</p>' : '') +
       '<p class="ghex-dim">✦ 设计理念为文化意象的表达与陪伴；生辰/卦象可自动展开更完整的详解。</p></div>';
     box.innerHTML = html;
@@ -1002,7 +1045,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     }
     if (!aiUrl) { outWrap.innerHTML = '<p class="ghex-dim">AI 服务未配置 ✦</p>'; return; }
     var mmNow = Number(window.__bs || 10);
-    var cnt = mmNow >= 10 ? 18 : 22;
+    var cnt = beadCountOf(mmNow);
     var mainName = (function () { var m = document.getElementById('rMain'); return m ? String(m.textContent || '').trim() : ''; })();
     var stoneName = String(mainName || '').split(/[（(]/)[0] || '天然水晶';
     var auxName = (function () { var m = document.getElementById('rAux'); var t = m ? String(m.textContent || '') : ''; return t ? t.split(/[（(]/)[0].trim() : ''; })() || '';
@@ -1069,8 +1112,8 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
     showDesign({
       name: name,
       sub: 'WEST · 星座定制 · ' + GLYPH[sun],
-      mainText: s.stone[0] + '（太阳 · 本我 · 主石 10mm）',
-      auxText: auxN + '（月亮情绪意象 · 配石 8mm）',
+      mainText: s.stone[0] + '（太阳 · 本我）',
+      auxText: auxN + '（月亮情绪意象）',
       metal: $('metalWest') ? $('metalWest').value : '',
       chain: chainTxt + (risRaw ? ' · 上升意象' : ''),
       glyph: GLYPH[sun] + (moonKey ? ' ☽' : ''),
@@ -1094,13 +1137,13 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
     showDesign({
       name: '双生 · ' + aKey + ' × ' + bKey,
       sub: 'UNION · 合盘定制 · ' + clasp,
-      mainText: a.stone[0] + '（我的光 · 主石 10mm）',
-      auxText: b.stone[0] + '（你的光 · 主石 10mm）',
+      mainText: a.stone[0] + '（我的光）',
+      auxText: b.stone[0] + '（你的光）',
       metal: $('metalUnion') ? $('metalUnion').value : '',
       chain: '互扣 · ' + clasp,
       glyph: GLYPH[aKey] + ' + ' + GLYPH[bKey],
       quote: a.quote + '　' + b.quote + '　两个人的光，合起来是一轮满月。各自佩戴时，你们都是完整的自己。',
-      beads: (function () { var mm = Number(window.__bs || 10); var n = mm >= 10 ? 18 : 22; var arr = []; for (var i = 0; i < n; i++) arr.push({ color: (i % 2 === 0) ? a.stone[1] : b.stone[1], mm: mm }); window.__lastBeads = arr; return arr; })(),
+      beads: (function () { var mm = Number(window.__bs || 10); var n = beadCountOf(mm); var arr = []; for (var i = 0; i < n; i++) arr.push({ color: (i % 2 === 0) ? a.stone[1] : b.stone[1], mm: mm }); window.__lastBeads = arr; return arr; })(),
       legend: [
         { role: '主石一', name: a.stone[0], color: a.stone[1], mm: 10 },
         { role: '主石二', name: b.stone[0], color: b.stone[1], mm: 10 }
@@ -1211,10 +1254,8 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
     });
   });
 
-  // 打开页面生成一张与当前谱系对应的示例设计卡（默认东方 · 生辰 · 巳蛇 · 午时）
-  if (!hashPanel || hashPanel === 'east') runBirth();
-  else if (hashPanel === 'west') runWest();
-  else runUnion();
+  // 页面打开不自动生成示例：右侧保持「语录轮播」空态，等用户完成输入后再定制
+  if (false) { if (!hashPanel || hashPanel === 'east') runBirth(); else if (hashPanel === 'west') runWest(); else runUnion(); }
 
   /* ================= 小光定制：让 小光 帮你挑 ================= */
   (function xgHelp() {
@@ -3399,6 +3440,7 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
         { role: '配珠', name: aux[0], color: aux[1], mm: Number(window.__bs || 10) }
       ]
     });
+    if (window.__askDesign) { try { window.__askDesign('zod', { zod: z, el: info.el }); } catch (e) {} }
   });
 })();
 
@@ -3514,6 +3556,8 @@ window.__askDesign = function (kind, info) {
     if (st) st.style.display = cust ? 'none' : '';
   }
   cardMode(true);
+  var gTmp = document.getElementById('genStatus');
+  if (gTmp) gTmp.textContent = '';
   if (box) {
     box.style.display = 'block';
     box.innerHTML = '<div class="gen-hex-inner">' +
@@ -3537,7 +3581,7 @@ window.__askDesign = function (kind, info) {
   var aiUrl = cfg.aiUrl || (cfg.url ? cfg.url + '/functions/v1/ai-assistant' : '');
   if (!aiUrl) { qstop(); cardMode(false); if (box) box.innerHTML = '<div class="gen-hex-inner"><p class="ghex-dim">AI 服务未配置 ✦</p></div>'; return; }
   var mm = Number(window.__bs || 10);
-  var count = mm >= 10 ? 18 : 22;
+  var count = beadCountOf(mm);
   var imgHost = document.getElementById('previewImg') || (function () {
     var host = document.createElement('div'); host.id = 'previewImg';
     var pc = document.getElementById('preview');
@@ -3555,6 +3599,8 @@ window.__askDesign = function (kind, info) {
     qstop();
     cardMode(false);
     if (!j || !j.ok) { if (box) box.innerHTML = '<div class="gen-hex-inner"><p class="ghex-dim">' + String((j && j.error) || '请求失败') + '</p></div>'; if (imgHost) imgHost.innerHTML = ''; return; }
+    var gEl2 = document.getElementById('genStatus');
+    if (gEl2 && !gEl2.textContent) gEl2.textContent = '✦ 定制完成，可换珠径重试或提交定制意向';
     var clean = String(j.analysis || '').split('*').join('');
     if (box) {
       box.style.display = 'block';
