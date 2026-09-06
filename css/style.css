@@ -3074,3 +3074,8 @@ html { overscroll-behavior-y: none; }
   color: var(--moon); border-radius: 999px; padding: 8px 18px; font-size: 13px; cursor: pointer; letter-spacing: .08em;
   background: transparent; transition: all .25s; }
 .btn-line:hover { border-color: var(--gold); color: var(--gold); box-shadow: 0 0 14px rgba(227,196,124,.25); }
+
+/* 定制工坊：生成期间轮播语录 */
+.ghex-quote { color: rgba(227,196,124,.9); font-family: var(--serif); font-size: 13.5px; letter-spacing: .14em;
+  line-height: 2.1; margin: 12px auto 2px; min-height: 4em; text-align: center; opacity: 0; }
+@media (max-width: 520px) { .ghex-quote { font-size: 12.5px; min-height: 4.6em; } }
