@@ -732,8 +732,8 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     }
     var gs2 = document.getElementById('genStatus');
     if (gs2 && !gs2.textContent) gs2.textContent = '✦ 设计已生成，可继续微调或提交定制意向';
-    try { seedImgWait(); } catch (e) {}
-    try { window.setTimeout(function () { if (typeof localIdea === 'function') localIdea(); }, 160); } catch (e) {}
+
+
     if ($('pName')) $('pName').textContent = cfg.name || '予光 · 定制';
     if ($('pSub')) $('pSub').textContent = cfg.sub || '';
     if ($('rMain')) $('rMain').textContent = cfg.mainText || '';
@@ -846,7 +846,8 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
         { role: '配石', name: aux[0], color: aux[1], mm: 8 }
       ]
     });
-    st('生辰设计已生成 ✦ 下方按钮可带上光语一起提交');
+    st('生辰信息已汇总 ✦ 小光正在为你整理设计…');
+    try { window.__askDesign('bazi', { year: yearEl ? String(yearEl.value || '').trim() : '', month: bm || '', day: bd || '', hour: hour ? hour[0] : '', zod: zodEl ? zodEl.value : '', el: info.el, gua: gua ? gua[0] : '' }); } catch (e) {}
     try { autoDetail('bazi', { zod: zodEl ? zodEl.value : '', el: info.el, year: yearEl ? String(yearEl.value || '').trim() : '', month: bm || '', day: bd || '', hour: hour ? hour[0] : '', gua: gua ? gua[0] : null }); } catch (e) {}
   }
 
@@ -908,7 +909,8 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
         { role: '配石', name: aux[0], color: aux[1], mm: 8 }
       ]
     });
-    st('摇卦完成 ✦ 得「' + hex[0] + '」。可再摇，也可带着卦象与光语提交');
+    st('摇卦完成 ✦ 小光正在为你整理设计…');
+    try { window.__askDesign('hex', { name: hex[0], sym: hex[1], idea: hex[3], wu: hex[2] }); } catch (e) {}
     try { autoDetail('hex', { name: hex[0], sym: hex[1], wu: hex[2], idea: hex[3] }); } catch (e) {}
   }
 
@@ -1109,7 +1111,8 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
         { role: '配石', name: auxN, color: auxC, mm: 8 }
       ]
     });
-    st('星座设计已生成 ✦ 下方按钮可带上光语一起提交');
+    st('星座信息已汇总 ✦ 小光正在为你整理设计…');
+    try { window.__askDesign('star', { sun: sun, moon: moonKey, rising: risRaw }); } catch (e) {}
   }
 
   function runUnion() {
@@ -1133,7 +1136,8 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
         { role: '主石二', name: b.stone[0], color: b.stone[1], mm: 10 }
       ]
     });
-    st('双珠设计已生成 ✦ 下方按钮可带上光语一起提交');
+    st('合盘信息已汇总 ✦ 小光正在为你整理设计…');
+    try { window.__askDesign('union', { a: aKey, b: bKey, note: String($('unionNote') ? $('unionNote').value : '') }); } catch (e) {}
   }
 
   function retryLast() {
@@ -3470,3 +3474,46 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
   var st0 = document.getElementById('genStatus');
   if (st0 && !st0.textContent) st0.textContent = '✦ 请选择定制方式并生成，设计卡与设计理念会显示在这里';
 })();
+
+/* ===== 设计引擎：DeepSeek(v4-flash) 文学分析 + 通义按配比出图 ===== */
+window.__askDesign = function (kind, info) {
+  var box = document.getElementById('genHexBox');
+  if (box) { box.style.display = 'block'; box.innerHTML = '<div class="gen-hex-inner"><div class="ghex-title">✦ 设计理念</div><p class="ghex-dim"><span class="yg-loading"></span> 小光正在向云端请教，为你定制这串光…（约 20-40 秒）</p></div>'; }
+  var cfg = window.SUPABASE || {};
+  var aiUrl = cfg.aiUrl || (cfg.url ? cfg.url + '/functions/v1/ai-assistant' : '');
+  if (!aiUrl) { if (box) box.innerHTML = '<div class="gen-hex-inner"><p class="ghex-dim">AI 服务未配置 ✦</p></div>'; return; }
+  var mm = Number(window.__bs || 10);
+  var count = mm >= 10 ? 18 : 22;
+  var imgHost = document.getElementById('previewImg') || (function () {
+    var host = document.createElement('div'); host.id = 'previewImg';
+    var stage = document.querySelector('#preview .bracelet-stage');
+    if (stage && stage.parentNode) stage.parentNode.insertBefore(host, stage.nextSibling); else { var pc = document.getElementById('preview'); if (pc) pc.appendChild(host); }
+    return host;
+  })();
+  if (imgHost) imgHost.innerHTML = '<p class="ghex-dim" style="margin-top:6px;"><span class="yg-loading"></span> 正在生成真水晶图…</p>';
+  var q = (typeof imgQuota === 'function') ? imgQuota() : { left: 999 };
+  var doImg = q.left > 0;
+  fetch(aiUrl, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ mode: 'design', kind: kind, info: info, design: { mm: mm, count: count, color: window.__mainC || '#e3c47c' } })
+  }).then(function (r) { return r.json(); }).then(function (j) {
+    if (!j || !j.ok) { if (box) box.innerHTML = '<div class="gen-hex-inner"><p class="ghex-dim">' + String((j && j.error) || '请求失败') + '</p></div>'; if (imgHost) imgHost.innerHTML = ''; return; }
+    var clean = String(j.analysis || '').split('*').join('');
+    if (box) {
+      box.style.display = 'block';
+      box.innerHTML = '<div class="gen-hex-inner"><div class="ghex-title">✦ 设计理念</div>' +
+        clean.split(String.fromCharCode(10)).map(function (ln) { ln = String(ln || '').trim(); if (!ln) return ''; return /[：:]$|石[:：]/.test(ln) ? '<p style="color:var(--gold);">' + ln + '</p>' : '<p>' + ln + '</p>'; }).join('') + '</div>';
+    }
+    if (imgHost) {
+      if (j.url) {
+        try { if (doImg && typeof imgUseUp === 'function') imgUseUp(); } catch (e) {}
+        imgHost.innerHTML = '<div class="ghex-title">真水晶预览 ✦</div><img src="' + j.url + '" alt="定制水晶手串" style="width:100%;border-radius:14px;border:1px solid var(--line);">';
+        try { imgHost.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+      } else if (!doImg) {
+        imgHost.innerHTML = '<p class="ghex-dim">今日出图额度已用完 ✦ 设计理念已给出，明日再生成图</p>';
+      }
+    }
+  }).catch(function () {
+    if (box) box.innerHTML = '<div class="gen-hex-inner"><p class="ghex-dim">请求失败，请稍后再试 ✦</p></div>';
+  });
+};
