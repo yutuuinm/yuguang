@@ -849,7 +849,6 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     });
     st('生辰信息已汇总 ✦ 小光正在为你整理设计…');
     try { window.__askDesign('bazi', { year: yearEl ? String(yearEl.value || '').trim() : '', month: bm || '', day: bd || '', hour: hour ? hour[0] : '', zod: zodEl ? zodEl.value : '', el: info.el, gua: gua ? gua[0] : '' }); } catch (e) {}
-    try { autoDetail('bazi', { zod: zodEl ? zodEl.value : '', el: info.el, year: yearEl ? String(yearEl.value || '').trim() : '', month: bm || '', day: bd || '', hour: hour ? hour[0] : '', gua: gua ? gua[0] : null }); } catch (e) {}
   }
 
   function runShake(forceNew) {
@@ -912,47 +911,8 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     });
     st('摇卦完成 ✦ 小光正在为你整理设计…');
     try { window.__askDesign('hex', { name: hex[0], sym: hex[1], idea: hex[3], wu: hex[2] }); } catch (e) {}
-    try { autoDetail('hex', { name: hex[0], sym: hex[1], wu: hex[2], idea: hex[3] }); } catch (e) {}
   }
 
-  /* 全量详解：调用后台 DeepSeek（ai-assistant，settings.ai 配置 v4-flash），渲染进详情箱并默认展开 */
-  function autoDetail(kind, payload) {
-    var box = document.getElementById('genHexBox');
-    if (!box) return;
-    var title = kind === 'bazi' ? '✦ 生辰 · 设计理念' : '✦ 卦 · 设计理念';
-    box.style.display = 'block';
-    box.innerHTML = '<div class="gen-hex-inner"><div class="ghex-title">' + title + '</div><p class="ghex-dim">让小光为你详解（正在展开…）</p></div>';
-    var q = '';
-    if (kind === 'hex') {
-      q = '请用中文，给「' + payload.name + '（' + payload.sym + '）」一份完整详细的卦象详解：先讲卦名与卦形意象，再讲它在“事业/感情/心境”三方面各自的文化意象提示，最后给一句适合做成手串的温柔光语。要求：全程按文化意象的表达来写，不做任何预测与保证，语气温暖克制，总量不超过500字，像一条温柔耐读、可直接分享的短文（不要提任何平台名），可分小段并在结尾给出2-3个话题词。';
-    } else {
-      q = '请用中文，根据以下信息给一份完整详细的“生辰意象”解读：生肖' + payload.zod + '（本命五行' + payload.el + '），出生' + (payload.year || '?') + '年' + (payload.month || '?') + '月' + (payload.day || '?') + '日' + (payload.hour || '？') + '时' + (payload.gua ? '，另取卦「' + payload.gua + '」' : '') + '。要求：1)五行与时节意象 2)主石/配石建议理由 3)三行左右的日常佩戴提示 4)一句予光风格的光语。全程按文化意象的表达来写，不做任何预测与保证，总量不超过550字，像一条温柔耐读、可直接分享的短文（不要提任何平台名），先讲意象与主配石选择，再给佩戴提示与一句光语，可分小段并给出话题词。';
-    }
-    var done = false;
-    var req = (window.sbAI) ? window.sbAI({ mode: 'chat', question: q }) : Promise.reject(new Error('noai'));
-    req.then(function (r) {
-      if (!box.isConnected) return;
-      done = true;
-      if (!r || !r.ok) {
-        outWrap.innerHTML = '<div class="gen-hex-inner"><div class="ghex-title">' + title + '</div>' + (kind === 'hex'
-          ? '<p>卦象「' + payload.name + '（' + payload.sym + '）」属' + (payload.wu || '') + '系的意象：' + (payload.idea || '') + '。取其意境做配色与主石之引，让它成为一枚随身的光。</p>'
-          : '<p>' + payload.zod + '属' + payload.el + '，以' + payload.el + '系晶石的意象作底色，把时节与时辰的光收进腕间。</p>') + '<p class="ghex-dim">✦ 详解服务暂不可用（后台 AI 需配置），以上为本地意象说明。</p></div>';
-        return;
-      }
-      var txt = String((r.answer || '').replace(/^#+\s*/gm, '').trim());
-      var html = '<div class="gen-hex-inner"><div class="ghex-title">' + title + '</div>' +
-        txt.split(/\n+/).map(function (ln) {
-          ln = ln.trim();
-          if (!ln) return '';
-          return /[：:：]$|^[\u4e00-\u9fa5]{1,8}（/.test(ln) ? '<p style="color:var(--gold);">' + ln + '</p>' : '<p>' + ln + '</p>';
-        }).join('') + '</div>';
-      outWrap.innerHTML = html;
-
-    }).catch(function () {
-      if (!box.isConnected || done) return;
-      outWrap.innerHTML = '<div class="gen-hex-inner"><div class="ghex-title">' + title + '</div><p>详解服务连接失败，稍后可再点一次「🔍 详细解卦」✦</p></div>';
-    });
-  }
     /* 配额：未登录 1 张/日，登录 2 张/日，管理员不限 */
   function imgQuota() {
     var role = localStorage.getItem('yg_role') || '';
@@ -3566,11 +3526,12 @@ window.__askDesign = function (kind, info) {
   var count = mm >= 10 ? 18 : 22;
   var imgHost = document.getElementById('previewImg') || (function () {
     var host = document.createElement('div'); host.id = 'previewImg';
-    var stage = document.querySelector('#preview .bracelet-stage');
-    if (stage && stage.parentNode) stage.parentNode.insertBefore(host, stage.nextSibling); else { var pc = document.getElementById('preview'); if (pc) pc.appendChild(host); }
+    var pc = document.getElementById('preview');
+    var hb = document.getElementById('genHexBox');
+    if (pc) { if (hb && hb.parentNode) pc.insertBefore(host, hb); else pc.appendChild(host); }
     return host;
   })();
-  if (imgHost) imgHost.innerHTML = '<p class="ghex-dim" style="margin-top:6px;"><span class="yg-loading"></span> 正在生成水晶图…</p>';
+  if (imgHost) imgHost.innerHTML = '';
   var q = (typeof imgQuota === 'function') ? imgQuota() : { left: 999 };
   var doImg = q.left > 0;
   fetch(aiUrl, {
