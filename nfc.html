@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>轻触之光 · 予光 NFC</title>
 <meta name="description" content="予光作品 NFC 轻触页——抽一下、答案之书、反馈立减与光语分享。愿每一次轻触，都有一段光被想起。">
-<link rel="stylesheet" href="css/style.css?v=09062105">
+<link rel="stylesheet" href="css/style.css?v=09062257">
 <style>
   .nf-wrap { max-width: 640px; margin: 0 auto; }
   .page-hero.nfHero { padding: 26px 14px 2px !important; }
@@ -240,8 +240,8 @@
   </div>
 </div>
 
-<script src="js/supabase-config.js?v=09062105"></script>
-<script src="js/main.js?v=09062105"></script>
+<script src="js/supabase-config.js?v=09062257"></script>
+<script src="js/main.js?v=09062257"></script>
 <script>
 /* ==================== NFC 落地页逻辑（轻触之光） ==================== */
 (function () {
@@ -294,7 +294,7 @@
       imgBox.innerHTML = '<img src="' + esc(window.sbImg(img)) + '" alt="作品图" loading="lazy" onerror="this.outerHTML=\'🪨\';">';
     } else imgBox.innerHTML = '🪨';
     var bEl = $('nfBatch');
-    if (batch) { bEl.style.display = ''; bEl.textContent = '定制编号 · ' + batch; }
+    if (batch) { bEl.style.display = ''; bEl.textContent = '专属编码：' + batch; }
     else bEl.style.display = 'none';
   }
 
@@ -500,7 +500,7 @@
     var batch = String(CUR.batch_no || '').trim();
     $('sharePrize').textContent = '🎉 立减 ¥' + prize;
     var mini = '<div style="font-size:13px;color:var(--gold);">' + esc(String(CUR.product_ref || '').trim() || '予光定制作品') + '</div>';
-    if (batch) mini += '<div style="margin-top:3px;">定制编号：' + esc(batch) + '</div>';
+    if (batch) mini += '<div style="margin-top:3px;">专属编码：' + esc(batch) + '</div>';
     mini += '<div style="color:var(--text-dim);">防伪码：' + esc(CUR.code || '') + '</div>';
     if (info.text) mini += '<div style="margin-top:6px;line-height:1.8;">' + esc(String(info.text).slice(0, 120)) + '</div>';
     $('shareMini').innerHTML = mini;
