@@ -131,12 +131,13 @@ Deno.serve(async (req) => {
           const hm = String(analysis).match(/#[0-9a-fA-F]{6}/g);
           if (hm) extraHexes = hm.slice(0, 4);
         } catch (e) {}
+
+      }
       if (!analysis) {
-        analysis = "五行意象｜主石 " + (d.stone || "天然水晶") + (d.aux ? "，配石 " + d.aux : "") + "；配色｜" + (d.color || "#e3c47c") + " 与 " + (d.accent || d.color || "#e3c47c") + "；设计理念｜依本命五行与卦意取阴阳平和、五行相生之石，作日常陪伴的一枚光。";
+        analysis = "五行意象｜主石 " + (d.stone || "天然水晶") + (d.aux ? "，配石 " + d.aux : "") + "；设计理念｜依本命五行与卦意取阴阳平和、五行相生之石，整串" + (d.mm || 10) + "mm 同径" + (d.count || 18) + "颗，作日常陪伴的一枚光。";
       }
-      if (!extraHexes.length && d.color) { extraHexes = [String(d.color)]; if (d.accent) extraHexes.push(String(d.accent)); }
-      }
-      const designLine = [
+      if (!extraHexes.length) { if (d.color) extraHexes.push(String(d.color)); if (d.accent) extraHexes.push(String(d.accent)); }
+            const designLine = [
         "品名：" + String(d.name || '予光手串'),
         "主石材质意向：" + String(d.stone || '天然水晶') + (d.aux ? "；配石点缀：" + String(d.aux) : ""),
         "双色：" + String(d.color || '#e3c47c') + " 与 " + String(d.accent || '同色') + " 等径交替成串" + (extraHexes.length ? "；分析配色：" + extraHexes.join(",") : ""),
