@@ -3079,3 +3079,23 @@ html { overscroll-behavior-y: none; }
 .ghex-quote { color: rgba(227,196,124,.9); font-family: var(--serif); font-size: 13.5px; letter-spacing: .14em;
   line-height: 2.1; margin: 12px auto 2px; min-height: 4em; text-align: center; opacity: 0; }
 @media (max-width: 520px) { .ghex-quote { font-size: 12.5px; min-height: 4.6em; } }
+
+/* 定制工坊：未输入时的语录轮播层 + 「小光正在为你定制」动画 */
+.preview-card { position: relative; }
+.yg-idle { position: absolute; inset: 0; z-index: 6; display: flex; align-items: center; justify-content: center;
+  padding: 22px; text-align: center; background: linear-gradient(170deg, rgba(15,22,38,.97), rgba(8,11,20,.99)); border-radius: 16px; }
+.yg-idle .i-q { color: rgba(227,196,124,.92); font-family: var(--serif); font-size: 15px; letter-spacing: .14em;
+  line-height: 2.2; max-width: 320px; margin: 0; opacity: 0; transition: opacity .6s ease; }
+.cust-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; margin: 4px 0 2px; }
+.cust-orb { width: 72px; height: 72px; border-radius: 50%; position: relative;
+  background: radial-gradient(circle at 34% 28%, #fff6e0, #e8c26a 56%, #b98a2f);
+  box-shadow: 0 0 24px rgba(227,196,124,.45); animation: custPulse 1.7s ease-in-out infinite; }
+.cust-orb::after { content: ''; position: absolute; inset: -11px; border-radius: 50%;
+  border: 1px solid rgba(227,196,124,.55); animation: custRing 1.7s ease-out infinite; }
+@keyframes custPulse { 0%,100% { transform: scale(1); box-shadow: 0 0 18px rgba(227,196,124,.4); }
+  50% { transform: scale(1.07); box-shadow: 0 0 34px rgba(227,196,124,.7); } }
+@keyframes custRing { 0% { transform: scale(.94); opacity: .9; }
+  75% { transform: scale(1.4); opacity: 0; } 100% { opacity: 0; } }
+.cust-title { color: var(--gold); font-family: var(--serif); font-size: 17px; letter-spacing: .32em;
+  margin: 0; white-space: nowrap; }
+@media (max-width: 520px) { .cust-title { font-size: 15px; letter-spacing: .22em; } }
