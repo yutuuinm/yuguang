@@ -132,7 +132,7 @@ Deno.serve(async (req) => {
       const sysP2 = [
         "你是予光的设计师与文案：根据用户信息，为一串水晶手串做完整定制方案（同径整串，" + beadLine + "）。",
         "不要使用任何 * 星号与 markdown 标记。",
-        "请严格按以下格式输出（每行一个条目）：",
+        "请严格按以下格式输出（每行一个条目），只输出最终答案本身，不要思考过程、不要解释、不要复述用户信息：",
         "1) 逐石配比：每行「石:海蓝宝|数量:1|色:#7FB5C9」列出 3-5 种晶石与其颗数与代表色（颗数之和须等于 " + count + "，体现主次搭配与调候/五行的平衡）；",
         "2) 设计理念：以「串为……量身定制」开篇，谈季节调候与五行喜忌，逐石点题（与上面石料一致），缀饰与整体意象，共约150-220字；",
         "3) 诗曰：四句七言收尾。",
@@ -150,7 +150,9 @@ Deno.serve(async (req) => {
       const lines = String(rawTxt).split(String.fromCharCode(10))
       lines.forEach(function (ln) {
         ln = ln.trim();
-        const m = /石[:：]\s*([^|]+?)\s*\|\s*数量[:：]\s*(\d+)\s*\|\s*色[:：]\s*(#[0-9a-fA-F]{3,6})/.exec(ln);
+        let m = /石[:：]\s*([^|]+?)\s*\|\s*数量[:：]\s*(\d+)\s*\|\s*色[:：]\s*(#[0-9a-fA-F]{3,6})/.exec(ln);
+        if (!m) m = /([\u4e00-\u9fa5]{2,6})(?:珠|石)?\s*[×x*]\s*(\d+)/.exec(ln);
+        if (!m) m = /([\u4e00-\u9fa5]{2,6})\s*(\d+)\s*颗/.exec(ln);
         if (m) stones.push({ name: m[1].trim(), count: Number(m[2]), color: m[3] });
       });
       if (!analysis) analysis = "予光定制：依五行与季节意象取平衡搭配（详见最终设计）";
