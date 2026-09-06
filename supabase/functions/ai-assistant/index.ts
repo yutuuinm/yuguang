@@ -123,8 +123,8 @@ Deno.serve(async (req) => {
       let analysis = "";
       let extraHexes = [];
       if (bz || hx) {
-        const ctx = bz ? ("生辰：" + bz.year + "年" + bz.month + "月" + bz.day + "日" + (bz.hour || "?") + "时，生肖" + (bz.zod || "") + "，本命" + (bz.el || "") + (bz.gua ? "，另取卦" + bz.gua : "")) : ("卦：" + hx.name + "（" + hx.sym + "），" + (hx.idea || "") + "，五行属" + (hx.wu || ""));
-        const sysP = ['你是予光设计师：根据以下信息，用中文输出一版可直接用于设计文案的分析（不要用任何 * 星号、不要用markdown标记）：', '1)一句五行喜用方向；2)推荐主石与配石（具体晶石名）；3)设计中应出现的配色3-4种，以 #HEX 表示；4)设计理念（100字内温柔短文）；5)一句光语。', '信息：' + ctx].join('');
+        const ctx = bz ? ("生辰：" + bz.year + "年" + bz.month + "月" + bz.day + "日" + (bz.hour || "?") + "时，生肖" + (bz.zod || "") + "，本命" + (bz.el || "") + (bz.gua ? "，另取卦" + bz.gua : "")) : ("卦：" + hx.name + "（" + hx.sym + "），" + (hx.idea || "") + "，五行属" + (hx.wu || "")) + "；成串规格：整串统一 " + (d.mm || 10) + "mm，共 " + (d.mm >= 10 ? 18 : 22) + " 颗同径圆珠";
+        const sysP = ['你是予光的设计师与文案：根据给定的生辰八字或卦象，为一串定制水晶手串写一段有东方韵味的完整分析文案。整串珠径已定（见信息），所有珠子同径同颗数，只需决定配色与石种（可3-5种颜色与晶石，不必只有两种）。不要用任何 * 星号、不用 markdown 标记。请按以下段落输出：', '第一段：以命局/卦意开篇（如：串为XX日主、XX月XX之命，量身定制……），结合季节调候、五行生克谈喜忌走向（字数约90-130字）。', '第二段：逐石点题：按上述走向挑选 3-5 种晶石与颜色，每种一两句诗意理由（如：取XX之XX色，润秋燥而不寒……），并交代整串是统一 8mm 或 10mm 的 22/18 颗同径珠。', '第三段：缀饰与整体意象（垫片/工艺/整体色感，2-3句，如：全串清而不冽，暖而不燥……）。', '最后：以四句诗收尾（每行一句诗，共四句）。', '整体约250-380字，优美克制，勿出现任何平台名。', '信息：' + ctx].join('');
         try {
           const pa = await fetch("https://api.deepseek.com/chat/completions", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + dk }, body: JSON.stringify({ model: dmodel, messages: [{ role: "system", content: sysP }], temperature: 0.7, max_tokens: 700 }) }).then(r=>r.json()).catch(()=>null);
           if (pa && pa.choices && pa.choices[0]) analysis = String((pa.choices[0].message && (pa.choices[0].message.content || pa.choices[0].message.reasoning_content)) || "").split("*").join("").trim();
