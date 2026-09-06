@@ -146,16 +146,17 @@ Deno.serve(async (req) => {
         ? String((pa2.choices[0].message.content || pa2.choices[0].message.reasoning_content) || "").split("*").join("").trim()
         : "";
       // 裁掉思考前言：只保留“最终交付文案”起始（石行/设计理念/串为…）
-      let analysis = rawTxt;
+      var analysis = rawTxt;
       {
-        const ti = String(rawTxt).search(/(?:^|
-)(设计理念|串为|石[:：])/);
-        if (ti > 0) analysis = String(rawTxt).slice(ti).replace(/^
-/, '');
+        var NLf = String.fromCharCode(10);
+        var cands = [NLf + '设计理念', NLf + '串为', NLf + '石:', NLf + '石：'];
+        var best = -1;
+        cands.forEach(function (c) {
+          var k = String(rawTxt).indexOf(c);
+          if (k > -1 && (best === -1 || k < best)) best = k;
+        });
+        if (best > -1) analysis = String(rawTxt).slice(best + 1).replace(/^\s*/, '');
       }
-      // 图必须在 DeepSeek 完整成文之后：以下已顺序在 fetch 完成后执行
-
-      let stones = [];
       const lines = String(rawTxt).split(String.fromCharCode(10))
       lines.forEach(function (ln) {
         ln = ln.trim();
