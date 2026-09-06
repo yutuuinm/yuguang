@@ -145,18 +145,18 @@ Deno.serve(async (req) => {
       const rawTxt = pa2 && pa2.choices && pa2.choices[0] && pa2.choices[0].message
         ? String((pa2.choices[0].message.content || pa2.choices[0].message.reasoning_content) || "").split("*").join("").trim()
         : "";
-      // 裁掉思考前言：只保留“最终交付文案”起始（石行/设计理念/串为…）
+      // 取“最终成文”：优先最后一个『设计理念』段；否则取最后石行之后
       var analysis = rawTxt;
-      var stones = [];
       {
-        var NLf = String.fromCharCode(10);
-        var cands = [NLf + '设计理念', NLf + '串为', NLf + '石:', NLf + '石：'];
-        var best = -1;
-        cands.forEach(function (c) {
-          var k = String(rawTxt).indexOf(c);
-          if (k > -1 && (best === -1 || k < best)) best = k;
-        });
-        if (best > -1) analysis = String(rawTxt).slice(best + 1).replace(/^\s*/, '');
+        var NLf2 = String.fromCharCode(10);
+        var from = -1;
+        var di = String(rawTxt).lastIndexOf(NLf2 + '设计理念');
+        var si2 = String(rawTxt).lastIndexOf(NLf2 + '串为');
+        var pi = String(rawTxt).lastIndexOf(NLf2 + '诗曰');
+        if (di > -1) from = di;
+        else if (si2 > -1) from = si2;
+        else if (pi > -1) { var t0 = String(rawTxt).indexOf(NLf2 + '石:'); if (t0 > -1) from = t0; }
+        if (from > -1) analysis = String(rawTxt).slice(from + 1).replace(/^\s*/, '');
       }
       const lines = String(rawTxt).split(String.fromCharCode(10))
       lines.forEach(function (ln) {
