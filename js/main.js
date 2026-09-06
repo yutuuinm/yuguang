@@ -1646,31 +1646,74 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
       setTimeout(function () { btn.click(); }, 260);
     }
   } catch (e) {}
+  function escV(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function cardNoHtml(title, note) {
+    return '<div class="verify-card"><div class="vg-top">' +
+      '<span class="vg-ico" style="background:radial-gradient(circle at 32% 28%,#f3c1ae,#c8694f 80%);">?</span>' +
+      '<div style="text-align:left;"><div class="vg-tt">' + escV(title) + '</div><div class="vg-st">请稍后再试</div></div></div>' +
+      '<div class="vg-note">' + escV(note || '') + '</div></div>';
+  }
   btn.addEventListener('click', function () {
     var code = (inp.value || '').trim();
-    if (!code) { res.innerHTML = '请输入作品背面/证书上的验证码。'; return; }
-    res.innerHTML = '查询中……';
+    if (!code) { res.innerHTML = '<p style="text-align:center;color:var(--text-dim);">请输入作品背面/证书上的验证码。</p>'; return; }
+    res.innerHTML = '<p style="text-align:center;"><span class="yg-loading"></span> 查询中……</p>';
     if (!window.sb) {
-      res.innerHTML = '当前为离线版，验真需联网数据库。请上线版或联系客服人工核验。';
+      res.innerHTML = '<p style="text-align:center;">当前为离线版，验真需联网数据库。请上线版或联系客服人工核验。</p>';
       return;
     }
     window.sb('records?select=*&code=eq.' + encodeURIComponent(code))
       .then(function (rows) {
         var r = rows && rows[0];
         if (!r) {
-          res.innerHTML = '<div class="doc-block" style="margin:0;"><h3 style="text-align:center;">未查询到该验证码</h3><p style="text-align:center;">请核对后重试；若仍有疑问，请联系客服人工核验（谨防仿冒渠道）。</p></div>';
+          res.innerHTML = cardNoHtml('未查询到该验证码', '请核对输入后重试；若仍有疑问，请联系客服人工核验（谨防仿冒渠道）。');
           return;
         }
         var info = (r.info && typeof r.info === 'object') ? r.info : {};
-        var img = (window.sbImg && r.image_urls) ? window.sbImg(String(r.image_urls).split(',')[0]) : '';
-        res.innerHTML = '<div class="doc-block" style="margin:0;">' +
-          '<h3 style="text-align:center;">✓ 验真通过 · 予光正品</h3>' +
-          (img ? '<img src="' + img + '" alt="作品图" style="width:100%;max-height:300px;object-fit:cover;border-radius:10px;margin-bottom:14px;" loading="lazy" onerror="this.style.display=\'none\';">' : '') +
-          '<p><b style="color:var(--moon);">验证码：</b><span style="color:var(--gold);letter-spacing:.1em;">' + code + '</span></p>' +
-          (r.product_ref ? '<p><b style="color:var(--moon);">作品：</b>' + r.product_ref + '</p>' : '') +
-          (info.text ? '<p>' + info.text + '</p>' : '') +
-          '<p style="color:var(--text-dim);font-size:12px;">建档时间：' + (r.created_at || '').replace('T', ' ').slice(0, 16) + '</p>' +
+        var imgs = String(r.image_urls || '').split(/[,，;]/).filter(Boolean);
+        var imgHtml = '';
+        if (imgs.length && window.sbImg) {
+          imgHtml = '<div class="vg-imgs">' + imgs.slice(0, 4).map(function (f) {
+            return '<figure><img src="' + escV(window.sbImg(f)) + '" alt="作品图" loading="lazy" onerror="this.parentNode.style.display=\'none\';"></figure>';
+          }).join('') + '</div>';
+        }
+        var meta = '';
+        if (r.batch_no) meta += '<div class="row"><b>定制编号</b><span>' + escV(r.batch_no) + '</span></div>';
+        meta += '<div class="row"><b>验证码</b><span class="code">' + escV(code) + '</span></div>';
+        meta += '<div class="row"><b>建档时间</b><span>' + escV(String(r.created_at || '').replace('T', ' ').slice(0, 16)) + '</span></div>';
+        var quote = info.text
+          ? '<div class="vg-quote"><div class="ql">予 光 · 光 语</div><p>' + escV(String(info.text)) + '</p></div>'
+          : '';
+        res.innerHTML =
+          '<div class="verify-card">' +
+            '<div class="vg-top"><span class="vg-ico">✓</span>' +
+            '<div style="text-align:left;"><div class="vg-tt">验真通过 · 予光正品</div><div class="vg-st">该作品已在予光官方建档</div></div></div>' +
+            imgHtml +
+            '<div class="vg-name">' + escV(r.product_ref || '予光定制作品') + '</div>' +
+            '<div class="vg-meta">' + meta + '</div>' +
+            quote +
+            '<div class="vg-acts">' +
+            '<button class="btn-line" type="button" data-vcopy>📋 复制验证码</button>' +
+            '<a class="btn-line" href="gallery.html">🛍️ 看看橱窗</a>' +
+            '</div>' +
+            '<div class="vg-note">＊ 验真仅核验予光官方建档信息；无法通过官方渠道核验的渠道请谨慎，谨防仿冒。</div>' +
           '</div>';
+        var cp = res.querySelector('[data-vcopy]');
+        if (cp) {
+          cp.addEventListener('click', function () {
+            var done = function () {
+              cp.textContent = '✓ 已复制';
+              setTimeout(function () { cp.textContent = '📋 复制验证码'; }, 1400);
+            };
+            try {
+              if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(done, done);
+              else done();
+            } catch (e) { done(); }
+          });
+        }
       })
       .catch(function () {
         res.innerHTML = '<p style="text-align:center;">查询服务暂不可用，请稍后再试或联系客服。</p>';
