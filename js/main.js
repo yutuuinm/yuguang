@@ -3502,6 +3502,18 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
 window.__askDesign = function (kind, info) {
   var box = document.getElementById('genHexBox');
   function qstop() { if (box && box._qiv) { clearInterval(box._qiv); box._qiv = null; } }
+  /* 定制中：只留动画区；完成后恢复上方名字/信息 */
+  function cardMode(cust) {
+    ['pName', 'pSub', 'pRows', 'pLight'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = cust ? 'none' : '';
+    });
+    var acts = document.querySelector('#preview .preview-actions');
+    if (acts) acts.style.display = cust ? 'none' : '';
+    var st = document.getElementById('genStatus');
+    if (st) st.style.display = cust ? 'none' : '';
+  }
+  cardMode(true);
   if (box) {
     box.style.display = 'block';
     box.innerHTML = '<div class="gen-hex-inner">' +
@@ -3523,7 +3535,7 @@ window.__askDesign = function (kind, info) {
   }
   var cfg = window.SUPABASE || {};
   var aiUrl = cfg.aiUrl || (cfg.url ? cfg.url + '/functions/v1/ai-assistant' : '');
-  if (!aiUrl) { qstop(); if (box) box.innerHTML = '<div class="gen-hex-inner"><p class="ghex-dim">AI 服务未配置 ✦</p></div>'; return; }
+  if (!aiUrl) { qstop(); cardMode(false); if (box) box.innerHTML = '<div class="gen-hex-inner"><p class="ghex-dim">AI 服务未配置 ✦</p></div>'; return; }
   var mm = Number(window.__bs || 10);
   var count = mm >= 10 ? 18 : 22;
   var imgHost = document.getElementById('previewImg') || (function () {
@@ -3541,6 +3553,7 @@ window.__askDesign = function (kind, info) {
     body: JSON.stringify({ mode: 'design', kind: kind, info: info, design: { mm: mm, count: count, color: window.__mainC || '#e3c47c' } })
   }).then(function (r) { return r.json(); }).then(function (j) {
     qstop();
+    cardMode(false);
     if (!j || !j.ok) { if (box) box.innerHTML = '<div class="gen-hex-inner"><p class="ghex-dim">' + String((j && j.error) || '请求失败') + '</p></div>'; if (imgHost) imgHost.innerHTML = ''; return; }
     var clean = String(j.analysis || '').split('*').join('');
     if (box) {
@@ -3580,6 +3593,7 @@ window.__askDesign = function (kind, info) {
     }
   }).catch(function () {
     qstop();
+    cardMode(false);
     if (box) box.innerHTML = '<div class="gen-hex-inner"><p class="ghex-dim">请求失败，请稍后再试 ✦</p></div>';
   });
 };
