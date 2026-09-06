@@ -3532,10 +3532,36 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
 /* ===== 设计引擎：DeepSeek(v4-flash) 文学分析 + 通义按配比出图 ===== */
 window.__askDesign = function (kind, info) {
   var box = document.getElementById('genHexBox');
-  if (box) { box.style.display = 'block'; box.innerHTML = '<div class="gen-hex-inner"><div class="ghex-title">✦ 设计理念</div><p class="ghex-dim"><span class="yg-loading"></span> 小光正在向云端请教，为你定制这串光…（约 20-40 秒）</p></div>'; }
+  /* 生成期间轮播的设计语录（予光 · 高级感） */
+  var DESIGN_QS = [
+    '一石一人，一光一味——予光只筛取与你相合的那一颗。',
+    '五行是东方的四季，星座是头顶的晚空——都替你收进一串珠光里。',
+    '不替未来作答，只为你此刻的心动，选一颗合适的光。',
+    '作品有唯一码，光语有唯一句——每一串予光，只属于一个人。'
+  ];
+  function qstop() { if (box && box._qiv) { clearInterval(box._qiv); box._qiv = null; } }
+  if (box) {
+    box.style.display = 'block';
+    box.innerHTML = '<div class="gen-hex-inner"><div class="ghex-title">✦ 设计理念</div>' +
+      '<p class="ghex-dim"><span class="yg-loading"></span> 小光正在为你与晶石对光…</p>' +
+      '<p class="ghex-quote" id="gqText"></p></div>';
+    var qEl = box.querySelector('#gqText');
+    var qi = 0;
+    qEl.style.transition = 'opacity .5s ease';
+    qEl.textContent = DESIGN_QS[0];
+    setTimeout(function () { qEl.style.opacity = '1'; }, 60);
+    box._qiv = setInterval(function () {
+      qEl.style.opacity = '0';
+      setTimeout(function () {
+        qi = (qi + 1) % DESIGN_QS.length;
+        qEl.textContent = DESIGN_QS[qi];
+        qEl.style.opacity = '1';
+      }, 420);
+    }, 5200);
+  }
   var cfg = window.SUPABASE || {};
   var aiUrl = cfg.aiUrl || (cfg.url ? cfg.url + '/functions/v1/ai-assistant' : '');
-  if (!aiUrl) { if (box) box.innerHTML = '<div class="gen-hex-inner"><p class="ghex-dim">AI 服务未配置 ✦</p></div>'; return; }
+  if (!aiUrl) { qstop(); if (box) box.innerHTML = '<div class="gen-hex-inner"><p class="ghex-dim">AI 服务未配置 ✦</p></div>'; return; }
   var mm = Number(window.__bs || 10);
   var count = mm >= 10 ? 18 : 22;
   var imgHost = document.getElementById('previewImg') || (function () {
@@ -3551,6 +3577,7 @@ window.__askDesign = function (kind, info) {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ mode: 'design', kind: kind, info: info, design: { mm: mm, count: count, color: window.__mainC || '#e3c47c' } })
   }).then(function (r) { return r.json(); }).then(function (j) {
+    qstop();
     if (!j || !j.ok) { if (box) box.innerHTML = '<div class="gen-hex-inner"><p class="ghex-dim">' + String((j && j.error) || '请求失败') + '</p></div>'; if (imgHost) imgHost.innerHTML = ''; return; }
     var clean = String(j.analysis || '').split('*').join('');
     if (box) {
@@ -3589,6 +3616,7 @@ window.__askDesign = function (kind, info) {
       }
     }
   }).catch(function () {
+    qstop();
     if (box) box.innerHTML = '<div class="gen-hex-inner"><p class="ghex-dim">请求失败，请稍后再试 ✦</p></div>';
   });
 };
