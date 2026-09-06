@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>轻触之光 · 予光 NFC</title>
+<meta name="description" content="予光作品 NFC 轻触页——抽一下、答案之书、反馈立减与光语分享。愿每一次轻触，都有一段光被想起。">
+<link rel="stylesheet" href="css/style.css?v=09062036">
+<style>
+  .nf-wrap { max-width: 640px; margin: 0 auto; }
+  .nf-card { display: flex; gap: 16px; align-items: flex-start; border: 1px solid var(--line); border-radius: 18px; padding: 18px;
+    background: linear-gradient(165deg, rgba(20,27,46,.62), rgba(10,13,22,.94)); box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+  .nf-img { width: 150px; height: 150px; flex: none; border-radius: 14px; overflow: hidden; border: 1px solid rgba(227,196,124,.4);
+    background: #0b0f1d; display:flex; align-items:center; justify-content:center; color: var(--text-dim); font-size: 40px; }
+  .nf-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .nf-meta { flex: 1; min-width: 0; }
+  .nf-name { color: var(--gold); font-size: 20px; letter-spacing: .12em; margin-bottom: 6px; font-family: var(--serif); }
+  .nf-sub { color: var(--moon); font-size: 13px; letter-spacing: .08em; margin: 4px 0; word-break: break-all; }
+  .nf-sub b { color: var(--gold); font-weight: 500; margin-right: 6px; }
+  .nf-idea { color: var(--moon); font-size: 13px; line-height: 1.9; margin-top: 8px; opacity: .9; }
+  .nf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 18px; }
+  .nf-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-align: center;
+    padding: 18px 10px 14px; border: 1px solid var(--line); border-radius: 16px; color: var(--moon); text-decoration: none; cursor: pointer;
+    background: linear-gradient(170deg, rgba(20,27,46,.66), rgba(11,14,23,.9)); transition: .25s; font-family: inherit; }
+  .nf-btn:hover { border-color: var(--gold); transform: translateY(-2px); box-shadow: 0 0 18px rgba(227,196,124,.16); }
+  .nf-btn .ic { font-size: 26px; line-height: 1; }
+  .nf-btn b { font-size: 16px; letter-spacing: .18em; font-weight: 500; color: var(--gold); }
+  .nf-btn small { color: var(--text-dim); font-size: 11px; letter-spacing: .04em; }
+  .nfm { position: fixed; inset: 0; background: rgba(3,6,12,.82); display: none; align-items: center; justify-content: center;
+    z-index: 3000; padding: 18px; }
+  .nfm.show { display: flex; }
+  .nfm-box { position: relative; width: 100%; max-width: 430px; max-height: 88vh; overflow: auto; border-radius: 18px; padding: 22px;
+    background: linear-gradient(170deg, #16203a, #0a0e1a); border: 1px solid rgba(227,196,124,.45); color: var(--moon);
+    box-shadow: 0 0 46px rgba(0,0,0,.6); text-align: center; }
+  .nfm-box h3 { color: var(--gold); letter-spacing: .2em; font-size: 17px; margin: 0 0 6px; font-family: var(--serif); }
+  .nfm-box .sub { color: var(--text-dim); font-size: 12px; margin-bottom: 14px; }
+  .nf-x { position: absolute; top: 10px; right: 12px; background: none; border: none; color: var(--text-dim); font-size: 20px; cursor: pointer; }
+  .play-result { margin: 12px 0; line-height: 2; }
+  .nf-wheel { position: relative; width: 240px; height: 240px; margin: 6px auto 4px; }
+  .nf-wheel canvas { width: 240px; height: 240px; display: block; transition: transform 4.4s cubic-bezier(.14,.92,.3,1); }
+  .nf-arrow { position: absolute; top: -6px; left: 50%; transform: translateX(-50%); color: var(--gold); font-size: 22px; z-index: 3;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,.6)); }
+  .nf-wheelhub { position: absolute; inset: 0; margin: auto; width: 46px; height: 46px; border-radius: 50%; background: radial-gradient(circle at 32% 28%, #fff6e0, #e3c47c 78%);
+    display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 0 12px rgba(227,196,124,.5); z-index: 2; }
+  .nf-btns { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+  .nf-plain { border: 1px solid rgba(227,196,124,.5); background: transparent; color: var(--moon); border-radius: 999px;
+    padding: 11px 16px; font-size: 14px; cursor: pointer; letter-spacing: .06em; }
+  .nf-btns .btn-gold, .nf-btns .nf-plain { width: 100%; }
+  .nf-comment { width: 100%; min-height: 84px; box-sizing: border-box; margin: 8px 0; border-radius: 10px; padding: 10px 12px; resize: vertical;
+    background: rgba(11,17,30,.9); color: var(--moon); border: 1px solid var(--line); font-size: 13px; line-height: 1.8; }
+  .nf-in { width: 100%; box-sizing: border-box; margin: 8px 0; border-radius: 10px; padding: 10px 12px;
+    background: rgba(11,17,30,.9); color: var(--moon); border: 1px solid var(--line); font-size: 13px; }
+  .nf-agree { border: 1px dashed rgba(227,196,124,.5); border-radius: 12px; padding: 12px; font-size: 12px; color: var(--text-dim);
+    line-height: 1.9; text-align: left; margin: 8px 0 12px; }
+  .nf-state { min-height: 20px; font-size: 12.5px; line-height: 1.9; color: var(--moon); margin: 6px 0; }
+  .nf-state.ok { color: #8fd6a8; }
+  .nf-state.bad { color: #ffb3a0; }
+  .nf-prize { color: var(--gold); font-size: 26px; letter-spacing: .1em; margin: 6px 0 10px; }
+  @media (max-width: 520px) {
+    .nf-card { flex-direction: column; align-items: center; text-align: center; }
+    .nf-img { width: 120px; height: 120px; }
+    .nf-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <img class="nav-logo" src="予光.jpg" alt="予光 logo">
+    <a class="nav-brand" href="index.html">予光</a>
+    <button class="menu-btn" id="menuBtn" aria-label="菜单">☰</button>
+    <nav class="nav-links" id="navLinks">
+      <a href="index.html">首页</a>
+      <a href="collections.html">系列</a>
+      <a href="studio.html">定制工坊</a>
+      <a href="gallery.html">光集</a>
+      <a href="atlas.html">星图志</a>
+      <a href="knowledge.html">学堂</a>
+      <a href="shop.html">拾光铺</a>
+      <a href="index.html#playSec">互动</a>
+      <a href="studio.html" style="color:var(--text-dim);font-size:13px;">开始定制</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="page-hero">
+    <h1 class="reveal visible">轻触之光</h1>
+    <p class="reveal visible">碰一碰作品上的感应区，或输入礼盒内验证码 · 属于这一件作品的时刻</p>
+  </section>
+
+  <section class="section">
+    <div class="wrap nf-wrap">
+
+      <div class="doc-block" id="nfLoading" style="text-align:center;">
+        <p><span class="yg-loading"></span> 正在读取作品信息…</p>
+      </div>
+
+      <div class="doc-block" id="nfEntry" style="display:none;text-align:center;">
+        <h3 style="text-align:center;">这件作品在这里等你</h3>
+        <p>把手机靠近作品随附卡片的感应区（NFC），或扫卡片上的二维码；也可以手动输入卡上的验证码。</p>
+        <input class="nf-in" id="nfManual" placeholder="输入验证码，如 YG-2609-XXXXXX" autocomplete="off">
+        <div class="nf-btns">
+          <button class="btn-gold" id="nfGo" type="button">查 看 这 件 作 品</button>
+          <button class="nf-plain" id="nfScan" type="button">📱 碰一碰 · 读取 NFC</button>
+        </div>
+        <div class="nf-state" id="nfEntryState"></div>
+        <p style="margin-top:12px;color:var(--text-dim);font-size:12px;">没有 NFC？也可以去 <a href="verify.html" style="color:var(--gold);">作品验真页</a> 输入同一枚验证码核验。</p>
+      </div>
+
+      <div class="doc-block" id="nfErr" style="display:none;text-align:center;">
+        <h3 style="text-align:center;">未找到这件作品</h3>
+        <p>请核对验证码后重试；若仍有疑问，可联系客服人工核验（谨防仿冒渠道）。</p>
+        <button class="nf-plain" id="nfBackEntry" type="button" style="margin-top:10px;">重新输入 / 碰一碰</button>
+      </div>
+
+      <div id="nfItem" style="display:none;">
+        <div class="nf-card">
+          <div class="nf-img" id="nfImgBox">🪨</div>
+          <div class="nf-meta">
+            <div class="nf-name" id="nfName"></div>
+            <div class="nf-sub" id="nfBatch" style="display:none;"><b>定制编号</b><span></span></div>
+            <div class="nf-sub" id="nfCodeRow"><b>防伪码</b><span id="nfCode"></span></div>
+            <div class="nf-sub" id="nfDate" style="opacity:.7;"></div>
+            <div class="nf-idea" id="nfIdea"></div>
+          </div>
+        </div>
+
+        <div class="nf-grid">
+          <button class="nf-btn" type="button" id="openQian"><span class="ic">🎋</span><b>抽一下</b><small>拈一支此刻的光语</small></button>
+          <button class="nf-btn" type="button" id="openBook"><span class="ic">📖</span><b>答案之书</b><small>轻翻一页，听一句回答</small></button>
+          <button class="nf-btn" type="button" id="openWheelBtn"><span class="ic">🎡</span><b>反馈立减</b><small>幸运转盘 · 分享登记立减</small></button>
+          <a class="nf-btn" href="gallery.html"><span class="ic">🛍️</span><b>看看橱窗</b><small>光集 · 更多作品</small></a>
+        </div>
+
+        <div id="shareWall" style="margin-top:14px;"></div>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="brand-line">予光</div>
+        <p style="color:var(--text-dim);font-size:14px;">黑暗中总有光伴你前行，虽微弱，但足够照亮。<br>予光——把光给你；我，就是光。</p>
+      </div>
+      <div>
+        <h5>探索</h5>
+        <a href="story.html">品牌故事</a>
+        <a href="intro.html">认识予光</a>
+        <a href="collections.html">系列总览</a>
+        <a href="gallery.html">光集</a>
+        <a href="knowledge.html">学堂 · 文化知识</a>
+        <a href="shop.html">拾光铺 · 商城</a>
+      </div>
+      <div>
+        <h5>服务</h5>
+        <a href="studio.html">定制工坊</a>
+        <a href="faq.html">常见问题</a>
+        <a href="verify.html">作品验真</a>
+        <a href="index.html#playSec">互动</a>
+      </div>
+    </div>
+    <div class="disclaimer">
+      免责声明：予光所有产品均为饰品。其中涉及的生肖、八卦、星座、星盘等符号及其解读，源自中国传统文化与流行文化中的象征寓意，属装饰与自我表达范畴，属文化意象与装饰表达，仅供参考与陪伴。愿你戴着它，把自己的日子过成想要的样子。© 予光 YUGUANG
+    </div>
+  </div>
+</footer>
+
+<!-- 抽一下 -->
+<div class="nfm" id="mQian">
+  <div class="nfm-box">
+    <button class="nf-x" data-close="mQian" type="button" aria-label="关闭">✕</button>
+    <h3>🎋 抽一下</h3>
+    <p class="sub">从生肖、八卦与星座的光语里，拈一支此刻想听的签</p>
+    <div class="play-result" id="qianRes">签筒已备好，等你的手。</div>
+    <div class="nf-btns">
+      <button class="btn-gold" id="qianBtn" type="button">拈 一 签</button>
+      <button class="nf-plain" data-close="mQian" type="button">收好这支签</button>
+    </div>
+  </div>
+</div>
+
+<!-- 答案之书 -->
+<div class="nfm" id="mBook">
+  <div class="nfm-box">
+    <button class="nf-x" data-close="mBook" type="button" aria-label="关闭">✕</button>
+    <h3>📖 答案之书</h3>
+    <p class="sub">心里默念一个问题，翻开一页——答案温柔，但不替你决定</p>
+    <div class="play-result" id="bookRes">在心里默念你的问题。</div>
+    <div class="nf-btns">
+      <button class="btn-gold" id="bookBtn" type="button">翻 开 一 页</button>
+      <button class="nf-plain" data-close="mBook" type="button">合上书</button>
+    </div>
+  </div>
+</div>
+
+<!-- 反馈立减：幸运转盘 -->
+<div class="nfm" id="mWheel">
+  <div class="nfm-box">
+    <button class="nf-x" data-close="mWheel" type="button" aria-label="关闭">✕</button>
+    <h3>🎡 反馈立减</h3>
+    <p class="sub">转出立减金额，写下光语并同意授权分享，即可登记（客服在订单处理时与你确认）</p>
+    <div class="nf-wheel">
+      <div class="nf-arrow">▼</div>
+      <canvas id="nfWheel" width="240" height="240"></canvas>
+      <div class="nf-wheelhub">🎡</div>
+    </div>
+    <div class="nf-state" id="wheelState"></div>
+    <div class="nf-btns">
+      <button class="btn-gold" id="spinGo" type="button">转动幸运转盘</button>
+      <button class="nf-plain" data-close="mWheel" type="button">先不转了</button>
+    </div>
+  </div>
+</div>
+
+<!-- 分享光语（立减登记） -->
+<div class="nfm" id="mShare">
+  <div class="nfm-box">
+    <button class="nf-x" data-close="mShare" type="button" aria-label="关闭">✕</button>
+    <h3>✨ 分享光语 · 登记立减</h3>
+    <p class="sub">写下你对这件作品的话，并同意授权，让这句光语留在予光</p>
+    <div class="nf-prize" id="sharePrize"></div>
+    <div style="font-size:12px;color:var(--text-dim);line-height:1.9;text-align:left;background:rgba(11,17,30,.6);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 6px;">
+      <div id="shareMini"></div>
+    </div>
+    <textarea class="nf-comment" id="shareCmt" placeholder="写一句此刻想说的光语或评论（选填）…"></textarea>
+    <input class="nf-in" id="shareContact" placeholder="联系方式（选填，微信号/手机号，用于返现核对）" autocomplete="off">
+    <div class="nf-agree">💡 点击下方按钮，即表示你同意：把本页的品名、编号、设计理念与图片（来自予光官方建档），连同你写的评论一起发布到予光的「光语分享」区（首页互动与光集可见），并自动向予光后台邮箱发送本单的授权回执（含防伪码与登记信息），用于立减登记。</div>
+    <div class="nf-state" id="shareState"></div>
+    <div class="nf-btns">
+      <button class="btn-gold" id="shareGo" type="button">✅ 同意授权分享</button>
+      <button class="nf-plain" data-close="mShare" type="button">暂不分享</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/supabase-config.js?v=09062036"></script>
+<script src="js/main.js?v=09062036"></script>
+<script>
+/* ==================== NFC 落地页逻辑（轻触之光） ==================== */
+(function () {
+  var CODE = '';
+  var CUR = null;
+  var PRIZE = 0;
+  var TCFG = null;
+  var spinGoBusy = false;
+  var wheelRot = 0;
+
+  function $(id) { return document.getElementById(id); }
+  function show(id) { var el = $(id); if (el) el.classList.add('show'); }
+  function hide(id) { var el = $(id); if (el) el.classList.remove('show'); }
+  function state(id, txt, kind) {
+    var el = $(id);
+    if (!el) return;
+    el.textContent = txt || '';
+    el.className = 'nf-state' + (kind === 'ok' ? ' ok' : kind === 'bad' ? ' bad' : '');
+  }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function recInfo(r) {
+    var i = r && r.info;
+    if (typeof i === 'string') { try { i = JSON.parse(i); } catch (e) { i = {}; } }
+    return i || {};
+  }
+  function firstImg(r) {
+    return String((r && r.image_urls) || '').split(/[,，;]/)[0] || '';
+  }
+  function showEntry(msg) {
+    $('nfLoading').style.display = 'none';
+    $('nfItem').style.display = 'none';
+    $('nfErr').style.display = 'none';
+    $('nfEntry').style.display = 'block';
+    state('nfEntryState', msg || '');
+    if (msg) state('nfEntryState', msg, 'bad');
+  }
+
+  function renderItem(r) {
+    var info = recInfo(r);
+    var name = String(r.product_ref || '').trim() || '予光定制作品';
+    var batch = String(r.batch_no || '').trim();
+    var img = firstImg(r);
+    $('nfName').textContent = name;
+    var imgBox = $('nfImgBox');
+    if (img && window.sbImg) {
+      imgBox.innerHTML = '<img src="' + esc(window.sbImg(img)) + '" alt="作品图" loading="lazy" onerror="this.outerHTML=\'🪨\';">';
+    } else imgBox.innerHTML = '🪨';
+    if (batch) {
+      $('nfBatch').style.display = '';
+      $('nfBatch').querySelector('span').textContent = batch;
+    } else $('nfBatch').style.display = 'none';
+    $('nfCode').textContent = r.code || '';
+    $('nfIdea').textContent = info.text ? String(info.text) : '愿这串光，陪你走一段夜路。';
+    var d = new Date();
+    $('nfDate').textContent = '轻触时间：' + d.toLocaleString('zh-CN');
+  }
+
+  function loadCode(code) {
+    CODE = String(code || '').trim().replace(/\s+/g, '');
+    if (!CODE) { showEntry(''); return; }
+    if (!window.sb) {
+      showEntry('离线版无法读取作品信息，请联网或到验真页联系客服。');
+      return;
+    }
+    $('nfLoading').style.display = 'block';
+    $('nfItem').style.display = 'none';
+    $('nfErr').style.display = 'none';
+    $('nfEntry').style.display = 'none';
+    state('nfEntryState', '');
+    window.sb('records?select=*&code=eq.' + encodeURIComponent(CODE)).then(function (rows) {
+      var r = rows && rows[0];
+      if (!r) {
+        $('nfLoading').style.display = 'none';
+        $('nfErr').style.display = 'block';
+        return;
+      }
+      CUR = r;
+      renderItem(r);
+      $('nfLoading').style.display = 'none';
+      $('nfItem').style.display = 'block';
+      try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) {}
+      if (window.__ygShareWall) {
+        window.__ygShareWall($('shareWall'), {
+          code: CODE,
+          limit: 30,
+          title: '这件作品的光语分享',
+          sub: '经本人同意的分享',
+          empty: '这件作品还没有光语分享 ✦ 转动幸运转盘，写下第一句吧。'
+        });
+      }
+    }).catch(function () {
+      $('nfLoading').style.display = 'none';
+      $('nfErr').style.display = 'block';
+    });
+  }
+
+  /* ——— 入口按钮 ——— */
+  $('nfGo').addEventListener('click', function () { loadCode($('nfManual').value); });
+  $('nfManual').addEventListener('keydown', function (e) { if (e.key === 'Enter') loadCode($('nfManual').value); });
+  $('nfBackEntry').addEventListener('click', function () { showEntry(''); });
+  $('nfScan').addEventListener('click', tryNfc);
+
+  /* 原生 NFC 读取（安卓 Chrome / Edge 等支持 Web NFC 的浏览器） */
+  function tryNfc() {
+    if (!('NDEFReader' in window)) {
+      state('nfEntryState', '当前浏览器不支持 NFC 读取，请用手机浏览器（Chrome/Edge）打开，或直接输入验证码。', 'bad');
+      return;
+    }
+    state('nfEntryState', '请把手机背面靠近作品卡片的感应区…');
+    try {
+      var reader = new NDEFReader();
+      reader.scan().then(function () {
+        state('nfEntryState', '已就绪，请靠近感应区…');
+        reader.onreading = function (ev) {
+          var found = '';
+          try {
+            for (var i = 0; i < ev.message.records.length; i++) {
+              var rec = ev.message.records[i];
+              var val = '';
+              try { val = rec.data ? String(rec.data) : ''; } catch (e) {}
+              if (!val && rec.mediaType === 'text/plain') { try { val = new TextDecoder().decode(rec.data); } catch (e2) {} }
+              var u = rec.type === 'url' ? (rec.data || '') : '';
+              var whole = String(u || val || '');
+              if (whole) {
+                var m = /[?&]c=([^&\s]+)/.exec(whole);
+                if (m) { found = decodeURIComponent(m[1]); break; }
+                if (/^YG-/i.test(whole)) { found = whole; break; }
+              }
+            }
+          } catch (e3) {}
+          if (found) loadCode(found);
+          else state('nfEntryState', '感应区内容里没有找到验证码，可改用输入。', 'bad');
+        };
+        reader.onerror = function () { state('nfEntryState', '读取失败，可尝试调整位置后重试。', 'bad'); };
+      }).catch(function (err) {
+        state('nfEntryState', 'NFC 读取被拒绝或不可用：' + String((err && err.message) || err) + '（也可直接输入验证码）', 'bad');
+      });
+    } catch (err2) {
+      state('nfEntryState', 'NFC 初始化失败：' + String((err2 && err2.message) || err2), 'bad');
+    }
+  }
+
+  /* ——— 弹窗通用 ——— */
+  document.querySelectorAll('.nf-x, [data-close]').forEach(function (b) {
+    b.addEventListener('click', function () { var t = b.getAttribute('data-close'); if (t) hide(t); });
+  });
+  document.querySelectorAll('.nfm').forEach(function (m) {
+    m.addEventListener('click', function (e) { if (e.target === m) m.classList.remove('show'); });
+  });
+  $('openQian').addEventListener('click', function () { show('mQian'); });
+  $('openBook').addEventListener('click', function () { show('mBook'); });
+  $('openWheelBtn').addEventListener('click', openWheel);
+
+  /* ——— 幸运转盘（金额沿用后台 转盘优惠 配置 app_data:wheel） ——— */
+  function ensureCfg() {
+    if (TCFG) return Promise.resolve(TCFG);
+    var d = { tiers: [28, 48, 68, 88] };
+    if (!window.sb) return Promise.resolve(d);
+    return window.sb('app_data?select=value&key=eq.wheel').then(function (rows) {
+      try {
+        var v = rows && rows[0] && rows[0].value;
+        if (typeof v === 'string') v = JSON.parse(v);
+        var mn = Number(v && v.min), mx = Number(v && v.max);
+        if (!isFinite(mn) || !isFinite(mx)) return d;
+        if (mx < mn) { var t = mn; mn = mx; mx = t; }
+        mn = Math.max(1, mn);
+        if (!(mx > mn)) mx = mn + 1;
+        var arr = [];
+        for (var k = 0; k < 4; k++) arr.push(Math.round(mn + (mx - mn) * k / 3));
+        TCFG = { tiers: arr };
+        return TCFG;
+      } catch (e) { return d; }
+    }).catch(function () { return d; });
+  }
+  var COLORS = ['#e3c47c', '#8fa3d9', '#c9575b', '#4c8c6a'];
+  function drawWheel(tiers) {
+    var cv = $('nfWheel');
+    var ctx = cv.getContext('2d');
+    var cx = 120, cy = 120, R = 112;
+    ctx.clearRect(0, 0, 240, 240);
+    var n = tiers.length || 4;
+    var seg = (Math.PI * 2) / n;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(-Math.PI / 2);
+    for (var k = 0; k < n; k++) {
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.arc(0, 0, R, k * seg, (k + 1) * seg);
+      ctx.closePath();
+      ctx.fillStyle = COLORS[k % COLORS.length];
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(8,12,22,.9)';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+    ctx.restore();
+    ctx.fillStyle = 'rgba(11,17,30,.55)';
+    ctx.beginPath(); ctx.arc(cx, cy, 34, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#f4efe6';
+    ctx.font = '600 15px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (var i = 0; i < n; i++) {
+      var a = (i * (360 / n) + (360 / n) / 2) * Math.PI / 180;
+      var tx = cx + Math.sin(a) * R * 0.62;
+      var ty = cy - Math.cos(a) * R * 0.62;
+      ctx.fillText('¥' + (tiers[i] != null ? tiers[i] : ''), tx, ty);
+    }
+    ctx.strokeStyle = 'rgba(244,239,230,.85)';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+  }
+  function openWheel() {
+    state('wheelState', '');
+    if (CODE && localStorage.getItem('yg_nfc_spin_' + CODE)) {
+      state('wheelState', '今日已为这件作品转过一次 ✦ 明日再来。');
+      var sb = $('spinGo');
+      if (sb) sb.disabled = true;
+    }
+    ensureCfg().then(function (cfg) {
+      TCFG = cfg;
+      drawWheel(cfg.tiers);
+      var sb = $('spinGo');
+      if (CODE && localStorage.getItem('yg_nfc_spin_' + CODE)) { if (sb) sb.disabled = true; }
+      else if (sb) sb.disabled = false;
+      show('mWheel');
+    });
+  }
+  $('spinGo').addEventListener('click', function () {
+    if (spinGoBusy) return;
+    if (!CUR || !TCFG) { state('wheelState', '请先读取作品信息', 'bad'); return; }
+    if (CODE && localStorage.getItem('yg_nfc_spin_' + CODE)) { state('wheelState', '今日已转 ✦ 明日再来。'); return; }
+    spinGoBusy = true;
+    var sb = $('spinGo');
+    if (sb) sb.disabled = true;
+    var idx = Math.floor(Math.random() * TCFG.tiers.length);
+    PRIZE = TCFG.tiers[idx];
+    var cv = $('nfWheel');
+    wheelRot += 360 * 6 + (360 - (idx * 90 + 45));
+    state('wheelState', '转盘转动中…');
+    cv.style.transform = 'rotate(' + wheelRot + 'deg)';
+    setTimeout(function () {
+      spinGoBusy = false;
+      if (CODE) { try { localStorage.setItem('yg_nfc_spin_' + CODE, '1'); } catch (e) {} }
+      state('wheelState', '转到了：立减 ¥' + PRIZE, 'ok');
+      setTimeout(function () { hide('mWheel'); openShare(PRIZE); }, 500);
+    }, 4500);
+  });
+
+  /* ——— 分享光语 · 同意授权 → 上传 + 发邮件回执 ——— */
+  function openShare(prize) {
+    if (!CUR) return;
+    var info = recInfo(CUR);
+    var img = firstImg(CUR);
+    var batch = String(CUR.batch_no || '').trim();
+    $('sharePrize').textContent = '🎉 立减 ¥' + prize;
+    var mini = '<div style="font-size:13px;color:var(--gold);">' + esc(String(CUR.product_ref || '').trim() || '予光定制作品') + '</div>';
+    if (batch) mini += '<div style="margin-top:3px;">定制编号：' + esc(batch) + '</div>';
+    mini += '<div style="color:var(--text-dim);">防伪码：' + esc(CUR.code || '') + '</div>';
+    if (info.text) mini += '<div style="margin-top:6px;line-height:1.8;">' + esc(String(info.text).slice(0, 120)) + '</div>';
+    $('shareMini').innerHTML = mini;
+    $('shareState').textContent = '分享后，客服将按本页登记信息与你确认立减 ✦';
+    $('shareState').className = 'nf-state';
+    $('shareGo').disabled = false;
+    $('shareGo').textContent = '✅ 同意授权分享';
+    show('mShare');
+  }
+  $('shareGo').addEventListener('click', function () {
+    var btn = $('shareGo');
+    if (btn.disabled) return;
+    if (!CUR) { state('shareState', '作品信息缺失，请重新碰一碰。', 'bad'); return; }
+    btn.disabled = true;
+    btn.textContent = '正在发送回执并上传分享…';
+    var info = recInfo(CUR);
+    var comment = ($('shareCmt').value || '').trim();
+    var contact = ($('shareContact').value || '').trim();
+    if (!window.__ygShareSubmit) {
+      state('shareState', '分享组件加载失败，请刷新页面重试。', 'bad');
+      btn.disabled = false; btn.textContent = '✅ 同意授权分享';
+      return;
+    }
+    window.__ygShareSubmit({
+      code: CUR.code,
+      name: String(CUR.product_ref || '').trim(),
+      batch: String(CUR.batch_no || '').trim(),
+      idea: String(info.text || '').trim(),
+      img: firstImg(CUR),
+      comment: comment,
+      discount: PRIZE,
+      contact: contact,
+      page: 'nfc'
+    }).then(function (r) {
+      if (r.db && r.mail) {
+        state('shareState', '✓ 已授权：光语分享已发布，回执邮件已发送，立减 ¥' + PRIZE + ' 已登记（客服将在订单处理时与你确认）。', 'ok');
+      } else if (r.db) {
+        state('shareState', '✓ 光语分享已发布；回执邮件暂时发送失败，客服稍后会补发登记。', 'ok');
+      } else if (r.mail) {
+        state('shareState', '✓ 回执邮件已发送并登记；分享区上传暂时失败，可稍后重试。', 'bad');
+      } else {
+        state('shareState', '上传与邮件都暂时失败，请稍后再试或联系客服。', 'bad');
+        btn.disabled = false; btn.textContent = '✅ 同意授权分享';
+        return;
+      }
+      btn.textContent = '✓ 已完成';
+      $('shareCmt').value = '';
+      $('shareContact').value = '';
+      if (window.__ygShareWall) {
+        window.__ygShareWall($('shareWall'), { code: CODE, limit: 30, title: '这件作品的光语分享', sub: '经本人同意的分享', empty: '这件作品还没有光语分享 ✦ 转动幸运转盘，写下第一句吧。' });
+      }
+      setTimeout(function () { hide('mShare'); }, 900);
+    }).catch(function () {
+      state('shareState', '网络异常，请稍后再试。', 'bad');
+      btn.disabled = false; btn.textContent = '✅ 同意授权分享';
+    });
+  });
+
+  /* ——— 初始：URL ?c= 直接读码，否则显示手动入口 ——— */
+  var autoCode = '';
+  try { autoCode = new URLSearchParams(location.search).get('c') || ''; } catch (e) {}
+  if (autoCode) loadCode(autoCode);
+  else showEntry('把手机靠近卡片感应区，或输入验证码查看这件作品。');
+})();
+</script>
+</body>
+</html>
