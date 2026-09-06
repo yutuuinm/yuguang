@@ -74,6 +74,14 @@ const GLYPH = {
   天秤: '♎', 天蝎: '♏', 射手: '♐', 摩羯: '♑', 水瓶: '♒', 双鱼: '♓',
 };
 
+// 予光 · 生成/等待时轮播的设计语录（品牌统一用语）
+const YG_QS = [
+  '一石一人，一光一味——予光只筛取与你相合的那一颗。',
+  '五行是东方的四季，星座是头顶的晚空——都替你收进一串珠光里。',
+  '不替未来作答，只为你此刻的心动，选一颗合适的光。',
+  '作品有唯一码，光语有唯一句——每一串予光，只属于一个人。'
+];
+
 // 光集：客户作品图片库（图片存放 site/客户图片/，条目在此登记，页面自动陈列）
 // 未来接入 Supabase 后可由 gallery 表驱动：sb('gallery?select=*&order=sort')
 const GALLERY_ITEMS = [
@@ -717,6 +725,7 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
   }
   function showDesign(cfg) {
     cfg = cfg || {};
+    if (window.__ygIdleStop) window.__ygIdleStop();
     var mmNow = Number(window.__bs || 10);
     if (cfg && cfg.legend) { cfg.legend.forEach(function (l) { if (l) l.mm = mmNow; }); }
     if (cfg && cfg.beads) { cfg.beads.forEach(function (b) { if (b) b.mm = mmNow; }); }
@@ -3492,29 +3501,22 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
 /* ===== 设计引擎：DeepSeek(v4-flash) 文学分析 + 通义按配比出图 ===== */
 window.__askDesign = function (kind, info) {
   var box = document.getElementById('genHexBox');
-  /* 生成期间轮播的设计语录（予光 · 高级感） */
-  var DESIGN_QS = [
-    '一石一人，一光一味——予光只筛取与你相合的那一颗。',
-    '五行是东方的四季，星座是头顶的晚空——都替你收进一串珠光里。',
-    '不替未来作答，只为你此刻的心动，选一颗合适的光。',
-    '作品有唯一码，光语有唯一句——每一串予光，只属于一个人。'
-  ];
   function qstop() { if (box && box._qiv) { clearInterval(box._qiv); box._qiv = null; } }
   if (box) {
     box.style.display = 'block';
-    box.innerHTML = '<div class="gen-hex-inner"><div class="ghex-title">✦ 设计理念</div>' +
-      '<p class="ghex-dim"><span class="yg-loading"></span> 小光正在为你与晶石对光…</p>' +
+    box.innerHTML = '<div class="gen-hex-inner">' +
+      '<div class="cust-wrap"><span class="cust-orb"></span><p class="cust-title">小光正在为你定制</p></div>' +
       '<p class="ghex-quote" id="gqText"></p></div>';
     var qEl = box.querySelector('#gqText');
     var qi = 0;
     qEl.style.transition = 'opacity .5s ease';
-    qEl.textContent = DESIGN_QS[0];
+    qEl.textContent = YG_QS[0];
     setTimeout(function () { qEl.style.opacity = '1'; }, 60);
     box._qiv = setInterval(function () {
       qEl.style.opacity = '0';
       setTimeout(function () {
-        qi = (qi + 1) % DESIGN_QS.length;
-        qEl.textContent = DESIGN_QS[qi];
+        qi = (qi + 1) % YG_QS.length;
+        qEl.textContent = YG_QS[qi];
         qEl.style.opacity = '1';
       }, 420);
     }, 5200);
@@ -3581,6 +3583,46 @@ window.__askDesign = function (kind, info) {
     if (box) box.innerHTML = '<div class="gen-hex-inner"><p class="ghex-dim">请求失败，请稍后再试 ✦</p></div>';
   });
 };
+
+/* ============================================================
+   定制工坊右侧初始态：未输入前只轮播语录；一经生成由 showDesign 关闭
+   ============================================================ */
+(function studioIdle() {
+  var timer = null;
+  var node = null;
+  function stop() {
+    if (timer) { clearInterval(timer); timer = null; }
+    if (node && node.parentNode) node.parentNode.removeChild(node);
+    node = null;
+  }
+  window.__ygIdleStop = stop;
+  window.__ygIdleStart = function () {
+    var pc = document.getElementById('preview');
+    if (!pc || document.getElementById('ygIdle')) return;
+    stop();
+    node = document.createElement('div');
+    node.id = 'ygIdle';
+    node.className = 'yg-idle';
+    var q = document.createElement('p');
+    q.className = 'i-q';
+    node.appendChild(q);
+    pc.appendChild(node);
+    var qi = 0;
+    q.textContent = YG_QS[0];
+    setTimeout(function () { q.style.opacity = '1'; }, 50);
+    timer = setInterval(function () {
+      q.style.opacity = '0';
+      setTimeout(function () {
+        qi = (qi + 1) % YG_QS.length;
+        q.textContent = YG_QS[qi];
+        q.style.opacity = '1';
+      }, 480);
+    }, 5200);
+  };
+  if (document.getElementById('preview')) {
+    setTimeout(function () { window.__ygIdleStart(); }, 80);
+  }
+})();
 
 /* ============================================================
    光语分享墙（NFC 落地页 / 互动区 / 光集 共用）
