@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>予光 · 管理后台</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09062002">
+<link rel="stylesheet" href="css/style.css?v=09062036">
 <style>
   /* ============ 予光 · 管理后台（分区式） ============ */
   .adm{max-width:1280px;margin:0 auto;padding:132px 12px 90px;position:relative;z-index:5;}
@@ -79,12 +79,18 @@
 
   /* —— 行内状态徽章已用内联色值 —— */
   .badge{display:inline-block;border-radius:999px;padding:0 10px;font-size:11px;letter-spacing:.08em;line-height:1.9;border:1px solid;}
-  .v-card{margin:14px auto 0;max-width:520px;text-align:center;padding:34px 22px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(165deg,#131b30,#0b0e17);box-shadow:0 0 30px rgba(0,0,0,.4);}
+  .v-card{margin:14px auto 0;max-width:470px;text-align:center;padding:32px 20px 20px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(165deg,#131b30,#0b0e17);box-shadow:0 0 30px rgba(0,0,0,.4);}
   .v-card .v-brand{font-family:var(--serif);letter-spacing:.5em;color:var(--gold);font-size:15px;margin-bottom:18px;}
-  .v-card .v-code{font-size:clamp(30px,6vw,44px);letter-spacing:.12em;color:var(--moon);font-family:"Courier New",monospace;font-weight:700;margin:6px 0 16px;word-break:break-all;}
-  .v-card .v-name{color:var(--gold);font-size:16px;letter-spacing:.1em;margin-bottom:8px;}
-  .v-card .v-line{color:var(--text-dim);font-size:12px;line-height:2;}
-  .v-card .v-tip{margin-top:16px;border-top:1px dashed var(--line-soft);padding-top:12px;color:var(--gold);font-size:12px;}
+  .v-card .v-name{color:var(--gold);font-size:clamp(17px,4.6vw,21px);letter-spacing:.14em;margin-bottom:10px;word-break:break-all;}
+  .v-card .v-batch{color:var(--moon);font-size:13.5px;letter-spacing:.1em;margin-bottom:14px;opacity:.92;word-break:break-all;}
+  .v-card .v-batch .v-lbl,.v-card .v-cap .v-lbl{opacity:.65;letter-spacing:.2em;font-size:.86em;}
+  .v-card .v-code{font-size:clamp(22px,5vw,33px);letter-spacing:.1em;color:var(--moon);font-family:"Courier New",monospace;font-weight:700;margin:4px 0 10px;word-break:break-all;}
+  .v-card .v-qr{display:inline-block;padding:9px;background:#fff;border-radius:12px;margin:6px auto 8px;box-shadow:0 0 0 1px rgba(227,196,124,.35);}
+  .v-card .v-qr canvas,.v-card .v-qr img{display:block;}
+  .v-card .v-cap{color:var(--gold);font-size:10.5px;letter-spacing:.3em;margin:2px 0 8px;}
+  .v-card .v-line{color:var(--text-dim);font-size:12px;line-height:2;max-width:400px;margin:4px auto 0;}
+  .v-card .v-foot{margin-top:16px;border-top:1px dashed var(--line-soft);padding-top:12px;color:var(--gold);font-size:12px;letter-spacing:.4em;}
+  .v-card .v-tip{margin-top:8px;color:var(--text-dim);font-size:11px;line-height:1.9;word-break:break-all;}
   .code-box{font-family:monospace;font-size:13px;white-space:pre-wrap;background:rgba(7,10,18,.8);border:1px solid var(--line-soft);border-radius:10px;padding:10px;margin:8px 0;color:var(--gold);}
   .user-av{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-deep));color:#14121a;font-weight:700;flex:none;}
   .json-detail{display:none;background:rgba(7,10,18,.85);padding:8px;border-radius:8px;font-size:11px;color:var(--text-dim);white-space:pre-wrap;}
@@ -310,8 +316,10 @@
       <div class="doc-pad">
         <div class="grid-2">
           <div>
-            <label class="f-label">专属定制编号（必填或留空自动生成 YG-时间戳 唯一码）</label>
-            <input id="sCode" placeholder="留空自动生成 YG-YYMMDD-XXXXXX" style="width:100%;">
+            <label class="f-label">品名 *（印在验证卡最上方，如 秋霁 · 乙火引）</label>
+            <input id="sName" placeholder="作品品名" style="width:100%;">
+            <label class="f-label">专属编号（选填；单独编的号，如 202608-A01）</label>
+            <input id="sBatch" placeholder="选填，如 202608-A01" style="width:100%;">
             <label class="f-label">客户账号（选填；选择后同时为客户代建订单）</label>
             <select id="sAcct" style="width:100%;">
               <option value="">— 不关联账号（仅入库）—</option>
@@ -324,9 +332,11 @@
             <textarea id="sMsg" style="min-height:110px;" placeholder="印在验证卡上的光语…"></textarea>
           </div>
         </div>
+        <label class="f-label">防伪码（选填；留空自动生成 YG-YYMMDD-XXXXXX 唯一码）</label>
+        <input id="sCode" placeholder="留空自动生成 YG-YYMMDD-XXXXXX" style="width:100%;">
         <label class="f-label">图片文件名（选填，多个逗号分隔）</label>
         <input id="sImgs" placeholder="如：img/customers/xx.jpg, img/customers/yy.jpg" style="width:100%;">
-        <div class="sec-note">入库字段：records.code = 专属编号（非 YG 前缀自动补 YG-）· product_ref = 编号 · info = {text: 光语} · image_urls = 图片文件名。若选择了客户账号，将同时建一条 已发货 订单（items[0].name = 编号），生成成功后弹窗展示 订单号 + 防伪码 供复制。</div>
+        <div class="sec-note">入库字段：records.code = 防伪码（自动或自填唯一码）· product_ref = 品名 · batch_no = 专属编号（选填）· info = {text: 光语} · image_urls = 图片文件名。卡片自上而下：品名 → 定制编号 → 防伪码 → 二维码。若选择了客户账号，将同时建一条 已发货 订单，生成成功后弹窗展示 订单号 + 防伪码 供复制。</div>
         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:8px;">
           <button class="btn-gold" id="sGen" type="button" title="校验后入库 records 并渲染官方验证卡">✨ 生成单个订单</button>
           <span class="msg" id="sGenMsg"></span>
@@ -348,6 +358,8 @@
             <input id="bName" placeholder="同一组作品的产品名" style="width:100%;">
             <label class="f-label">数量（1–50）</label>
             <input id="bQty" type="number" min="1" max="50" value="5" style="width:130px;">
+            <label class="f-label">专属编号（选填；留空则不填。填前缀则自动逐枚后缀，如 202608-A → 202608-A-01…）</label>
+            <input id="bBatch" placeholder="选填，如 202608-A" style="width:100%;">
           </div>
           <div>
             <label class="f-label">光语（选填，随码入库 info.text）</label>
@@ -356,7 +368,7 @@
         </div>
         <label class="f-label">图片文件名（选填，多个逗号分隔；同一组共用同一组图片）</label>
         <input id="bImgs" placeholder="如：img/customers/xx.jpg" style="width:100%;">
-        <div class="sec-note">逐枚生成 YG-YYMMDD-XXXXXX 唯一码 → records.code 唯一 · product_ref = 产品名称 · info = {text: 光语} · image_urls = 图片，全部入库后列出全部码并可一键复制。适合同一作品的多件成品统一建档。</div>
+        <div class="sec-note">逐枚生成 YG-YYMMDD-XXXXXX 唯一码 → records.code 唯一 · product_ref = 产品名称 · batch_no = 专属编号（填前缀时逐枚自动后缀）· info = {text: 光语} · image_urls = 图片，全部入库后列出全部码并可一键复制。适合同一作品的多件成品统一建档。</div>
         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:8px;">
           <button class="btn-gold" id="bGo" type="button" title="校验后并发入库（每批 5 枚）">📦 批量生成（自动入库）</button>
           <span class="msg" id="bGenMsg"></span>
@@ -806,8 +818,8 @@
 
 <footer class="footer"><div class="wrap"><div class="disclaimer">© 予光 YUGUANG · 管理后台 · 仅供内部使用</div></div></footer>
 
-<script src="js/supabase-config.js?v=09062002"></script>
-<script src="js/main.js?v=09062002"></script>
+<script src="js/supabase-config.js?v=09062036"></script>
+<script src="js/main.js?v=09062036"></script>
 <script>
 (function () {
   'use strict';
@@ -990,7 +1002,9 @@
     var info = {};
     var q = itemQuote(it) || String(o.note || '').trim();
     if (q) info.text = String(q).slice(0, 200);
-    return { code: it.code, product_ref: String(it.name || '定制作品').slice(0, 60), info: info, image_urls: itemImgs(it), created_at: o.created_at };
+    var batch = String((it && (it.batch_no || it.batch)) || '').trim();
+    if (!batch && o && o.order_no) batch = String(o.order_no).trim(); // 无专属编号时退而显示该单订单号
+    return { code: it.code, product_ref: String(it.name || '定制作品').slice(0, 60), batch_no: batch, info: info, image_urls: itemImgs(it), created_at: o.created_at };
   }
   function copyText(txt) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -1042,7 +1056,7 @@
     var items = orderItems(o);
     var jobs = [];
     items.forEach(function (it, i) {
-      if (!it.code) jobs.push({ i: i, name: String(it.name || '定制作品').slice(0, 60), quote: itemQuote(it), imgs: itemImgs(it) });
+      if (!it.code) jobs.push({ i: i, name: String(it.name || '定制作品').slice(0, 60), quote: itemQuote(it), imgs: itemImgs(it), batch: String((it && (it.batch_no || it.batch)) || '').trim() });
     });
     if (!jobs.length) return Promise.resolve(0);
     var used = {};
@@ -1056,7 +1070,9 @@
         // 光语优先取该件 quote；旧数据未逐件存光语时回退订单备注 note
         var t = j.quote || String(o.note || '').trim();
         if (t) info.text = String(t).slice(0, 200);
-        return insertRecordGuarded({ code: j.code, product_ref: j.name, info: info, image_urls: j.imgs }).then(function () { return j; });
+        var recRow = { code: j.code, product_ref: j.name, info: info, image_urls: j.imgs };
+        if (j.batch) recRow.batch_no = j.batch;
+        return insertRecordGuarded(recRow).then(function () { return j; });
       });
       return Promise.all(ps).then(function () { return next(); });
     }
@@ -1147,6 +1163,7 @@
       h += '<div class="oitem"><label>光语</label><textarea data-equote="' + i + '" style="flex:1;min-width:200px;margin:0;" placeholder="印在验证卡上的光语…">' + esc(itemQuote(it)) + '</textarea>' +
         (code ? '<span class="badge" style="color:#8fb6e8;border-color:#8fb6e855;">码 ' + esc(code) + '</span>' : '<span class="badge" style="color:var(--gold);border-color:var(--gold)66;">待生成</span>') + '</div>';
       h += '<div class="oitem"><label>图片</label><input data-eimg="' + i + '" value="' + esc(itemImgs(it)) + '" placeholder="图片文件名，逗号分隔"></div>';
+      h += '<div class="oitem"><label>专属编号</label><input data-ebatch="' + i + '" value="' + esc((it && (it.batch_no || it.batch)) || '') + '" placeholder="选填，如 202608-A01；导出卡片时优先显示"></div>';
     });
     h += '<label class="f-label">备注 note（合并信息 / 物流行会自动保留）</label><textarea data-enote style="min-height:52px;">' + esc(o.note || '') + '</textarea>';
     h += '<div style="margin-top:8px;"><button class="btn-sm" data-act="oEditSave">💾 保存</button><button class="btn-sm" data-act="oEditCancel">取消</button></div>';
@@ -1216,6 +1233,12 @@
           var i = Number(inp.getAttribute('data-eimg'));
           if (!items[i]) items[i] = {};
           items[i].image_urls = inp.value.trim();
+        });
+        tr.querySelectorAll('input[data-ebatch]').forEach(function (inp) {
+          var i = Number(inp.getAttribute('data-ebatch'));
+          if (!items[i]) items[i] = {};
+          var v = inp.value.trim();
+          if (v) items[i].batch_no = v; else delete items[i].batch_no;
         });
         var noteEl = tr.querySelector('[data-enote]');
         var note = noteEl ? noteEl.value : (o.note || '');
@@ -1476,6 +1499,9 @@
   }
   function sGenSubmit() {
     var used = {};
+    var name = ($('sName').value || '').trim();
+    if (!name) { setMsg('sGenMsg', '请填写品名（印在验证卡最上方）', 'bad'); return; }
+    var batch = ($('sBatch').value || '').trim();
     var code = ($('sCode').value || '').trim();
     if (!code) code = uniqueCode(used);
     else {
@@ -1489,20 +1515,24 @@
     var info = {};
     if (note) info.text = note;
     setMsg('sGenMsg', '正在生成…');
-    var row = { code: code, product_ref: code, info: info, image_urls: imgs };
+    var row = { code: code, product_ref: name, info: info, image_urls: imgs };
+    if (batch) row.batch_no = batch;
     insertRecordGuarded(row).then(function (rr) {
       var finalCode = (rr && rr.row && rr.row.code) || code;
+      $('sName').value = '';
+      $('sBatch').value = '';
       $('sCode').value = '';
       $('sMsg').value = '';
       $('sImgs').value = '';
       $('sAmount').value = '';
       $('sAcct').value = '';
-      var cardRow = { code: finalCode, product_ref: finalCode, info: info, image_urls: imgs, created_at: new Date().toISOString() };
+      var cardRow = { code: finalCode, product_ref: name, batch_no: batch, info: info, image_urls: imgs, created_at: new Date().toISOString() };
       setMsg('sGenMsg', '✅ 已生成并入库：' + finalCode, 'ok');
       renderCard(cardRow);
       if (!acct) return;
       var no = ygOrderNo();
-      var items = [{ name: finalCode, code: finalCode }];
+      var items = [{ name: name, code: finalCode }];
+      if (batch) items[0].batch_no = batch;
       if (amount !== undefined) items[0].price = amount;
       adm({ op: 'insert', table: 'orders', row: { order_no: no, account: acct, items: items, amount: (amount === undefined ? 0 : amount), note: note || '予光订单', status: 'shipped' } }).then(function (r2) {
         if (!r2.ok) { setMsg('sGenMsg', '⚠️ 防伪码已入库 ' + finalCode + '，但为客户建单失败：' + (r2.error || ''), 'bad'); return; }
@@ -1510,6 +1540,7 @@
           '<h3>✅ 生成单个订单 · 成功</h3>' +
           '<div class="small-note" style="margin-bottom:8px;">已为账号 <b style="color:var(--gold);">' + esc(acct) + '</b> 代建 已发货 订单，请把以下信息发给客户（可复制）。</div>' +
           '<label class="f-label">订单号</label><div class="code-box">' + esc(no) + '</div>' +
+          (batch ? '<label class="f-label">专属编号</label><div class="code-box">' + esc(batch) + '</div>' : '') +
           '<label class="f-label">防伪码</label><div class="code-box">' + esc(finalCode) + '</div>' +
           '<div class="btn-row">' +
           '<button class="btn-line" data-cpno type="button" title="复制订单号">📋 复制订单号</button>' +
@@ -1531,17 +1562,74 @@
     if (typeof info === 'string') { try { info = JSON.parse(info); } catch (e) { info = {}; } }
     return info || {};
   }
-  function vCardHtml(rec) {
+  function verifyUrlFor(code) {
+    return location.protocol + '//' + location.host + location.pathname.replace(/[^/]*$/, '') + 'verify.html?c=' + encodeURIComponent(code || '');
+  }
+  function nfcUrlFor(code) {
+    return location.protocol + '//' + location.host + location.pathname.replace(/[^/]*$/, '') + 'nfc.html?c=' + encodeURIComponent(code || '');
+  }
+  function vCardHtml(rec, extra) {
     var info = recInfo(rec);
+    var name = String(rec.product_ref || '').trim() || '予光定制作品';
+    var batch = String(rec.batch_no || (extra && extra.order_no) || '').trim();
     var h = '<div class="v-card">';
-    h += '<div class="v-brand">予 光 Y U G U A N G</div>';
+    h += '<div class="v-name">' + esc(name) + '</div>';
+    if (batch) h += '<div class="v-batch"><span class="v-lbl">定制编号</span> · ' + esc(batch) + '</div>';
     h += '<div class="v-code">' + esc(rec.code || '') + '</div>';
-    h += '<div class="v-name">' + esc(rec.product_ref || '予光定制作品') + '</div>';
-    if (info.text) h += '<div class="v-line">' + esc(info.text) + '</div>';
-    h += '<div class="v-line">建档时间：' + esc(fmtTime(rec.created_at)) + '</div>';
-    h += '<div class="v-tip">予光作品验真页：' + esc(location.protocol + '//' + location.host + '/verify.html') + '<br>输入该验证码即可查询建档信息</div>';
+    h += '<div class="v-qr" data-qrurl="' + esc(verifyUrlFor(rec.code)) + '"></div>';
+    h += '<div class="v-cap">扫 码 核 验 正 品</div>';
+    if (info.text) h += '<div class="v-line">' + esc(String(info.text).slice(0, 200)) + '</div>';
+    h += '<div class="v-foot">予 光 · Y U G U A N G</div>';
+    h += '<div class="v-tip">建档时间：' + esc(fmtTime(rec.created_at)) + '</div>';
     h += '</div>';
     return h;
+  }
+  /* ——— 二维码：本地 qrcode.min.js 动态加载 + 填充 [data-qrurl] 容器 ——— */
+  var _qrWait = null;
+  function ensureQrLib(cb) {
+    if (window.QRCode) { if (cb) cb(); return; }
+    if (!_qrWait) {
+      _qrWait = [];
+      var s = document.createElement('script');
+      s.src = 'js/qrcode.min.js';
+      s.onload = s.onerror = function () { var q = _qrWait; _qrWait = null; (q || []).forEach(function (f) { f && f(); }); };
+      document.head.appendChild(s);
+    }
+    _qrWait.push(cb);
+  }
+  function qrCards(root) {
+    if (!root) return;
+    var els = root.querySelectorAll('[data-qrurl]');
+    if (!els.length) return;
+    ensureQrLib(function () {
+      if (!window.QRCode) return;
+      els.forEach(function (el) {
+        if (el.childNodes.length) return;
+        try {
+          new QRCode(el, { text: el.getAttribute('data-qrurl') || '', width: 132, height: 132, correctLevel: QRCode.CorrectLevel.M });
+        } catch (e) { el.innerHTML = '<span style="color:#9aa5b8;font-size:10px;">二维码生成失败</span>'; }
+      });
+    });
+  }
+  function fitLines(ctx, text, maxW) {
+    var out = [], cur = '';
+    for (var i = 0; i < String(text).length; i++) {
+      var ch = String(text).charAt(i);
+      if (ctx.measureText(cur + ch).width <= maxW) cur += ch;
+      else { if (cur) out.push(cur); cur = ch; }
+      if (out.length >= 6) break;
+    }
+    if (cur) out.push(cur);
+    return out;
+  }
+  function rrPath(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
   }
   function renderCard(rec) {
     lastCard = rec;
@@ -1549,11 +1637,14 @@
     h += vCardHtml(rec);
     h += '<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">';
     h += '<button class="btn-line" id="copyCardBtn" type="button" title="复制验证码到剪贴板">📋 复制码</button>';
-    h += '<button class="btn-line" id="exportCardBtn" type="button" title="用 canvas 绘制该卡并下载 JPG">🖼️ 导出为图片(JPG)</button>';
+    h += '<button class="btn-line" id="nfcCardBtn" type="button" title="复制 NFC 标签内容（把该链接写入作品 NFC 标签，轻触直达四板块页面）">📱 复制 NFC 码</button>';
+    h += '<button class="btn-line" id="exportCardBtn" type="button" title="用 canvas 绘制该卡并下载 JPG（含验真二维码）">🖼️ 导出为图片(JPG)</button>';
     h += '<button class="btn-line" id="toDbBtn" type="button" title="跳转到 数据库记录管理（records）查看刚生成的记录">🗄️ 去数据库记录管理</button>';
     h += '</div></div>';
     $('sCardArea').innerHTML = h;
+    qrCards($('sCardArea'));
     $('copyCardBtn').addEventListener('click', function () { copyText(rec.code); setMsg('sGenMsg', '已复制 ' + rec.code, 'ok'); });
+    $('nfcCardBtn').addEventListener('click', function () { copyText(nfcUrlFor(rec.code)); setMsg('sGenMsg', '已复制 NFC 标签链接（写入作品标签后，轻触直达抽一下/答案之书/反馈立减/橱窗页面）', 'ok'); });
     $('exportCardBtn').addEventListener('click', function () { exportCardJpg(rec); });
     $('toDbBtn').addEventListener('click', function () { $('dTable').value = 'records'; goToDb(); });
   }
@@ -1571,11 +1662,13 @@
       h += '<div style="margin:12px 0;">' + vCardHtml(itemRec(o, it)) + '</div>';
       h += '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:6px;">' +
         '<button class="btn-line" data-exp="' + idx + '" type="button" title="canvas 绘制该验证卡并下载 JPG">📷 下载此卡 JPG</button>' +
-        '<button class="btn-line" data-expcopy="' + idx + '" type="button" title="复制该防伪码">📋 复制码 ' + esc(it.code) + '</button></div>';
+        '<button class="btn-line" data-expcopy="' + idx + '" type="button" title="复制该防伪码">📋 复制码 ' + esc(it.code) + '</button>' +
+        '<button class="btn-line" data-expnfc="' + idx + '" type="button" title="复制 NFC 标签内容（写入作品 NFC 标签用）">📱 NFC 码</button></div>';
     });
     h += '<div class="btn-row"><button class="btn-ghost" data-x type="button">关闭</button></div>';
     var m = openModal(h);
     bindModalClose(m);
+    qrCards(m);
     m.querySelectorAll('[data-exp]').forEach(function (b) {
       b.addEventListener('click', function () {
         var it = coded[Number(b.getAttribute('data-exp'))];
@@ -1588,57 +1681,104 @@
         if (it && it.code) { copyText(it.code); setMsg('oMsg', '已复制 ' + it.code, 'ok'); }
       });
     });
+    m.querySelectorAll('[data-expnfc]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var it = coded[Number(b.getAttribute('data-expnfc'))];
+        if (it && it.code) { copyText(nfcUrlFor(it.code)); setMsg('oMsg', '已复制 NFC 标签链接：' + nfcUrlFor(it.code), 'ok'); }
+      });
+    });
   }
-  /* canvas 手绘验证卡并下载 JPG（予光暗金） */
-  function downloadVCard(rec) {
+  /* canvas 手绘验证卡并下载 JPG（予光暗金 · 品名→定制编号→防伪码→二维码） */
+  function downloadVCard(rec, extra) {
     if (!rec || !rec.code) return;
-    var W = 1080, H = 720;
-    var c = document.createElement('canvas');
-    c.width = W; c.height = H;
-    var ctx = c.getContext('2d');
-    ctx.fillStyle = '#0c1220';
-    ctx.fillRect(0, 0, W, H);
-    var grd = ctx.createRadialGradient(W * 0.5, H * 0.2, 40, W * 0.5, H * 0.5, W * 0.7);
-    grd.addColorStop(0, 'rgba(227,196,124,0.16)'); grd.addColorStop(1, 'rgba(6,9,16,0)');
-    ctx.fillStyle = grd; ctx.fillRect(0, 0, W, H);
-    ctx.strokeStyle = 'rgba(227,196,124,.55)'; ctx.lineWidth = 3;
-    ctx.strokeRect(36, 36, W - 72, H - 72);
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#e3c47c';
-    ctx.font = '500 40px "Songti SC", serif';
-    ctx.fillText('予 光  Y U G U A N G', W / 2, 130);
-    ctx.fillStyle = '#f4efe6';
-    var code = rec.code || '';
-    var csize = 92;
-    ctx.font = '700 ' + csize + 'px "Courier New", monospace';
-    while (ctx.measureText(code).width > W - 180 && csize > 18) {
-      csize -= 6;
-      ctx.font = '700 ' + csize + 'px "Courier New", monospace';
-    }
-    ctx.fillText(code, W / 2, 300);
-    ctx.fillStyle = '#e3c47c';
-    ctx.font = '500 46px "Songti SC", serif';
-    ctx.fillText(String(rec.product_ref || '予光定制作品').slice(0, 24), W / 2, 410);
-    ctx.fillStyle = 'rgba(244,239,230,.85)';
-    ctx.font = '400 30px sans-serif';
     var info = recInfo(rec);
-    var text = String(info.text || '');
-    var ty = 465;
-    if (text) {
-      var words = text.slice(0, 60);
-      var lines = [];
-      while (words.length > 0) { lines.push(words.slice(0, 20)); words = words.slice(20); }
-      lines.slice(0, 3).forEach(function (ln) { ctx.fillText(ln, W / 2, ty); ty += 40; });
-    }
-    ctx.fillStyle = 'rgba(244,239,230,.55)';
-    ctx.font = '400 24px sans-serif';
-    var url = location.protocol + '//' + location.host + '/verify.html';
-    ctx.fillText('予光作品验真页：' + url, W / 2, H - 110);
-    ctx.fillText('建档时间：' + fmtTime(rec.created_at), W / 2, H - 70);
-    var a = document.createElement('a');
-    a.download = '予光-验证卡-' + code + '.jpg';
-    a.href = c.toDataURL('image/jpeg', 0.92);
-    a.click();
+    var name = String(rec.product_ref || '').trim() || '予光定制作品';
+    var batch = String(rec.batch_no || (extra && extra.order_no) || '').trim();
+    var code = rec.code || '';
+    var qrText = verifyUrlFor(code);
+    ensureQrLib(function () {
+      try {
+        var W = 900, H = 1260;
+        var c = document.createElement('canvas');
+        c.width = W; c.height = H;
+        var ctx = c.getContext('2d');
+        ctx.fillStyle = '#0c1220';
+        ctx.fillRect(0, 0, W, H);
+        var grd = ctx.createRadialGradient(W * 0.5, H * 0.14, 60, W * 0.5, H * 0.5, W * 0.72);
+        grd.addColorStop(0, 'rgba(227,196,124,0.17)'); grd.addColorStop(1, 'rgba(6,9,16,0)');
+        ctx.fillStyle = grd; ctx.fillRect(0, 0, W, H);
+        ctx.strokeStyle = 'rgba(227,196,124,.6)'; ctx.lineWidth = 4;
+        ctx.strokeRect(36, 36, W - 72, H - 72);
+        ctx.strokeStyle = 'rgba(227,196,124,.18)'; ctx.lineWidth = 1;
+        ctx.strokeRect(54, 54, W - 108, H - 108);
+        ctx.textAlign = 'center';
+        // ① 品名
+        ctx.fillStyle = '#e3c47c';
+        ctx.font = '600 46px "Songti SC", "PingFang SC", serif';
+        ctx.fillText(String(name).slice(0, 18), W / 2, 150);
+        var y = 150;
+        // ② 定制编号
+        if (batch) {
+          ctx.fillStyle = 'rgba(244,239,230,.62)';
+          ctx.font = '400 22px "PingFang SC", sans-serif';
+          ctx.fillText('定制编号 · ' + String(batch).slice(0, 30), W / 2, y + 62);
+          y += 122;
+        }
+        // ③ 防伪码
+        ctx.fillStyle = 'rgba(244,239,230,.55)';
+        ctx.font = '400 20px "PingFang SC", sans-serif';
+        ctx.fillText('— 防伪码 —', W / 2, y + 52);
+        ctx.fillStyle = '#f4efe6';
+        var csize = 46;
+        ctx.font = '700 ' + csize + 'px "Courier New", monospace';
+        while (ctx.measureText(code).width > W - 220 && csize > 16) {
+          csize -= 2;
+          ctx.font = '700 ' + csize + 'px "Courier New", monospace';
+        }
+        ctx.fillText(code, W / 2, y + 128);
+        y += 196;
+        // ④ 二维码（白底圆角块，内含扫码验真链接）
+        var qrTop = y + 28, qrSize = 340, qx = (W - qrSize) / 2;
+        ctx.fillStyle = '#ffffff';
+        rrPath(ctx, qx, qrTop, qrSize, qrSize, 18); ctx.fill();
+        if (window.QRCode) {
+          var qd = document.createElement('div');
+          qd.style.cssText = 'position:fixed;left:-9999px;top:0;';
+          document.body.appendChild(qd);
+          try {
+            new QRCode(qd, { text: qrText, width: qrSize, height: qrSize, correctLevel: QRCode.CorrectLevel.M });
+            var qcv = qd.querySelector('canvas') || qd.querySelector('img');
+            if (qcv) ctx.drawImage(qcv, qx, qrTop, qrSize, qrSize);
+          } catch (e) {}
+          document.body.removeChild(qd);
+        }
+        ctx.fillStyle = 'rgba(227,196,124,.85)';
+        ctx.font = '400 20px "PingFang SC", sans-serif';
+        ctx.fillText('予光 · 扫码核验正品', W / 2, qrTop + qrSize + 46);
+        y = qrTop + qrSize + 84;
+        // ⑤ 光语（自动折行，最多 3 行）
+        var text = String(info.text || '');
+        if (text) {
+          ctx.fillStyle = 'rgba(244,239,230,.82)';
+          ctx.font = '400 25px "Songti SC", serif';
+          fitLines(ctx, text, W - 210).slice(0, 3).forEach(function (ln) {
+            ctx.fillText(ln, W / 2, y);
+            y += 46;
+          });
+        }
+        // ⑥ 底部品牌 + 建档时间
+        ctx.fillStyle = 'rgba(227,196,124,.6)';
+        ctx.font = '400 26px "Songti SC", serif';
+        ctx.fillText('予 光 · Y U G U A N G', W / 2, H - 92);
+        ctx.fillStyle = 'rgba(244,239,230,.5)';
+        ctx.font = '400 20px "PingFang SC", sans-serif';
+        ctx.fillText('建档时间：' + fmtTime(rec.created_at), W / 2, H - 54);
+        var a = document.createElement('a');
+        a.download = '予光-验证卡-' + code + '.jpg';
+        a.href = c.toDataURL('image/jpeg', 0.92);
+        a.click();
+      } catch (e) {}
+    });
   }
   function exportCardJpg(rec) {
     var r = (rec && rec.code) ? rec : lastCard;
@@ -1656,13 +1796,18 @@
     var qty = Math.min(50, Math.max(1, num($('bQty').value) || 1));
     var note = ($('bMsg').value || '').trim();
     var imgs = ($('bImgs').value || '').trim();
+    var batch = ($('bBatch').value || '').trim();
     var info = {};
     if (note) info.text = note;
     var codes = [];
     var used = {};
     for (var i = 0; i < qty; i++) { codes.push(uniqueCode(used)); used[codes[i]] = 1; }
     setMsg('bGenMsg', '开始入库 0/' + qty + ' …');
-    var jobs = codes.map(function (c) { return { code: c, row: { code: c, product_ref: name, info: info, image_urls: imgs } }; });
+    var jobs = codes.map(function (c, i) {
+      var row = { code: c, product_ref: name, info: info, image_urls: imgs };
+      if (batch) row.batch_no = batch + '-' + pad2(i + 1);
+      return { code: c, row: row };
+    });
     var q = jobs.slice(); var done = 0; var failed = 0;
     function next() {
       if (!q.length) {
@@ -2234,13 +2379,14 @@
   /* ——— records 专属行渲染 ——— */
   function dbRecRowsHtml(rows) {
     var h = '<tr><th style="width:26px;"><input type="checkbox" id="dRecAllChk" class="chk" title="全选/取消当前列表"></th>' +
-      '<th>防伪码 code</th><th>编号 product_ref</th><th>光语 info</th><th>图片 image_urls</th><th>建档时间</th><th>操作</th></tr>';
+      '<th>防伪码 code</th><th>品名 product_ref</th><th>专属编号 batch_no</th><th>光语 info</th><th>图片 image_urls</th><th>建档时间</th><th>操作</th></tr>';
     rows.forEach(function (row) {
       var info = recInfo(row);
       var checked = DB.sel[String(row.id)] ? ' checked' : '';
       h += '<tr><td><input type="checkbox" class="dRecChk" data-id="' + row.id + '"' + checked + '></td>' +
         '<td style="font-family:monospace;color:var(--gold);font-size:12px;">' + esc(row.code || '') + '</td>' +
         '<td>' + esc(row.product_ref || '—') + '</td>' +
+        '<td>' + esc(row.batch_no || '—') + '</td>' +
         '<td>' + esc(info.text || '—') + '</td>' +
         '<td class="dim">' + esc(String(row.image_urls || '').split(/[,，]/).filter(Boolean).join('、') || '—').slice(0, 120) + '</td>' +
         '<td class="dim">' + esc(fmtTime(row.created_at)) + '</td>' +
@@ -2263,10 +2409,13 @@
       '<h3>🖼️ 验证卡预览 · ' + esc(row.code || '') + '</h3>' +
       '<div style="margin:8px 0;">' + vCardHtml(row) + '</div>' +
       '<div class="btn-row"><button class="btn-line" data-pcopy type="button">📋 复制码</button>' +
-      '<button class="btn-line" data-pexp type="button" title="canvas 绘制并下载 JPG">📷 下载 JPG</button>' +
+      '<button class="btn-line" data-pnfc type="button" title="复制 NFC 标签内容（写入作品 NFC 标签用）">📱 NFC 码</button>' +
+      '<button class="btn-line" data-pexp type="button" title="canvas 绘制并下载 JPG（含验真二维码）">📷 下载 JPG</button>' +
       '<button class="btn-ghost" data-x type="button">关闭</button></div>');
     bindModalClose(m);
+    qrCards(m);
     m.querySelector('[data-pcopy]').addEventListener('click', function () { copyText(row.code); });
+    m.querySelector('[data-pnfc]').addEventListener('click', function () { copyText(nfcUrlFor(row.code)); dbSaveCfgMsg('已复制 NFC 标签链接'); });
     m.querySelector('[data-pexp]').addEventListener('click', function () { downloadVCard(row); });
   }
   function dbRecDetail(id) {
@@ -2278,30 +2427,33 @@
     var m = openModal(
       '<h3>查看详情 · 编辑 · ' + esc(row.code || '') + '</h3>' +
       '<div class="small-note" style="margin-bottom:8px;">记录 id=' + esc(row.id) + ' · 建档：' + esc(fmtTime(row.created_at)) + ' · 保存以 update 写回 records。</div>' +
-      '<label class="f-label">编号 product_ref</label><input id="drName" style="width:100%;" value="' + esc(row.product_ref || '') + '">' +
+      '<label class="f-label">品名 product_ref</label><input id="drName" style="width:100%;" value="' + esc(row.product_ref || '') + '">' +
+      '<label class="f-label">专属编号 batch_no（选填）</label><input id="drBatch" style="width:100%;" value="' + esc(row.batch_no || '') + '" placeholder="如 202608-A01">' +
       '<label class="f-label">光语 info.text</label><textarea id="drMsg" style="min-height:70px;">' + esc(info.text || '') + '</textarea>' +
       '<label class="f-label">图片文件名 image_urls（逗号分隔）</label><input id="drImg" style="width:100%;" value="' + esc(row.image_urls || '') + '">' +
       '<div class="btn-row"><button class="btn-line" data-dcp type="button" title="复制防伪码">📋 复制码</button>' +
+      '<button class="btn-line" data-dnfc type="button" title="复制 NFC 标签内容（写入作品 NFC 标签用）">📱 NFC 码</button>' +
       '<button class="btn-line" data-dexp type="button" title="按当前输入导出验证卡 JPG">📷 导出 JPG</button>' +
-      '<button class="btn-gold" data-dsave type="button" title="update records（编号/光语/图片）">💾 保存修改</button>' +
+      '<button class="btn-gold" data-dsave type="button" title="update records（品名/专属编号/光语/图片）">💾 保存修改</button>' +
       '<button class="btn-ghost" data-x type="button">关闭</button></div>');
     bindModalClose(m);
     m.querySelector('[data-dcp]').addEventListener('click', function () { copyText(row.code); });
+    m.querySelector('[data-dnfc]').addEventListener('click', function () { copyText(nfcUrlFor(row.code)); dbSaveCfgMsg('已复制 NFC 标签链接'); });
     m.querySelector('[data-dexp]').addEventListener('click', function () {
       var o = {};
       Object.keys(o0).forEach(function (k) { o[k] = o0[k]; });
       var t = (m.querySelector('#drMsg').value || '').trim();
       if (t) o.text = t; else delete o.text;
-      downloadVCard({ code: row.code, product_ref: (m.querySelector('#drName').value || '').trim() || row.product_ref, info: o, image_urls: (m.querySelector('#drImg').value || '').trim(), created_at: row.created_at });
+      downloadVCard({ code: row.code, product_ref: (m.querySelector('#drName').value || '').trim() || row.product_ref, batch_no: (m.querySelector('#drBatch').value || '').trim(), info: o, image_urls: (m.querySelector('#drImg').value || '').trim(), created_at: row.created_at });
     });
     m.querySelector('[data-dsave]').addEventListener('click', function () {
       var name = (m.querySelector('#drName').value || '').trim();
-      if (!name) { setMsg('dMsg', '编号不能为空', 'bad'); return; }
+      if (!name) { setMsg('dMsg', '品名不能为空', 'bad'); return; }
       var o = {};
       Object.keys(o0).forEach(function (k) { o[k] = o0[k]; });
       var t = (m.querySelector('#drMsg').value || '').trim();
       if (t) o.text = t; else delete o.text;
-      adm({ op: 'update', table: 'records', id: row.id, set: { product_ref: name, info: o, image_urls: (m.querySelector('#drImg').value || '').trim() } }).then(function (r) {
+      adm({ op: 'update', table: 'records', id: row.id, set: { product_ref: name, batch_no: (m.querySelector('#drBatch').value || '').trim(), info: o, image_urls: (m.querySelector('#drImg').value || '').trim() } }).then(function (r) {
         closeModal(m);
         if (r.ok) { dbSaveCfgMsg('已保存记录 ' + row.code); loadDb(); }
         else setMsg('dMsg', '保存失败：' + (r.error || ''), 'bad');
