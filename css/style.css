@@ -3227,3 +3227,11 @@ html.lux-lock::-webkit-scrollbar, body.lux-lock::-webkit-scrollbar { display: no
 .yg-lux-info { position: relative; z-index: 2; }
 .yg-lux-imgwrap { position: relative; z-index: 1; }
 .yg-lux-imgwrap img { position: relative; z-index: 2; }
+.yg-lux-actions { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 8px; }
+.yg-lux-prev, .yg-lux-next { width: 38px; height: 38px; border-radius: 50%; cursor: pointer; font-size: 22px;
+  color: #fff; border: 1px solid rgba(255,255,255,.3); background: rgba(255,255,255,.1);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center;
+  justify-content: center; line-height: 1; }
+.yg-lux-prev:hover, .yg-lux-next:hover { background: rgba(227,196,124,.3); border-color: rgba(227,196,124,.6); }
+.yg-lux-count { font-size: 13px; color: rgba(250,244,232,.85); letter-spacing: .2em; }
+.yg-lux-imgwrap { touch-action: pan-y; }
