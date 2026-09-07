@@ -43,35 +43,48 @@ window.sbImg = function (v) {
   return window.SUPABASE.url + '/storage/v1/object/public/' + v;
 };
 
-/* 提交成功后触发邮件通知（需已部署 email-send；失败静默） */
-window.notifyEmail = function (table, body) {
+/* 提交成功后触发邮件通知（统一发送到后台预置邮箱；失败静默）
+   type：order / message / design（系列预约设计）/ gallery_submit / subscriber / share 等 */
+window.notifyEmail = function (table, body, type) {
   var cfg = window.SUPABASE;
   if (!cfg || !cfg.url) return;
   try {
+    var t = type || (table === 'orders' ? 'order' : (table === 'subscribers' ? 'subscriber' : 'message'));
     var subject = '【予光】新信息通知';
     var f = {};
-    if (table === 'orders') {
+    if (t === 'order') {
       subject = '【予光】新的定制/购买意向';
-      f['客户联系方式'] = body.phone || body.account || '';
-      f['商品明细'] = typeof body.items === 'string' ? body.items : JSON.stringify(body.items || []).slice(0, 300);
-      f['留言/备注'] = body.note || '—';
+      f['客户联系方式'] = body.phone || body.account || '—';
+      f['商品明细'] = typeof body.items === 'string' ? body.items : JSON.stringify(body.items || []).slice(0, 400);
+      f['留言/备注'] = String(body.note || '—').slice(0, 600);
       f['下单账号'] = body.account || '（未登录）';
       f['期望金额'] = body.amount !== undefined ? ('¥' + body.amount) : '—';
-    } else if (table === 'messages') {
-      subject = '【予光】新的留言/投稿';
+    } else if (t === 'design') {
+      subject = '【予光】系列/预约设计意向';
+      f['称呼'] = body.name || '—';
+      f['联系方式'] = body.contact || '—';
+      f['预约设计内容'] = String(body.content || body.note || '—').slice(0, 600);
+    } else if (t === 'gallery_submit') {
+      subject = '【予光】光集投稿意向';
+      f['称呼'] = body.name || '—';
+      f['联系方式'] = body.contact || '—';
+      f['作品信息与光语'] = String(body.content || '').slice(0, 600);
+    } else if (t === 'subscriber') {
+      subject = '【予光】新的订阅';
+      f['订阅联系方式'] = body.contact || '—';
+    } else if (t === 'share') {
+      subject = '【予光】光语分享 · 顾客授权回执';
+      Object.keys(body || {}).forEach(function (k) { f[k] = body[k]; });
+    } else {
+      subject = '【予光】新的留言';
       f['称呼'] = body.name || '—';
       f['联系方式'] = body.contact || '—';
       f['内容'] = String(body.content || '').slice(0, 500);
-    } else if (table === 'subscribers') {
-      subject = '【予光】新的订阅';
-      f['联系方式'] = body.contact || '—';
-    } else {
-      f['内容'] = JSON.stringify(body || {}).slice(0, 500);
     }
     fetch(cfg.url + '/functions/v1/email-send', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ kind: table || 'info', subject: subject, fields: f })
+      body: JSON.stringify({ kind: t, subject: subject, fields: f })
     }).catch(function () {});
   } catch (e) {}
 };
