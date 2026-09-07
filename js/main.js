@@ -3732,9 +3732,11 @@ window.__askDesign = function (kind, info) {
    - __ygLuxBind(root, sel, {name, idea, cmt})：给卡片批量绑定点图/点卡打开
    ============================================================ */
 (function luxViewer() {
+  var luxItems = [];
+  var luxCur = 0;
+  var sw = { x: null, y: null, t: 0 };
   function txt(el) { return el ? String(el.textContent || '').trim() : ''; }
   function ensure() {
-    /* 注意：必须用 className 查（元素只有 className，没 id）；用 getElementById 永远返回 null，导致每次都创建新元素、hide() 失效 */
     var o = document.querySelector('.yg-lux');
     if (o) return o;
     o = document.createElement('div');
@@ -3743,34 +3745,40 @@ window.__askDesign = function (kind, info) {
       '<img class="yg-lux-photo" alt="" src="背景.jpg" onerror="this.style.display=\'none\';">' +
       '<div class="yg-lux-stage">' +
       '<button class="yg-lux-x" type="button" aria-label="关闭">✕</button>' +
-      '<div class="yg-lux-imgwrap"><img id="ygLuxImg" alt="作品大图"></div>' +
+      '<div class="yg-lux-imgwrap" id="ygLuxWrap"><img id="ygLuxImg" alt="作品大图"></div>' +
       '<div class="yg-lux-info">' +
       '<div class="yg-lux-name" id="ygLuxName"></div>' +
       '<div class="yg-lux-idea" id="ygLuxIdea"></div>' +
       '<div class="yg-lux-cmt" id="ygLuxCmt"></div>' +
+      '<div class="yg-lux-actions"><button class="yg-lux-prev" type="button" title="上一张">‹</button>' +
+      '<span class="yg-lux-count" id="ygLuxCount"></span>' +
+      '<button class="yg-lux-next" type="button" title="下一张">›</button></div>' +
       '<button class="yg-lux-done" type="button">关 闭</button></div></div>';
     document.body.appendChild(o);
-    /* 关闭判定：点大图 / 图片区 / 空白背景 / ✕ / 关闭按钮 都会关；文字区不误关（便于阅读滚动） */
+    o.querySelector('.yg-lux-x').addEventListener('click', function () { hide(); });
+    o.querySelector('.yg-lux-done').addEventListener('click', function () { hide(); });
+    o.querySelector('.yg-lux-prev').addEventListener('click', function () { prev(); });
+    o.querySelector('.yg-lux-next').addEventListener('click', function () { next(); });
     o.addEventListener('click', function (e) {
       var t = e.target;
-      if (!t) return;
-      if (t === o) { hide(); return; }
-      if (t.closest && (t.closest('.yg-lux-x') || t.closest('.yg-lux-done') || t.closest('.yg-lux-imgwrap') || t.closest('#ygLuxImg'))) { hide(); return; }
-      if (t.closest && t.closest('.yg-lux-info')) return; // 信息文字区：不关闭，可滚动阅读
-      hide(); // 其余区域（如 info 边上的留白）也直接关
+      if (t && t === o) hide();   // 只有点浮层最外层（stage 之外的空白边）才关；轻触大图不退出
     });
-    /* pointer 兜底：手指按下/抬起在非文字区即关，避免某些浏览器不派发 click */
-    o.addEventListener('pointerup', function (e) {
-      var t = e.target;
-      if (!t || !t.closest) return;
-      if (t.closest('.yg-lux-info')) return;
-      hide();
+    /* 左右滑动切换上一张/下一张 */
+    var wrap = o.querySelector('.yg-lux-imgwrap');
+    wrap.addEventListener('pointerdown', function (e) { sw.x = e.clientX; sw.y = e.clientY; sw.t = Date.now(); });
+    wrap.addEventListener('pointerup', function (e) {
+      if (sw.x == null) return;
+      var dx = e.clientX - sw.x, dy = e.clientY - sw.y;
+      var dt = Date.now() - sw.t;
+      sw.x = sw.y = sw.t = null;
+      if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) || dt > 900) return;
+      if (dx < 0) next(); else prev();
     });
-    o.addEventListener('pointerdown', function (e) {
-      var t = e.target;
-      if (!t || !t.closest) return;
-      if (t.closest('.yg-lux-info')) return;
-      hide();
+    window.addEventListener('keydown', function (ev) {
+      if (!document.querySelector('.yg-lux.on')) return;
+      if (ev.key === 'ArrowRight') next();
+      else if (ev.key === 'ArrowLeft') prev();
+      else if (ev.key === 'Escape') hide();
     });
     return o;
   }
@@ -3782,24 +3790,46 @@ window.__askDesign = function (kind, info) {
     var de = document.documentElement;
     if (de) de.classList.remove('lux-lock');
   }
-  window.__ygLuxHide = hide;
-  window.__ygLux = function (img, name, idea, cmt) {
+  function show(i) {
+    if (!luxItems.length) return;
+    luxCur = Math.min(luxItems.length - 1, Math.max(0, i || 0));
+    var it = luxItems[luxCur] || {};
     var o = ensure();
     var im = o.querySelector('#ygLuxImg');
     im.style.opacity = '';
-    if (img) { im.src = img; }
+    if (it.img) { im.src = it.img; }
     else { im.removeAttribute('src'); im.style.opacity = '0.18'; }
-    o.querySelector('#ygLuxName').textContent = name || '';
+    o.querySelector('#ygLuxName').textContent = it.name || '';
     var ie = o.querySelector('#ygLuxIdea');
-    ie.textContent = idea || '';
-    ie.style.display = idea ? '' : 'none';
+    ie.textContent = it.idea || '';
+    ie.style.display = it.idea ? '' : 'none';
     var ce = o.querySelector('#ygLuxCmt');
-    ce.textContent = cmt ? ('「' + cmt + '」') : '';
-    ce.style.display = cmt ? '' : 'none';
+    ce.textContent = it.cmt ? ('「' + it.cmt + '」') : '';
+    ce.style.display = it.cmt ? '' : 'none';
+    var cnt = o.querySelector('#ygLuxCount');
+    if (cnt) cnt.textContent = luxItems.length > 1 ? ((luxCur + 1) + ' / ' + luxItems.length) : '';
+    var multi = luxItems.length > 1;
+    var pv = o.querySelector('.yg-lux-prev');
+    var nx = o.querySelector('.yg-lux-next');
+    if (pv) pv.style.display = multi ? '' : 'none';
+    if (nx) nx.style.display = multi ? '' : 'none';
+  }
+  function prev() { if (luxItems.length > 1) show(luxCur - 1); }
+  function next() { if (luxItems.length > 1) show(luxCur + 1); }
+  function showList(list, idx) {
+    luxItems = list && list.length ? list : [];
+    if (!luxItems.length) return;
+    show(idx || 0);
+    var o = ensure();
     o.classList.add('on');
     document.body.classList.add('lux-lock');
     var de = document.documentElement;
     if (de) de.classList.add('lux-lock');
+  }
+  window.__ygLuxHide = hide;
+  window.__ygLuxList = showList;
+  window.__ygLux = function (img, name, idea, cmt) {
+    showList([{ img: img, name: name, idea: idea, cmt: cmt }], 0);
   };
   window.__ygLuxBind = function (root, sel, opts) {
     if (!root || !sel) return;
@@ -3808,14 +3838,13 @@ window.__askDesign = function (kind, info) {
       card.addEventListener('click', function () {
         var im = card.querySelector('img');
         var src = im ? (im.currentSrc || im.src || '') : '';
-        if (window.__ygLux) window.__ygLux(src, opts.name ? txt(card.querySelector(opts.name)) : '', opts.idea ? txt(card.querySelector(opts.idea)) : '', opts.cmt ? txt(card.querySelector(opts.cmt)) : '');
+        window.__ygLux(src, opts.name ? txt(card.querySelector(opts.name)) : '', opts.idea ? txt(card.querySelector(opts.idea)) : '', opts.cmt ? txt(card.querySelector(opts.cmt)) : '');
       });
     });
   };
-  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') hide(); });
 })();
 
-/* 光集卡（首页 #ghGrid / 光集页 #galleryGrid）：点击整卡 = 点开大图 + 设计理念 */
+/* 光集卡（首页 #ghGrid / 光集页 #galleryGrid）：点开后可 ← → 左右切换全部作品 */
 (function () {
   function pick(el, sels) {
     for (var i = 0; i < sels.length; i++) {
@@ -3830,9 +3859,21 @@ window.__askDesign = function (kind, info) {
     if (t.closest('a,button,input,select,textarea')) return;
     var card = t.closest('#ghGrid .gh-card, #galleryGrid .g-card');
     if (!card) return;
-    var im = card.querySelector('img');
-    var src = im ? (im.currentSrc || im.src || '') : '';
-    if (window.__ygLux) window.__ygLux(src, pick(card, ['.gh-name', '.g-name']), pick(card, ['.gh-story', '.g-story']), '');
+    var grid = card.closest('#ghGrid') || card.closest('#galleryGrid');
+    var cards = grid ? grid.querySelectorAll('.gh-card, .g-card') : [];
+    var list = [];
+    var idx = 0;
+    Array.prototype.forEach.call(cards, function (c, i) {
+      var im = c.querySelector('img');
+      list.push({
+        img: im ? (im.currentSrc || im.src || '') : '',
+        name: pick(c, ['.gh-name', '.g-name']),
+        idea: pick(c, ['.gh-story', '.g-story']),
+        cmt: ''
+      });
+      if (c === card) idx = i;
+    });
+    if (window.__ygLuxList && list.length) window.__ygLuxList(list, idx);
   });
 })();
 
@@ -3899,8 +3940,8 @@ window.__askDesign = function (kind, info) {
         '<div class="yg-share-grid">' + cards + '</div>';
       host.querySelectorAll('[data-lx]').forEach(function (el) {
         el.addEventListener('click', function () {
-          var it = luxItems[Number(el.getAttribute('data-lx'))];
-          if (it && window.__ygLux) window.__ygLux(it.img, it.name, it.idea, it.cmt);
+          var idx = Number(el.getAttribute('data-lx'));
+          if (luxItems[idx] && window.__ygLuxList) window.__ygLuxList(luxItems, idx);
         });
       });
     }).catch(function () { host.style.display = 'none'; });
