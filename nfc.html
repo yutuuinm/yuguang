@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>轻触之光 · 予光 NFC</title>
 <meta name="description" content="予光作品 NFC 轻触页——抽一下、答案之书、反馈立减与光语分享。愿每一次轻触，都有一段光被想起。">
-<link rel="stylesheet" href="css/style.css?v=09071856">
+<link rel="stylesheet" href="css/style.css?v=09071953">
 <style>
   .nf-wrap { max-width: 640px; margin: 0 auto; }
   .page-hero.nfHero { padding: 26px 14px 2px !important; }
@@ -240,8 +240,8 @@
   </div>
 </div>
 
-<script src="js/supabase-config.js?v=09071856"></script>
-<script src="js/main.js?v=09071856"></script>
+<script src="js/supabase-config.js?v=09071953"></script>
+<script src="js/main.js?v=09071953"></script>
 <script>
 /* ==================== NFC 落地页逻辑（轻触之光） ==================== */
 (function () {
@@ -458,7 +458,7 @@
   function openWheel() {
     state('wheelState', '');
     if (CODE && localStorage.getItem('yg_nfc_spin_' + CODE)) {
-      state('wheelState', '今日已为这件作品转过一次 ✦ 明日再来。');
+      state('wheelState', '这枚作品已经转过一次 ✦ 每枚作品仅一次机会。');
       var sb = $('spinGo');
       if (sb) sb.disabled = true;
     }
@@ -474,7 +474,7 @@
   $('spinGo').addEventListener('click', function () {
     if (spinGoBusy) return;
     if (!CUR || !TCFG) { state('wheelState', '请先读取作品信息', 'bad'); return; }
-    if (CODE && localStorage.getItem('yg_nfc_spin_' + CODE)) { state('wheelState', '今日已转 ✦ 明日再来。'); return; }
+    if (CODE && localStorage.getItem('yg_nfc_spin_' + CODE)) { state('wheelState', '这枚作品已经转过一次 ✦ 每枚作品仅一次机会。'); return; }
     spinGoBusy = true;
     var sb = $('spinGo');
     if (sb) sb.disabled = true;
