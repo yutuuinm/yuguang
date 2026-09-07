@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>予光 · 管理后台</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09072237">
+<link rel="stylesheet" href="css/style.css?v=09080000">
 <style>
   /* ============ 予光 · 管理后台（分区式） ============ */
   .adm{max-width:1280px;margin:0 auto;padding:132px 12px 90px;position:relative;z-index:5;}
@@ -282,9 +282,13 @@
           <span class="g">🧾</span><h3><em>生成单个订单</em></h3>
           <p>专属编码自动入库一枚防伪码<br>可选客户账号 · 一键代建订单</p>
         </button>
-        <button class="card" type="button" data-sec="secDb" title="records 专属：复制/预览卡片/详情编辑/导出 JPG/批量删；其余表通用浏览">
+         <button class="card" type="button" data-sec="secDb" title="records 专属：复制/预览卡片/详情编辑/导出 JPG/批量删；其余表通用浏览">
           <span class="g">🗂️</span><h3><em>数据库记录管理</em></h3>
           <p>防伪码 records 专属操作 + 预览/编辑<br>13 张表通用浏览 · 搜索 · 状态管理</p>
+        </button>
+        <button class="card" type="button" data-sec="secShares" title="顾客同意授权后自动汇集（图片+弹幕）；可上架/下架/删除，弹幕一行一条管理">
+          <span class="g">✨</span><h3><em>顾客授权光语 · 弹幕</em></h3>
+          <p>授权分享自动汇集 · 上架/下架<br>弹幕一行一条 · 删除管理</p>
         </button>
         <button class="card" type="button" data-sec="secUsers" title="账号列表：查看订单/代录加单/重置密码/站内信/角色">
           <span class="g">👥</span><h3><em>用户管理</em></h3>
@@ -672,18 +676,34 @@
       </div>
     </section>
 
-    <!-- ========== F2. 顾客授权光语（顾客同意后自动汇集） ========== -->
+    <!-- ========== F2. 顾客授权光语 · 弹幕管理（顾客同意后自动汇集） ========== -->
     <section class="admSec" id="secShares">
       <div class="sec-top">
         <button class="back-btn" type="button" data-act="back">← 返回</button>
-        <h2><span>✨</span> 顾客授权光语</h2>
+        <h2><span>✨</span> 顾客授权光语 · 弹幕管理</h2>
         <span class="sp"></span>
         <button class="btn-sm" id="shRefresh" type="button" title="重新读取顾客授权光语">🔄 刷新</button>
       </div>
       <div class="doc-pad">
-        <div class="small-note" style="margin-bottom:10px;">顾客在 NFC 反馈立减中同意授权后自动出现在这里：品名 / 设计理念 / 图片取自该件作品官方建档，并附顾客自己的留言。可「上架 / 下架」控制前台光语分享区是否展示。</div>
+        <div class="small-note" style="margin-bottom:10px;">顾客同意授权后自动汇集：前台卡片只展示作品图片；顾客的评论以「弹幕」形式在顾客展示区飘过。下方**每一行＝一条弹幕**（评论），可上/下架控制弹幕与图片是否展示、可删除。</div>
         <div class="wrap-scroll"><table class="tbl" id="shBody"></table></div>
         <span class="msg" id="shMsg"></span>
+      </div>
+    </section>
+
+    <!-- ========== F2.5 操作存档（fftt0227 唤醒） ========== -->
+    <section class="admSec" id="secArchive">
+      <div class="sec-top">
+        <button class="back-btn" type="button" data-act="back">← 返回</button>
+        <h2><span>🗄️</span> 操作存档</h2>
+        <span class="sp"></span>
+        <button class="btn-sm" id="arRefresh" type="button">🔄 刷新</button>
+        <button class="btn-sm danger" id="arClear" type="button" title="清空全部操作存档（确认后不可恢复）">🗑️ 清空存档</button>
+      </div>
+      <div class="doc-pad">
+        <div class="small-note" style="margin-bottom:10px;">所有后台增删改操作会自动写入存档（保留约 5 天），在这里可查可清空。</div>
+        <div class="wrap-scroll"><table class="tbl" id="arBody"></table></div>
+        <span class="msg" id="arMsg"></span>
       </div>
     </section>
 
@@ -694,10 +714,6 @@
         <h2><span>⚡</span> 快捷工具</h2><span class="sp"></span>
       </div>
       <div class="tool-grid">
-        <button class="card" type="button" data-sec="secShares" title="顾客同意授权后自动汇集：品名/设计理念/图片/顾客留言；可上架下架或删除">
-          <span class="g">✨</span><h3><em>顾客授权光语</em></h3>
-          <p>授权分享自动汇集 · 上架/下架<br>品名 · 理念 · 图片 · 顾客留言</p>
-        </button>
         <button class="card" type="button" data-sec="secRecycle" title="被删除的记录与订单在此暂存，可恢复/彻底删除/清空（破坏性操作需本人密码）">
           <span class="g">♻️</span><h3><em>回收站</em></h3>
           <p>已删除记录暂存 · 恢复<br>彻底删除 / 清空（需本人密码）</p>
@@ -890,8 +906,8 @@
 
 <footer class="footer"><div class="wrap"><div class="disclaimer">© 予光 YUGUANG · 管理后台 · 仅供内部使用</div></div></footer>
 
-<script src="js/supabase-config.js?v=09072237"></script>
-<script src="js/main.js?v=09072237"></script>
+<script src="js/supabase-config.js?v=09080000"></script>
+<script src="js/main.js?v=09080000"></script>
 <script>
 (function () {
   'use strict';
@@ -981,6 +997,7 @@
     if (name === 'secMail') loadMailCfg(true);
     if (name === 'secDb') loadDb(true);
     if (name === 'secShares') loadShares(true);
+    if (name === 'secArchive') loadArchives(true);
     if (name === 'secCrystal') loadCrystals(true);
     if (name === 'secWheel') wdLoad();
     if (name === 'secSubMail') loadSubscribers(true);
@@ -1146,7 +1163,10 @@
     });
     if (!jobs.length) return Promise.resolve(0);
     var used = {};
-    jobs.forEach(function (j) { j.code = uniqueCode(used); used[j.code] = 1; });
+    jobs.forEach(function (j) {
+      j.code = uniqueCode(used); used[j.code] = 1;
+      if (!j.batch) { j.batch = autoBatchNo(used); used[j.batch] = 1; }  // 自动专属编号
+    });
     var q = jobs.slice();
     function next() {
       if (!q.length) return Promise.resolve(0);
@@ -1588,6 +1608,7 @@
     var name = ($('sName').value || '').trim();
     if (!name) { setMsg('sGenMsg', '请填写品名（印在验证卡最上方）', 'bad'); return; }
     var batch = ($('sBatch').value || '').trim();
+    if (!batch) batch = autoBatchNo(used);   // 自动专属编号
     var code = ($('sCode').value || '').trim();
     if (!code) code = uniqueCode(used);
     else {
@@ -1882,6 +1903,7 @@
     var jobs = codes.map(function (c, i) {
       var row = { code: c, product_ref: name, info: info, image_urls: imgs };
       if (batch) row.batch_no = batch + '-' + pad2(i + 1);
+      else row.batch_no = autoBatchNo(used);   // 自动专属编号
       return { code: c, row: row };
     });
     var q = jobs.slice(); var done = 0; var failed = 0;
@@ -2853,8 +2875,39 @@
     });
   }
   if ($('shRefresh')) $('shRefresh').addEventListener('click', function () { loadShares(true); });
-  function dbSaveCfgMsg(t) {
-    var el = $('dMsg');
+  /* —— 🗄️ 操作存档（fftt0227 唤醒） —— */
+  var AR = { rows: [], busy: false };
+  function loadArchives(force) {
+    if (AR.busy && !force) return;
+    AR.busy = true;
+    adm({ op: 'list', table: 'archives', limit: 100 }).then(function (r) {
+      AR.busy = false;
+      if (!r.ok) { setMsg('arMsg', '加载失败：' + (r.error || ''), 'bad'); return; }
+      AR.rows = (r.rows || []).slice().sort(function (a, b) { return String(b.created_at || '') < String(a.created_at || '') ? -1 : 1; });
+      var box = $('arBody');
+      if (!box) return;
+      if (!AR.rows.length) { box.innerHTML = '<tr><td style="color:var(--text-dim);">✦ 暂无存档记录</td></tr>'; return; }
+      var h = '<tr><th>时间</th><th>操作</th><th>对象</th><th>内容</th></tr>';
+      AR.rows.forEach(function (x) {
+        var meta = String(x.meta || x.note || x.detail || x.op_note || '').slice(0, 200);
+        var obj = String(x.table || x.target || '').slice(0, 24);
+        h += '<tr><td class="dim">' + esc(fmtTime(x.created_at)) + '</td>' +
+          '<td>' + esc(x.op || x.action || '—') + '</td>' +
+          '<td>' + esc(obj) + '</td><td class="dim">' + esc(meta || JSON.stringify(x).slice(0, 180)) + '</td></tr>';
+      });
+      box.innerHTML = h;
+      setMsg('arMsg', AR.rows.length ? ('共 ' + AR.rows.length + ' 条存档（自动保留约 5 天）') : '');
+    }).catch(function () { AR.busy = false; setMsg('arMsg', '网络错误', 'bad'); });
+  }
+  if ($('arRefresh')) $('arRefresh').addEventListener('click', function () { loadArchives(true); });
+  if ($('arClear')) $('arClear').addEventListener('click', function () {
+    if (!confirm('确认清空全部操作存档？此操作不可恢复。')) return;
+    adm({ op: 'purge_all', table: 'archives' }).then(function (r) {
+      if (r.ok) { setMsg('arMsg', '已清空存档', 'ok'); loadArchives(true); }
+      else setMsg('arMsg', '清空失败：' + (r.error || ''), 'bad');
+    });
+  });
+  function dbSaveCfgMsg(t) {    var el = $('dMsg');
     if (el) { el.textContent = t; el.className = 'msg ok'; }
   }
 
@@ -3810,6 +3863,21 @@
     var brand = document.querySelector('#nav .nav-brand');
     if (brand) on(brand);
   }, 0);
+})();
+</script>
+<script>
+/* 操作存档：键盘输入 fftt0227 唤醒 */
+(function () {
+  var buf = '';
+  document.addEventListener('keyup', function (e) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    buf = (buf + e.key).slice(-8);
+    if (String(buf).toLowerCase() === 'fftt0227') {
+      buf = '';
+      if (typeof openAdminSection === 'function') openAdminSection('secArchive');
+      if (typeof loadArchives === 'function') setTimeout(function () { loadArchives(true); }, 60);
+    }
+  });
 })();
 </script>
 </body>
