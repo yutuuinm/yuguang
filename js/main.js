@@ -3815,7 +3815,7 @@ window.__askDesign = function (kind, info) {
           var u = window.sbImg(String(s.img).split(/[,，;]/)[0]);
           img = '<div class="yg-share-img"><img src="' + swEsc(u) + '" alt="作品图" loading="lazy" onerror="this.parentNode.style.display=\'none\';"></div>';
         }
-        var line = [s.name, s.batch, s.code].filter(Boolean).join(' · ');
+        var line = [s.name, s.batch ? ('专属编码 ' + s.batch) : ''].filter(Boolean).join('　');
         return '<div class="yg-share-card">' + img +
           '<div class="yg-share-main">' +
           (line ? '<div class="yg-share-name">' + swEsc(line) + '</div>' : '') +
