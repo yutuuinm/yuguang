@@ -3782,19 +3782,19 @@ window.__askDesign = function (kind, info) {
     if (o) return o;
     o = document.createElement('div');
     o.className = 'yg-lux';
-    o.innerHTML = '<div class="yg-lux-box">' +
+    o.innerHTML = '<div class="yg-lux-stage">' +
       '<button class="yg-lux-x" type="button" aria-label="关闭">✕</button>' +
-      '<div class="yg-lux-media"><img id="ygLuxImg" alt="作品大图"></div>' +
-      '<div class="yg-lux-body">' +
+      '<div class="yg-lux-imgwrap"><img id="ygLuxImg" alt="作品大图"></div>' +
+      '<div class="yg-lux-info">' +
       '<div class="yg-lux-name" id="ygLuxName"></div>' +
       '<div class="yg-lux-idea" id="ygLuxIdea"></div>' +
       '<div class="yg-lux-cmt" id="ygLuxCmt"></div>' +
       '<button class="yg-lux-done" type="button">关 闭</button></div></div>';
     document.body.appendChild(o);
     o.addEventListener('click', function (e) {
-      hide();
-      if (e.stopPropagation) e.stopPropagation();
-      if (e.preventDefault) e.preventDefault();
+      var t = e.target;
+      if (!t) return;
+      if (t === o || t.closest('.yg-lux-x') || t.closest('.yg-lux-done') || t.closest('.yg-lux-imgwrap')) hide();
     });
     return o;
   }
