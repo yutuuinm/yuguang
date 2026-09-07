@@ -3788,9 +3788,10 @@ window.__askDesign = function (kind, info) {
       '<div class="yg-lux-body">' +
       '<div class="yg-lux-name" id="ygLuxName"></div>' +
       '<div class="yg-lux-idea" id="ygLuxIdea"></div>' +
-      '<div class="yg-lux-cmt" id="ygLuxCmt"></div></div></div>';
+      '<div class="yg-lux-cmt" id="ygLuxCmt"></div>' +
+      '<button class="yg-lux-done" type="button">关 闭</button></div></div>';
     document.body.appendChild(o);
-    o.addEventListener('click', function (e) { if (e.target === o || e.target.closest('.yg-lux-x')) hide(); });
+    o.addEventListener('click', function (e) { if (e.target === o || e.target.closest('.yg-lux-x') || e.target.closest('.yg-lux-done')) hide(); });
     return o;
   }
   function hide() { var o = ensure(); o.classList.remove('on'); document.body.classList.remove('lux-lock'); }
@@ -3822,6 +3823,7 @@ window.__askDesign = function (kind, info) {
       });
     });
   };
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') hide(); });
 })();
 
 /* 光集卡（首页 #ghGrid / 光集页 #galleryGrid）：点击整卡 = 点开大图 + 设计理念 */
