@@ -3112,3 +3112,29 @@ html { overscroll-behavior-y: none; }
 /* 东方子标签：星座/合盘快捷跳转 */
 .sub-btn.go-sub { color: var(--gold); border-color: rgba(227,196,124,.55); }
 .sub-btn.go-sub:hover { background: rgba(227,196,124,.12); }
+/* 定制方式四子标签：统一金字常驻 */
+.mode-chips .sub-btn { color: var(--gold); }
+.mode-chips .sub-btn.active { background: linear-gradient(135deg, rgba(227,196,124,.26), rgba(227,196,124,.08));
+  border-color: var(--gold); box-shadow: 0 0 12px rgba(227,196,124,.22); }
+/* 语录/定制动画背后星尘 */
+.yg-idle { background-image:
+  radial-gradient(1.4px 1.4px at 12% 16%, rgba(255,246,224,.95), transparent 60%),
+  radial-gradient(1.2px 1.2px at 84% 12%, rgba(143,163,217,.9), transparent 60%),
+  radial-gradient(1.6px 1.6px at 66% 34%, rgba(255,246,224,.8), transparent 60%),
+  radial-gradient(1.2px 1.2px at 30% 62%, rgba(143,163,217,.85), transparent 60%),
+  radial-gradient(1.4px 1.4px at 90% 72%, rgba(255,246,224,.75), transparent 60%),
+  radial-gradient(1.2px 1.2px at 20% 86%, rgba(227,196,124,.8), transparent 60%),
+  linear-gradient(170deg, rgba(15,22,38,.97), rgba(8,11,20,.99)); }
+#genHexBox.cust-loading .gen-hex-inner { background-image:
+  radial-gradient(1.4px 1.4px at 14% 18%, rgba(255,246,224,.9), transparent 60%),
+  radial-gradient(1.2px 1.2px at 86% 16%, rgba(143,163,217,.9), transparent 60%),
+  radial-gradient(1.4px 1.4px at 70% 66%, rgba(255,246,224,.75), transparent 60%),
+  radial-gradient(1.2px 1.2px at 26% 74%, rgba(227,196,124,.85), transparent 60%); }
+/* 站点表单：深色自适应输入块（预约/留言/订阅/意向/关系备注等） */
+.sb-form textarea, .sb-form input, .field textarea, .field input, .field select {
+  background: rgba(11,17,30,.9); color: var(--moon);
+  border: 1px solid rgba(244,239,230,.18); border-radius: 10px;
+  padding: 9px 11px; font-size: 13px; outline: none; font-family: var(--sans); box-sizing: border-box; }
+.sb-form textarea:focus, .sb-form input:focus, .field textarea:focus, .field input:focus, .field select:focus { border-color: var(--gold); }
+.field textarea, .sb-form textarea { resize: none; width: 100%; min-height: 64px; overflow: hidden; }
+#unionNote { min-height: 64px; }
