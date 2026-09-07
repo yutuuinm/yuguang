@@ -53,11 +53,12 @@ Deno.serve(async (req) => {
     const smtpPort = Number(Deno.env.get("SMTP_PORT") || (db && db.smtp_port) || 465);
     if (!smtpUser || !smtpPass) throw new Error("发件邮箱未配置（settings.mail 或 Secrets）");
 
-    // 收件人：请求 to > settings.mail.to 数组 > 环境 MAIL_TO
+    // 收件人：请求 to > settings.mail.to > 环境 MAIL_TO > 后台预置默认邮箱（管理员收件）
+    const DEFAULT_TO = ["15040690227@163.com"];
     const dbTo = (db && db.to) || [];
     const envTo = String(Deno.env.get("MAIL_TO") || "").split(/[,，;；\s]+/).filter(Boolean);
     const list = payload.to ? String(payload.to).split(/[,，;；\s]+/).filter(Boolean)
-      : (Array.isArray(dbTo) && dbTo.length ? dbTo : envTo);
+      : (Array.isArray(dbTo) && dbTo.length ? dbTo : (envTo.length ? envTo : DEFAULT_TO.slice()));
     if (!list.length) throw new Error("未配置收件邮箱（settings.mail.to）");
 
     const kind = payload.kind || "message";
