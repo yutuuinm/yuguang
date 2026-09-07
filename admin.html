@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>予光 · 管理后台</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09071840">
+<link rel="stylesheet" href="css/style.css?v=09071846">
 <style>
   /* ============ 予光 · 管理后台（分区式） ============ */
   .adm{max-width:1280px;margin:0 auto;padding:132px 12px 90px;position:relative;z-index:5;}
@@ -657,6 +657,21 @@
       </div>
     </section>
 
+    <!-- ========== F2. 顾客授权光语（顾客同意后自动汇集） ========== -->
+    <section class="admSec" id="secShares">
+      <div class="sec-top">
+        <button class="back-btn" type="button" data-act="back">← 返回</button>
+        <h2><span>✨</span> 顾客授权光语</h2>
+        <span class="sp"></span>
+        <button class="btn-sm" id="shRefresh" type="button" title="重新读取顾客授权光语">🔄 刷新</button>
+      </div>
+      <div class="doc-pad">
+        <div class="small-note" style="margin-bottom:10px;">顾客在 NFC 反馈立减中同意授权后自动出现在这里：品名 / 设计理念 / 图片取自该件作品官方建档，并附顾客自己的留言。可「上架 / 下架」控制前台光语分享区是否展示。</div>
+        <div class="wrap-scroll"><table class="tbl" id="shBody"></table></div>
+        <span class="msg" id="shMsg"></span>
+      </div>
+    </section>
+
     <!-- ========== G. 快捷工具（次级卡片网格 · 维护/设置类） ========== -->
     <section class="admSec" id="secTools">
       <div class="sec-top">
@@ -664,6 +679,10 @@
         <h2><span>⚡</span> 快捷工具</h2><span class="sp"></span>
       </div>
       <div class="tool-grid">
+        <button class="card" type="button" data-sec="secShares" title="顾客同意授权后自动汇集：品名/设计理念/图片/顾客留言；可上架下架或删除">
+          <span class="g">✨</span><h3><em>顾客授权光语</em></h3>
+          <p>授权分享自动汇集 · 上架/下架<br>品名 · 理念 · 图片 · 顾客留言</p>
+        </button>
         <button class="card" type="button" data-sec="secRecycle" title="被删除的记录与订单在此暂存，可恢复/彻底删除/清空（破坏性操作需本人密码）">
           <span class="g">♻️</span><h3><em>回收站</em></h3>
           <p>已删除记录暂存 · 恢复<br>彻底删除 / 清空（需本人密码）</p>
@@ -856,8 +875,8 @@
 
 <footer class="footer"><div class="wrap"><div class="disclaimer">© 予光 YUGUANG · 管理后台 · 仅供内部使用</div></div></footer>
 
-<script src="js/supabase-config.js?v=09071840"></script>
-<script src="js/main.js?v=09071840"></script>
+<script src="js/supabase-config.js?v=09071846"></script>
+<script src="js/main.js?v=09071846"></script>
 <script>
 (function () {
   'use strict';
@@ -946,6 +965,7 @@
     if (name === 'secUsers') loadUsers(true);
     if (name === 'secMail') loadMailCfg(true);
     if (name === 'secDb') loadDb(true);
+    if (name === 'secShares') loadShares(true);
     if (name === 'secCrystal') loadCrystals(true);
     if (name === 'secWheel') wdLoad();
     if (name === 'secSubMail') loadSubscribers(true);
@@ -2730,6 +2750,70 @@
       }).catch(function () { if (sv) { sv.disabled = false; sv.textContent = '💾 保存修改'; } setMsg('dMsg', '网络错误', 'bad'); });
     });
   }
+  /* —— ✨ 顾客授权光语（shares：顾客同意后自动汇集） —— */
+  var SH = { rows: [], busy: false };
+  function loadShares(force) {
+    if (SH.busy && !force) return;
+    SH.busy = true;
+    adm({ op: 'list', table: 'shares', limit: 200 }).then(function (r) {
+      SH.busy = false;
+      if (!r.ok) { setMsg('shMsg', '加载失败：' + (r.error || ''), 'bad'); return; }
+      SH.rows = (r.rows || []).slice().sort(function (a, b) { return (Number(b.id) || 0) - (Number(a.id) || 0); });
+      renderShares();
+    }).catch(function () { SH.busy = false; setMsg('shMsg', '网络错误', 'bad'); });
+  }
+  function renderShares() {
+    var box = $('shBody');
+    if (!box) return;
+    var rows = SH.rows;
+    setMsg('shMsg', rows.length ? ('共 ' + rows.length + ' 条顾客授权光语') : '');
+    if (!rows.length) {
+      box.innerHTML = '<tr><td style="color:var(--text-dim);">✦ 还没有顾客授权的光语——第一位顾客在 NFC 反馈立减里同意分享后，会自动出现在这里</td></tr>';
+      return;
+    }
+    var h = '<tr><th>状态</th><th>品名</th><th>设计理念</th><th>图片</th><th>顾客留言</th><th>立减</th><th>授权时间</th><th>操作</th></tr>';
+    rows.forEach(function (s) {
+      var on = s.approved !== false;
+      h += '<tr><td><button class="btn-sm" data-shok="' + s.id + '" data-v="' + (!on) + '">' + (on ? '🟢 上架中' : '⚪ 已下架') + '</button></td>' +
+        '<td>' + esc(s.name || '—') + (s.batch ? '<div class="dim" style="font-size:11px;">' + esc(s.batch) + '</div>' : '') + '</td>' +
+        '<td style="max-width:250px;color:var(--text-dim);font-size:12px;">' + esc(String(s.idea || '').slice(0, 140)) + '</td>' +
+        '<td class="dim">' + esc(String(s.img || '—').slice(0, 50)) + '</td>' +
+        '<td style="max-width:220px;color:var(--moon);">' + esc(String(s.comment || '（未留言）').slice(0, 160)) + '</td>' +
+        '<td>' + (Number(s.discount) > 0 ? '¥' + Number(s.discount) : '—') + '</td>' +
+        '<td class="dim">' + esc(fmtTime(s.created_at)) + '</td>' +
+        '<td style="white-space:nowrap;"><button class="btn-sm" data-shcp="' + s.id + '" title="复制防伪码">📋 码</button>' +
+        '<button class="btn-sm danger" data-shdel="' + s.id + '" title="删除该条（二次确认）">🗑️ 删除</button></td></tr>';
+    });
+    box.innerHTML = h;
+    box.querySelectorAll('[data-shok]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var id = Number(b.getAttribute('data-shok'));
+        var v = b.getAttribute('data-v') === 'true';
+        adm({ op: 'update', table: 'shares', id: id, set: { approved: v } }).then(function (r2) {
+          if (r2.ok) { dbSaveCfgMsg('已' + (v ? '上架' : '下架') + '该条光语'); loadShares(true); }
+          else setMsg('shMsg', '操作失败：' + (r2.error || ''), 'bad');
+        }).catch(function () { setMsg('shMsg', '网络错误', 'bad'); });
+      });
+    });
+    box.querySelectorAll('[data-shcp]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var s = SH.rows.filter(function (x) { return String(x.id) === b.getAttribute('data-shcp'); })[0];
+        if (s && s.code) copyText(s.code);
+      });
+    });
+    box.querySelectorAll('[data-shdel]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var s = SH.rows.filter(function (x) { return String(x.id) === b.getAttribute('data-shdel'); })[0];
+        if (!s) return;
+        if (!confirm('删除这条顾客授权光语？删除后前台分享区不再展示。')) return;
+        adm({ op: 'delete', table: 'shares', id: s.id }).then(function (r2) {
+          if (r2.ok) { setMsg('shMsg', '已删除', 'ok'); loadShares(true); }
+          else setMsg('shMsg', '删除失败：' + (r2.error || ''), 'bad');
+        }).catch(function () { setMsg('shMsg', '网络错误', 'bad'); });
+      });
+    });
+  }
+  if ($('shRefresh')) $('shRefresh').addEventListener('click', function () { loadShares(true); });
   function dbSaveCfgMsg(t) {
     var el = $('dMsg');
     if (el) { el.textContent = t; el.className = 'msg ok'; }
