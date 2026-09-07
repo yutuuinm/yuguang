@@ -3791,7 +3791,11 @@ window.__askDesign = function (kind, info) {
       '<div class="yg-lux-cmt" id="ygLuxCmt"></div>' +
       '<button class="yg-lux-done" type="button">关 闭</button></div></div>';
     document.body.appendChild(o);
-    o.addEventListener('click', function (e) { if (e.target === o || e.target.closest('.yg-lux-x') || e.target.closest('.yg-lux-done')) hide(); });
+    o.addEventListener('click', function (e) {
+      var t = e.target;
+      if (!t) return;
+      if (t === o || t.closest('.yg-lux-x') || t.closest('.yg-lux-done') || t.closest('.yg-lux-media')) hide();
+    });
     return o;
   }
   function hide() { var o = ensure(); o.classList.remove('on'); document.body.classList.remove('lux-lock'); }
@@ -3940,7 +3944,6 @@ window.__askDesign = function (kind, info) {
       if (row.name) fields['品名'] = row.name;
       if (row.batch) fields['专属编号'] = row.batch;
       fields['防伪码'] = row.code || '—';
-      if (row.idea) fields['设计理念'] = row.idea;
       if (row.img) fields['图片文件名'] = row.img;
       fields['客户评论'] = row.comment || '（未填写）';
       fields['立减金额'] = row.discount ? ('¥' + row.discount) : '—';
