@@ -3771,6 +3771,81 @@ window.__askDesign = function (kind, info) {
 })();
 
 /* ============================================================
+   大图 + 设计理念 浮层（仿白桦臻品橱窗点开效果 · 予光星夜底）
+   - __ygLux(img, name, idea, cmt)：打开
+   - __ygLuxBind(root, sel, {name, idea, cmt})：给卡片批量绑定点图/点卡打开
+   ============================================================ */
+(function luxViewer() {
+  function txt(el) { return el ? String(el.textContent || '').trim() : ''; }
+  function ensure() {
+    var o = document.getElementById('ygLux');
+    if (o) return o;
+    o = document.createElement('div');
+    o.className = 'yg-lux';
+    o.innerHTML = '<div class="yg-lux-box">' +
+      '<button class="yg-lux-x" type="button" aria-label="关闭">✕</button>' +
+      '<div class="yg-lux-media"><img id="ygLuxImg" alt="作品大图"></div>' +
+      '<div class="yg-lux-body">' +
+      '<div class="yg-lux-name" id="ygLuxName"></div>' +
+      '<div class="yg-lux-idea" id="ygLuxIdea"></div>' +
+      '<div class="yg-lux-cmt" id="ygLuxCmt"></div></div></div>';
+    document.body.appendChild(o);
+    o.addEventListener('click', function (e) { if (e.target === o || e.target.closest('.yg-lux-x')) hide(); });
+    return o;
+  }
+  function hide() { var o = ensure(); o.classList.remove('on'); document.body.classList.remove('lux-lock'); }
+  window.__ygLuxHide = hide;
+  window.__ygLux = function (img, name, idea, cmt) {
+    var o = ensure();
+    var im = o.querySelector('#ygLuxImg');
+    im.style.opacity = '';
+    if (img) { im.src = img; }
+    else { im.removeAttribute('src'); im.style.opacity = '0.18'; }
+    o.querySelector('#ygLuxName').textContent = name || '';
+    var ie = o.querySelector('#ygLuxIdea');
+    ie.textContent = idea || '';
+    ie.style.display = idea ? '' : 'none';
+    var ce = o.querySelector('#ygLuxCmt');
+    ce.textContent = cmt ? ('「' + cmt + '」') : '';
+    ce.style.display = cmt ? '' : 'none';
+    o.classList.add('on');
+    document.body.classList.add('lux-lock');
+  };
+  window.__ygLuxBind = function (root, sel, opts) {
+    if (!root || !sel) return;
+    opts = opts || {};
+    root.querySelectorAll(sel).forEach(function (card) {
+      card.addEventListener('click', function () {
+        var im = card.querySelector('img');
+        var src = im ? (im.currentSrc || im.src || '') : '';
+        if (window.__ygLux) window.__ygLux(src, opts.name ? txt(card.querySelector(opts.name)) : '', opts.idea ? txt(card.querySelector(opts.idea)) : '', opts.cmt ? txt(card.querySelector(opts.cmt)) : '');
+      });
+    });
+  };
+})();
+
+/* 光集卡（首页 #ghGrid / 光集页 #galleryGrid）：点击整卡 = 点开大图 + 设计理念 */
+(function () {
+  function pick(el, sels) {
+    for (var i = 0; i < sels.length; i++) {
+      var n = el.querySelector(sels[i]);
+      if (n && String(n.textContent || '').trim()) return String(n.textContent).trim();
+    }
+    return '';
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    if (!t || !t.closest) return;
+    if (t.closest('a,button,input,select,textarea')) return;
+    var card = t.closest('#ghGrid .gh-card, #galleryGrid .g-card');
+    if (!card) return;
+    var im = card.querySelector('img');
+    var src = im ? (im.currentSrc || im.src || '') : '';
+    if (window.__ygLux) window.__ygLux(src, pick(card, ['.gh-name', '.g-name']), pick(card, ['.gh-story', '.g-story']), '');
+  });
+})();
+
+/* ============================================================
    光语分享墙（NFC 落地页 / 互动区 / 光集 共用）
    - __ygShareWall(host, opt)：按 opt.code 过滤或全局拉取 shares 表渲染
    - __ygShareSubmit(p)：写入 shares 表 + 自动发授权回执邮件（收件人取后台邮件设置）
@@ -3809,18 +3884,20 @@ window.__askDesign = function (kind, info) {
         return;
       }
       host.style.display = '';
-      var cards = rows.map(function (s) {
-        var img = '';
-        if (s.img && window.sbImg) {
-          var u = window.sbImg(String(s.img).split(/[,，;]/)[0]);
-          img = '<div class="yg-share-img"><img src="' + swEsc(u) + '" alt="作品图" loading="lazy" onerror="this.parentNode.style.display=\'none\';"></div>';
-        }
+      var luxItems = [];
+      var cards = rows.map(function (s, idx) {
+        var u = '';
+        if (s.img && window.sbImg) u = window.sbImg(String(s.img).split(/[,，;]/)[0]);
+        luxItems.push({ img: u, name: String(s.name || '').trim(), idea: String(s.idea || '').trim(), cmt: String(s.comment || '').trim() });
+        var imgHtml = u
+          ? '<div class="yg-share-img" data-lx="' + idx + '" role="button" title="点开看图与设计理念">' +
+            '<img src="' + swEsc(u) + '" alt="作品图" loading="lazy" onerror="this.parentNode.style.display=\'none\';"></div>'
+          : '';
         var line = [s.name, s.batch ? ('专属编码 ' + s.batch) : ''].filter(Boolean).join('　');
-        return '<div class="yg-share-card">' + img +
+        return '<div class="yg-share-card">' + imgHtml +
           '<div class="yg-share-main">' +
           (line ? '<div class="yg-share-name">' + swEsc(line) + '</div>' : '') +
-          (s.idea ? '<div class="yg-share-idea">' + swEsc(String(s.idea).slice(0, 120)) + '</div>' : '') +
-          (s.comment ? '<div class="yg-share-cmt">「' + swEsc(String(s.comment).slice(0, 200)) + '」</div>' : '') +
+          (s.comment ? '<div class="yg-share-cmt">「' + swEsc(String(s.comment).slice(0, 160)) + '」</div>' : '') +
           '<div class="yg-share-foot">' +
           '<span class="yg-share-tag">已授权分享</span>' +
           '<span class="yg-share-date">' + swTime(s.created_at) + '</span></div>' +
@@ -3829,6 +3906,12 @@ window.__askDesign = function (kind, info) {
       host.innerHTML =
         (title ? '<div class="yg-share-head"><h3>' + title + '</h3>' + (sub ? '<span>' + sub + '</span>' : '') + '</div>' : '') +
         '<div class="yg-share-grid">' + cards + '</div>';
+      host.querySelectorAll('[data-lx]').forEach(function (el) {
+        el.addEventListener('click', function () {
+          var it = luxItems[Number(el.getAttribute('data-lx'))];
+          if (it && window.__ygLux) window.__ygLux(it.img, it.name, it.idea, it.cmt);
+        });
+      });
     }).catch(function () { host.style.display = 'none'; });
   };
 
