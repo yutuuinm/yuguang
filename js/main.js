@@ -533,7 +533,17 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     if ($('subZodiac')) $('subZodiac').hidden = (name !== 'zodiac');
   }
   subBtns.forEach((b) => {
-    b.addEventListener('click', function () { setEastSub(b.getAttribute('data-sub')); });
+    b.addEventListener('click', function () {
+      var g = b.getAttribute('data-go');
+      if (g) {
+        var tb = document.querySelector('.tab-btn[data-panel="' + g + '"]');
+        if (tb && !tb.classList.contains('active')) tb.click();
+        var pnl = $('panel-' + g);
+        if (pnl) pnl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+      setEastSub(b.getAttribute('data-sub'));
+    });
   });
   window.__studioShow = function (cfg) { showDesign(cfg); };
 
@@ -1362,7 +1372,7 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
 (function initGallery() {
   var grid = document.getElementById('galleryGrid');
   if (!grid) return;
-  var cards = GALLERY_ITEMS.map(function (it, i) {
+  var cards = GALLERY_ITEMS.slice(0, 8).map(function (it, i) {
     return (
       '<figure class="g-card reveal" style="transition-delay:' + (i * 60) + 'ms">' +
         '<div class="g-img">' +
@@ -1389,7 +1399,7 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
   window.sb('gallery?select=*&visible=eq.true&approved=eq.true&order=sort.asc')
     .then(function (rows) {
       if (!rows || !rows.length) { grid.innerHTML = '<p class="section-sub" style="text-align:center;color:var(--text-dim);padding:20px 0;">光集正在整理 ✦ 敬请期待</p>'; return; }
-      grid.innerHTML = rows.map(function (it) {
+      grid.innerHTML = rows.slice(0, 8).map(function (it) {
         var src = (window.sbImg && it.image_url) ? window.sbImg(it.image_url) : '';
         return '<figure class="g-card reveal">' +
           '<div class="g-img">' +
@@ -2174,13 +2184,35 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
 })();
 
 
-/* ========== 页面切换过渡导航 + 左上角返回（鸿蒙式） ========== */
+/* ========== 页面切换过渡导航 + 左上角返回 ========== */
+/* 全站通用：任何时刻清掉残留的离场黑屏 / 进入遮罩（含 bfcache 返回） */
+(function pageGlue() {
+  function clean() {
+    var b = document.body;
+    if (b) b.classList.remove('yg-exit');
+    var g = document.getElementById('ygGo');
+    if (g) g.remove();
+  }
+  window.addEventListener('load', clean);
+  window.addEventListener('pageshow', clean);
+  window.addEventListener('pagehide', clean);
+})();
 (function () {
   var leaving = false;
+  function ensureGo() {
+    var g = document.getElementById('ygGo');
+    if (g) return g;
+    g = document.createElement('div');
+    g.id = 'ygGo';
+    g.innerHTML = '<span class="go-orb"></span><span class="go-txt">正在进入 · 予光</span>';
+    document.body.appendChild(g);
+    return g;
+  }
   function nav(url) {
     if (leaving) return; leaving = true;
-    document.body.classList.add('yg-exit');
-    setTimeout(function () { try { location.assign(url); } catch (e) { location.href = url; } }, 250);
+    var g = ensureGo();
+    requestAnimationFrame(function () { if (g) g.classList.add('on'); });
+    setTimeout(function () { try { location.assign(url); } catch (e) { location.href = url; } }, 260);
   }
   window.ygNav = nav;
 
@@ -2221,7 +2253,10 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
   function stkPop() {
     try {
       var a = stkGet();
-      if (a.length > 1) { var t = a.pop(); sessionStorage.setItem(STK, JSON.stringify(a)); return t; }
+      while (a.length) {
+        var t = a.pop();
+        if (t !== location.pathname) { sessionStorage.setItem(STK, JSON.stringify(a)); return t; }
+      }
     } catch (e) {}
     return null;
   }
@@ -2230,7 +2265,8 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
   window.addEventListener('pageshow', function () { document.body.classList.remove('yg-exit'); });
   b.addEventListener('click', function (ev) {
     ev.preventDefault();
-    document.body.classList.add('yg-exit');
+    var g2 = ensureGo();
+    if (g2) requestAnimationFrame(function () { g2.classList.add('on'); });
     setTimeout(function () {
       if (/admin\.html$/.test(location.pathname)) { location.href = 'index.html'; return; }
       if (singleMode) {
@@ -2244,7 +2280,7 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
       try { same = ref && (new URL(ref).origin === location.origin); } catch (e) { same = ref.indexOf(location.origin) === 0; }
       if (same && history.length > 1) history.back();
       else location.href = 'index.html';
-    }, 250);
+    }, 260);
   });
   var navInner = document.querySelector('.nav-inner');
   if (navInner && navInner.firstChild) navInner.insertBefore(b, navInner.firstChild);
@@ -3736,7 +3772,7 @@ window.__askDesign = function (kind, info) {
           (s.idea ? '<div class="yg-share-idea">' + swEsc(String(s.idea).slice(0, 120)) + '</div>' : '') +
           (s.comment ? '<div class="yg-share-cmt">「' + swEsc(String(s.comment).slice(0, 200)) + '」</div>' : '') +
           '<div class="yg-share-foot">' +
-          (Number(s.discount) > 0 ? '<span class="yg-share-disc">立减 ¥' + Number(s.discount) + '</span>' : '<span class="yg-share-tag">已授权分享</span>') +
+          '<span class="yg-share-tag">已授权分享</span>' +
           '<span class="yg-share-date">' + swTime(s.created_at) + '</span></div>' +
           '</div></div>';
       }).join('');
