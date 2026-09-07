@@ -520,30 +520,46 @@ const BG_PHOTO = '背景.jpg'; // 星夜底图：替换为新的背景图文件�
     if (hb) hb.click();
   }
 
-  /* ---------- 东方：生辰 / 摇卦 子方式切换 ---------- */
+  /* ---------- 生辰 / 摇卦 / 星座 / 合盘 四子标签（同一栏常驻切换） ---------- */
   var subBtns = document.querySelectorAll('#eastSubTabs .sub-btn');
   function setEastSub(name) {
-    subBtns.forEach((b) => {
-      var on = b.getAttribute('data-sub') === name;
+    if ($('subBirth')) $('subBirth').hidden = (name !== 'birth');
+    if ($('subShake')) $('subShake').hidden = (name !== 'shake');
+    syncModeChips();
+  }
+  function syncModeChips() {
+    var actTab = document.querySelector('.tab-btn.active');
+    var p = actTab ? actTab.dataset.panel : 'east';
+    var m = p;
+    if (p === 'east') {
+      m = ($('subBirth') && !$('subBirth').hidden) ? 'birth' : 'shake';
+    }
+    subBtns.forEach(function (b) {
+      var on = b.getAttribute('data-m') === m;
       b.classList.toggle('active', on);
       b.setAttribute('aria-selected', on ? 'true' : 'false');
     });
-    if ($('subBirth')) $('subBirth').hidden = (name !== 'birth');
-    if ($('subShake')) $('subShake').hidden = (name !== 'shake');
-    if ($('subZodiac')) $('subZodiac').hidden = (name !== 'zodiac');
+  }
+  function pickMode(m) {
+    if (m === 'birth' || m === 'shake') {
+      var tb = document.querySelector('.tab-btn[data-panel="east"]');
+      if (tb && !tb.classList.contains('active')) tb.click();
+      setEastSub(m);
+    } else {
+      var tb2 = document.querySelector('.tab-btn[data-panel="' + m + '"]');
+      if (tb2 && !tb2.classList.contains('active')) tb2.click();
+      syncModeChips();
+    }
   }
   subBtns.forEach((b) => {
     b.addEventListener('click', function () {
-      var g = b.getAttribute('data-go');
-      if (g) {
-        var tb = document.querySelector('.tab-btn[data-panel="' + g + '"]');
-        if (tb && !tb.classList.contains('active')) tb.click();
-        var pnl = $('panel-' + g);
-        if (pnl) pnl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        return;
-      }
-      setEastSub(b.getAttribute('data-sub'));
+      var m = b.getAttribute('data-m');
+      if (m) pickMode(m);
     });
+  });
+  /* 顶部大分页点击后，让四子标签保持同步高亮 */
+  document.querySelectorAll('.tab-btn').forEach(function (tb) {
+    tb.addEventListener('click', function () { syncModeChips(); });
   });
   window.__studioShow = function (cfg) { showDesign(cfg); };
 
@@ -1579,7 +1595,7 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
       window.sb(table, { method: 'POST', body: JSON.stringify(body) })
         .then(function () {
           if (status) status.textContent = (table === 'orders' ? '已收到 ✦ 客服将与你二次确认（通常在 1 个工作日内）。' : '已收到你的留言 ✦ 我们会在 1 个工作日内回复。');
-          if (window.notifyEmail) window.notifyEmail(table, body);
+          if (window.notifyEmail) window.notifyEmail(table, body, type);
           f.reset();
           if (btn) btn.disabled = false;
         })
@@ -1700,17 +1716,20 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
             return '<figure><img src="' + escV(window.sbImg(f)) + '" alt="作品图" loading="lazy" onerror="this.parentNode.style.display=\'none\';"></figure>';
           }).join('') + '</div>';
         }
+        var pre = Number(r.verify_count || 0);
+        var isFirst = pre < 1;
         var meta = '';
         if (r.batch_no) meta += '<div class="row"><b>定制编号</b><span>' + escV(r.batch_no) + '</span></div>';
         meta += '<div class="row"><b>验证码</b><span class="code">' + escV(code) + '</span></div>';
         meta += '<div class="row"><b>建档时间</b><span>' + escV(String(r.created_at || '').replace('T', ' ').slice(0, 16)) + '</span></div>';
+        meta += '<div class="row"><b>查询次数</b><span>' + (isFirst ? '首次验证' : ('已查询 ' + pre + ' 次')) + '</span></div>';
         var quote = info.text
           ? '<div class="vg-quote"><div class="ql">予 光 · 光 语</div><p>' + escV(String(info.text)) + '</p></div>'
           : '';
         res.innerHTML =
           '<div class="verify-card">' +
-            '<div class="vg-top"><span class="vg-ico">✓</span>' +
-            '<div style="text-align:left;"><div class="vg-tt">验真通过 · 予光正品</div><div class="vg-st">该作品已在予光官方建档</div></div></div>' +
+            '<div class="vg-top"><span class="vg-ico"' + (isFirst ? '' : ' style="background:radial-gradient(circle at 32% 28%,#f3c1ae,#c8694f 80%);"') + '>' + (isFirst ? '✓' : '⚠') + '</span>' +
+            '<div style="text-align:left;"><div class="vg-tt">验真通过 · 予光正品</div><div class="vg-st" id="vgStText">' + (isFirst ? '首次验证 · 请放心' : '多次验证 · 请留意来源') + '</div></div></div>' +
             imgHtml +
             '<div class="vg-name">' + escV(r.product_ref || '予光定制作品') + '</div>' +
             '<div class="vg-meta">' + meta + '</div>' +
@@ -1721,6 +1740,23 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
             '</div>' +
             '<div class="vg-note">＊ 验真仅核验予光官方建档信息；无法通过官方渠道核验的渠道请谨慎，谨防仿冒。</div>' +
           '</div>';
+        /* 记一次查询：区分首次 / 多次 */
+        try {
+          var cfgV = window.SUPABASE || {};
+          if (cfgV.url && cfgV.anon) {
+            fetch(cfgV.url + '/rest/v1/rpc/inc_verify', {
+              method: 'POST',
+              headers: { apikey: cfgV.anon, Authorization: 'Bearer ' + cfgV.anon, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ p_code: code })
+            }).then(function (rr) { return rr.json().catch(function () { return []; }); }).then(function (arr) {
+              var cnt = arr && arr[0] && arr[0].cnt;
+              if (cnt != null) {
+                var stEl = res.querySelector('#vgStText');
+                if (stEl) stEl.textContent = (Number(cnt) === 1) ? '✓ 首次验证 · 请放心' : ('多次验证 · 已查询 ' + cnt + ' 次，请留意来源');
+              }
+            }).catch(function () {});
+          }
+        } catch (e) {}
         var cp = res.querySelector('[data-vcopy]');
         if (cp) {
           cp.addEventListener('click', function () {
@@ -2184,6 +2220,19 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
 })();
 
 
+/* 表单自适应高度（关系备注/留言/订阅/意向等不再需要手动拖） */
+(function () {
+  function fit(ta) {
+    if (!ta || ta.dataset.nofit) return;
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(240, Math.max(64, ta.scrollHeight + 2)) + 'px';
+  }
+  document.querySelectorAll('.field textarea, .sb-form textarea, #xgNeed').forEach(function (ta) {
+    fit(ta);
+    ta.addEventListener('input', function () { fit(ta); });
+  });
+})();
+
 /* ========== 页面切换过渡导航 + 左上角返回 ========== */
 /* 全站通用：任何时刻清掉残留的离场黑屏 / 进入遮罩（含 bfcache 返回） */
 (function pageGlue() {
@@ -2265,10 +2314,10 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
   window.addEventListener('pageshow', function () { document.body.classList.remove('yg-exit'); });
   b.addEventListener('click', function (ev) {
     ev.preventDefault();
+    if (/admin\.html$/.test(location.pathname)) { location.href = 'index.html'; return; }   // 后台左上角返回 → 主页
     var g2 = ensureGo();
     if (g2) requestAnimationFrame(function () { g2.classList.add('on'); });
     setTimeout(function () {
-      if (/admin\.html$/.test(location.pathname)) { location.href = 'index.html'; return; }
       if (singleMode) {
         var home = document.querySelector('.nav-brand');
         if (home) { home.click(); return; }
@@ -3579,7 +3628,7 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
 /* ===== 设计引擎：DeepSeek(v4-flash) 文学分析 + 通义按配比出图 ===== */
 window.__askDesign = function (kind, info) {
   var box = document.getElementById('genHexBox');
-  function qstop() { if (box && box._qiv) { clearInterval(box._qiv); box._qiv = null; } }
+  function qstop() { if (box && box._qiv) { clearInterval(box._qiv); box._qiv = null; } if (box) box.classList.remove('cust-loading'); }
   /* 定制中：只留动画区；完成后恢复上方名字/信息 */
   function cardMode(cust) {
     ['pName', 'pSub', 'pRows', 'pLight'].forEach(function (id) {
@@ -3595,6 +3644,7 @@ window.__askDesign = function (kind, info) {
   var gTmp = document.getElementById('genStatus');
   if (gTmp) gTmp.textContent = '';
   if (box) {
+    box.classList.add('cust-loading');
     box.style.display = 'block';
     box.innerHTML = '<div class="gen-hex-inner">' +
       '<div class="cust-wrap"><span class="cust-orb"></span><p class="cust-title">小光正在为你定制</p></div>' +
@@ -3802,16 +3852,15 @@ window.__askDesign = function (kind, info) {
       var cfg = window.SUPABASE || {};
       if (!cfg.emailUrl) return Promise.resolve();
       var fields = {};
-      fields['防伪码'] = row.code || '—';
       if (row.name) fields['品名'] = row.name;
       if (row.batch) fields['专属编号'] = row.batch;
+      fields['防伪码'] = row.code || '—';
       if (row.idea) fields['设计理念'] = row.idea;
       if (row.img) fields['图片文件名'] = row.img;
       fields['客户评论'] = row.comment || '（未填写）';
       fields['立减金额'] = row.discount ? ('¥' + row.discount) : '—';
       if (row.contact) fields['顾客联系方式'] = row.contact;
       fields['授权时间'] = new Date().toLocaleString('zh-CN');
-      fields['作品验真链接'] = location.origin + location.pathname.replace(/[^/]*$/, '') + 'verify.html?c=' + encodeURIComponent(row.code);
       return fetch(cfg.emailUrl, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ kind: 'share', subject: '【予光】光语分享 · 顾客授权回执（NFC 反馈立减）', fields: fields })
