@@ -3792,9 +3792,9 @@ window.__askDesign = function (kind, info) {
       '<button class="yg-lux-done" type="button">关 闭</button></div></div>';
     document.body.appendChild(o);
     o.addEventListener('click', function (e) {
-      var t = e.target;
-      if (!t) return;
-      if (t === o || t.closest('.yg-lux-x') || t.closest('.yg-lux-done') || t.closest('.yg-lux-media')) hide();
+      hide();
+      if (e.stopPropagation) e.stopPropagation();
+      if (e.preventDefault) e.preventDefault();
     });
     return o;
   }
@@ -3828,6 +3828,14 @@ window.__askDesign = function (kind, info) {
     });
   };
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') hide(); });
+  /* 兜底：浮层开着时，任意一次点击都关闭（capture 阶段先执行，防其它监听器抢先） */
+  document.addEventListener('click', function (ev) {
+    var o = document.getElementById('ygLux');
+    if (!o || !o.classList.contains('on')) return;
+    hide();
+    if (ev.stopPropagation) ev.stopPropagation();
+    if (ev.preventDefault) ev.preventDefault();
+  }, true);
 })();
 
 /* 光集卡（首页 #ghGrid / 光集页 #galleryGrid）：点击整卡 = 点开大图 + 设计理念 */
