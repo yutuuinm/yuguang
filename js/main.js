@@ -3798,7 +3798,7 @@ window.__askDesign = function (kind, info) {
     var q = 'shares?select=*&order=created_at.desc&limit=' + (opt.limit || 12);
     if (opt.code) q += '&code=eq.' + encodeURIComponent(opt.code);
     window.sb(q).then(function (rows) {
-      rows = rows || [];
+      rows = (rows || []).filter(function (s) { return s.approved === undefined || s.approved === true; }); // 后台下架的不展示
       var title = opt.title || host.getAttribute('data-title') || '';
       var sub = opt.sub || host.getAttribute('data-sub') || '';
       var emptyTxt = opt.empty || host.getAttribute('data-empty') || '还没有光语分享 ✦ 愿你是写下第一句的人。';
