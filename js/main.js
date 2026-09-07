@@ -3798,7 +3798,13 @@ window.__askDesign = function (kind, info) {
     });
     return o;
   }
-  function hide() { var o = ensure(); o.classList.remove('on'); document.body.classList.remove('lux-lock'); }
+  function hide() {
+    var o = ensure();
+    o.classList.remove('on');
+    document.body.classList.remove('lux-lock');
+    var de = document.documentElement;
+    if (de) de.classList.remove('lux-lock');
+  }
   window.__ygLuxHide = hide;
   window.__ygLux = function (img, name, idea, cmt) {
     var o = ensure();
@@ -3815,6 +3821,8 @@ window.__askDesign = function (kind, info) {
     ce.style.display = cmt ? '' : 'none';
     o.classList.add('on');
     document.body.classList.add('lux-lock');
+    var de = document.documentElement;
+    if (de) de.classList.add('lux-lock');
   };
   window.__ygLuxBind = function (root, sel, opts) {
     if (!root || !sel) return;
@@ -3832,6 +3840,15 @@ window.__askDesign = function (kind, info) {
   document.addEventListener('click', function (ev) {
     var o = document.getElementById('ygLux');
     if (!o || !o.classList.contains('on')) return;
+    hide();
+    if (ev.stopPropagation) ev.stopPropagation();
+    if (ev.preventDefault) ev.preventDefault();
+  }, true);
+  /* 触摸兜底：按下即关（文字区除外，便于阅读滚动长理念） */
+  document.addEventListener('pointerdown', function (ev) {
+    var o = document.getElementById('ygLux');
+    if (!o || !o.classList.contains('on')) return;
+    if (ev.target && ev.target.closest && ev.target.closest('.yg-lux-idea,.yg-lux-name,.yg-lux-cmt')) return;
     hide();
     if (ev.stopPropagation) ev.stopPropagation();
     if (ev.preventDefault) ev.preventDefault();
