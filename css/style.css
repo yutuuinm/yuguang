@@ -3235,3 +3235,18 @@ html.lux-lock::-webkit-scrollbar, body.lux-lock::-webkit-scrollbar { display: no
 .yg-lux-prev:hover, .yg-lux-next:hover { background: rgba(227,196,124,.3); border-color: rgba(227,196,124,.6); }
 .yg-lux-count { font-size: 13px; color: rgba(250,244,232,.85); letter-spacing: .2em; }
 .yg-lux-imgwrap { touch-action: pan-y; }
+
+/* 顾客分享：弹幕 + 图片墙 */
+.yg-dan { overflow: hidden; height: 36px; margin: 4px 0 14px; position: relative; display: flex; align-items: center;
+  background: rgba(10,14,26,.35); border-radius: 999px; }
+.yg-dan-track { display: flex; gap: 30px; white-space: nowrap; width: max-content; padding-left: 100%;
+  animation: ygDanScroll 42s linear infinite; }
+.yg-dan-item { color: rgba(250,244,232,.92); font-size: 13px; letter-spacing: .05em; }
+@keyframes ygDanScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+.yg-dan-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
+.yg-dan-img { display: block; width: 100%; aspect-ratio: 1/1; padding: 0; margin: 0; border: none; overflow: hidden;
+  border-radius: 14px; cursor: pointer; background: #0b0f1d;
+  box-shadow: 0 6px 16px rgba(0,0,0,.25); transition: transform .3s ease, box-shadow .3s ease; }
+.yg-dan-img:hover { transform: translateY(-3px); box-shadow: 0 12px 26px rgba(0,0,0,.4), 0 0 0 1px rgba(227,196,124,.5); }
+.yg-dan-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+@media (max-width: 560px) { .yg-dan-grid { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; } }
