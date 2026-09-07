@@ -3199,3 +3199,54 @@ html.lux-lock::-webkit-scrollbar, body.lux-lock::-webkit-scrollbar { display: no
   letter-spacing: .2em; cursor: pointer; }
 .yg-lux-done:hover { background: rgba(227,196,124,.14); }
 .yg-share-img[data-lx], #ghGrid .gh-card, #galleryGrid .g-card { cursor: pointer; }
+
+/* ===== 大图浮层（桦版样式：全屏大图 + 底部玻璃信息条 · 予光星夜） ===== */
+.yg-lux { position: fixed; left: 0; top: 0; right: 0; bottom: 0; z-index: 9000; display: flex;
+  align-items: center; justify-content: center; overflow: hidden;
+  pointer-events: none; opacity: 0; transition: opacity .25s ease;
+  background:
+    radial-gradient(2px 2px at 8% 12%, rgba(255,246,224,.95), transparent 60%),
+    radial-gradient(1.6px 1.6px at 20% 70%, rgba(143,163,217,.9), transparent 60%),
+    radial-gradient(3px 3px at 32% 30%, rgba(255,246,224,.9), transparent 62%),
+    radial-gradient(1.8px 1.8px at 46% 84%, rgba(227,196,124,.9), transparent 60%),
+    radial-gradient(2.4px 2.4px at 58% 16%, rgba(255,246,224,.9), transparent 62%),
+    radial-gradient(1.6px 1.6px at 70% 62%, rgba(143,163,217,.9), transparent 60%),
+    radial-gradient(3px 3px at 84% 34%, rgba(255,246,224,.85), transparent 62%),
+    radial-gradient(1.8px 1.8px at 93% 82%, rgba(255,246,224,.8), transparent 60%),
+    radial-gradient(1.8px 1.8px at 50% 48%, rgba(255,246,224,.6), transparent 60%),
+    radial-gradient(120% 80% at 50% 0%, rgba(96,126,216,.42), transparent 55%),
+    radial-gradient(80% 70% at 50% 115%, rgba(227,196,124,.3), transparent 60%),
+    radial-gradient(60% 55% at 8% 88%, rgba(96,126,216,.3), transparent 60%),
+    linear-gradient(172deg, #17234c 0%, #0c1430 42%, #070b1c 75%, #04060f 100%); }
+.yg-lux.on { opacity: 1; pointer-events: auto; }
+.yg-lux-stage { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 12px; padding: 16px 14px 18px; }
+.yg-lux-imgwrap { flex: 1 1 auto; min-height: 0; width: 100%; display: flex; align-items: center;
+  justify-content: center; position: relative; }
+.yg-lux-imgwrap::before { content: ''; position: absolute; inset: -6% -3%;
+  background: radial-gradient(circle at 50% 50%, rgba(227,196,124,.2), transparent 68%);
+  filter: blur(30px); pointer-events: none; }
+.yg-lux-imgwrap img { position: relative; max-width: 96vw; max-height: 100%; width: auto; height: auto;
+  object-fit: contain; border-radius: 16px; display: block;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 30px 80px rgba(0,0,0,.55), 0 0 46px rgba(227,196,124,.22); }
+.yg-lux-info { flex: 0 0 auto; width: 100%; max-width: 660px;
+  background: linear-gradient(165deg, rgba(255,255,255,.18), rgba(255,255,255,.05) 55%, rgba(255,255,255,.02));
+  backdrop-filter: blur(14px) saturate(150%); -webkit-backdrop-filter: blur(14px) saturate(150%);
+  border: 1px solid rgba(255,255,255,.16); border-radius: 18px; padding: 12px 16px 14px; text-align: center;
+  box-shadow: 0 10px 34px rgba(0,0,0,.5), inset 0 1px rgba(255,255,255,.22); }
+.yg-lux-name { font-family: var(--serif); color: #e9c47c; font-size: 18px; letter-spacing: .16em;
+  margin-bottom: 6px; text-align: center; }
+.yg-lux-idea { color: rgba(250,244,232,.9); font-size: 13.5px; line-height: 1.85; text-align: left;
+  white-space: pre-wrap; word-break: break-word; max-height: 20vh; overflow-y: auto; }
+.yg-lux-cmt { color: #ffe9b8; font-size: 13.5px; line-height: 1.9; text-align: left;
+  border-left: 2px solid rgba(227,196,124,.7); padding-left: 10px; margin-top: 8px; }
+.yg-lux-x { position: absolute; top: 12px; right: 14px; z-index: 5; width: 40px; height: 40px;
+  border-radius: 50%; border: 1px solid rgba(255,255,255,.25); cursor: pointer; font-size: 19px; color: #fff;
+  background: linear-gradient(160deg, rgba(255,255,255,.24), rgba(255,255,255,.06));
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 6px 18px rgba(0,0,0,.45), inset 0 1px rgba(255,255,255,.35); display: flex;
+  align-items: center; justify-content: center; }
+.yg-lux-done { display: inline-block; margin: 12px auto 2px; border: 1px solid rgba(227,196,124,.6);
+  background: transparent; color: #e9c47c; border-radius: 999px; padding: 7px 26px; font-size: 13px;
+  letter-spacing: .2em; cursor: pointer; }
+.yg-lux-done:hover { background: rgba(227,196,124,.16); }
