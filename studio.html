@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>定制工坊 · 予光</title>
 <meta name="description" content="予光定制工坊——东方生肖五行、西方星座星盘、双人合盘，三分钟生成一枚属于你的光。把古老的星空语言做成你愿意戴在身上的光。">
-<link rel="stylesheet" href="css/style.css?v=09071206">
+<link rel="stylesheet" href="css/style.css?v=09071832">
 </head>
 <body>
 
@@ -88,15 +88,15 @@
       <div>
           <div class="bead-size-row" id="beadSizeRow"><span class="bs-t">珠径</span><button class="bs-btn active" type="button" data-mm="10">10mm · 18颗</button><button class="bs-btn" type="button" data-mm="8">8mm · 22颗</button></div>
 
+        <div class="sub-tabs mode-chips" id="eastSubTabs" role="tablist" aria-label="定制方式">
+          <button type="button" class="sub-btn active" data-m="birth" role="tab">生辰定制</button>
+          <button type="button" class="sub-btn" data-m="shake" role="tab">摇卦定制</button>
+          <button type="button" class="sub-btn" data-m="west" role="tab">星座定制</button>
+          <button type="button" class="sub-btn" data-m="union" role="tab">合盘定制</button>
+        </div>
+
         <!-- ===== 东方：生辰定制 / 摇卦定制 ===== -->
         <div class="panel active" id="panel-east">
-          <div class="sub-tabs" id="eastSubTabs" role="tablist" aria-label="东方定制方式">
-            <button type="button" class="sub-btn active" data-sub="birth" id="subTabBirth" role="tab" aria-selected="true">生辰定制</button>
-            <button type="button" class="sub-btn" data-sub="shake" id="subTabShake" role="tab" aria-selected="false">摇卦定制</button>
-            <button type="button" class="sub-btn go-sub" data-go="west" role="tab">星座定制 ›</button>
-            <button type="button" class="sub-btn go-sub" data-go="union" role="tab">合盘定制 ›</button>
-          </div>
-
           <div class="shared-row">
             <div class="field">
               <label for="eastZodiac">本命生肖（五行自动推演 · 生辰模式可按年份自动选好）</label>
@@ -293,7 +293,7 @@
 </footer>
 
 <script src="js/lunar.min.js"></script>
-<script src="js/supabase-config.js?v=09071206"></script>
-<script src="js/main.js?v=09071206"></script>
+<script src="js/supabase-config.js?v=09071832"></script>
+<script src="js/main.js?v=09071832"></script>
 </body>
 </html>
