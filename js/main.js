@@ -3917,27 +3917,33 @@ window.__askDesign = function (kind, info) {
       }
       host.style.display = '';
       var luxItems = [];
-      var cards = rows.map(function (s, idx) {
+      var imgCards = [];
+      var dms = [];
+      rows.forEach(function (s) {
+        var cmt = String(s.comment || '').trim();
+        if (cmt) dms.push(cmt);
         var u = '';
         if (s.img && window.sbImg) u = window.sbImg(String(s.img).split(/[,，;]/)[0]);
-        luxItems.push({ img: u, name: String(s.name || '').trim(), idea: String(s.idea || '').trim(), cmt: String(s.comment || '').trim() });
-        var imgHtml = u
-          ? '<div class="yg-share-img" data-lx="' + idx + '" role="button" title="点开看图与设计理念">' +
-            '<img src="' + swEsc(u) + '" alt="作品图" loading="lazy" onerror="this.parentNode.style.display=\'none\';"></div>'
-          : '';
-        var line = [s.name, s.batch ? ('专属编码 ' + s.batch) : ''].filter(Boolean).join('　');
-        return '<div class="yg-share-card">' + imgHtml +
-          '<div class="yg-share-main">' +
-          (line ? '<div class="yg-share-name">' + swEsc(line) + '</div>' : '') +
-          (s.comment ? '<div class="yg-share-cmt">「' + swEsc(String(s.comment).slice(0, 160)) + '」</div>' : '') +
-          '<div class="yg-share-foot">' +
-          '<span class="yg-share-tag">已授权分享</span>' +
-          '<span class="yg-share-date">' + swTime(s.created_at) + '</span></div>' +
-          '</div></div>';
-      }).join('');
+        if (!u) return;
+        var idx = luxItems.length;
+        luxItems.push({ img: u, name: String(s.name || '').trim(), idea: String(s.idea || '').trim(), cmt: '' });
+        imgCards.push('<button type="button" class="yg-dan-img" data-lx="' + idx + '" title="点开看图与设计理念">' +
+          '<img src="' + swEsc(u) + '" alt="作品图" loading="lazy" onerror="this.style.display=\'none\';"></button>');
+      });
+      if (!luxItems.length) {
+        host.style.display = hideEmpty ? 'none' : '';
+        host.innerHTML = '<p class="yg-share-none">' + emptyTxt + '</p>';
+        return;
+      }
+      var danHtml = '';
+      if (dms.length) {
+        var one = dms.map(function (c) { return '<span class="yg-dan-item">✦ ' + swEsc(String(c).slice(0, 60)) + '</span>'; }).join('');
+        danHtml = '<div class="yg-dan"><div class="yg-dan-track">' + one + one + '</div></div>';
+      }
       host.innerHTML =
         (title ? '<div class="yg-share-head"><h3>' + title + '</h3>' + (sub ? '<span>' + sub + '</span>' : '') + '</div>' : '') +
-        '<div class="yg-share-grid">' + cards + '</div>';
+        danHtml +
+        '<div class="yg-dan-grid">' + imgCards.join('') + '</div>';
       host.querySelectorAll('[data-lx]').forEach(function (el) {
         el.addEventListener('click', function () {
           var idx = Number(el.getAttribute('data-lx'));
