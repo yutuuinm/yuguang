@@ -2981,17 +2981,7 @@ html { overscroll-behavior-y: none; }
 #admShell { animation: admIn .45s cubic-bezier(.22, .7, .3, 1) both; }
 @keyframes admIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
-/* 光集大卡弹层 */
-.ygLight { position: fixed; inset: 0; z-index: 1000; background: rgba(4, 7, 13, .8); display: none; align-items: center; justify-content: center; padding: 20px; }
-.ygLight.show { display: flex; animation: fadeIn .2s ease both; }
-.ygLightCard { position: relative; max-width: min(680px, 94vw); width: 100%; max-height: 88vh; overflow: auto; background: #0d1424; border: 1px solid var(--line); border-radius: 18px; padding: 18px 18px 20px; box-shadow: 0 24px 70px rgba(0,0,0,.6); animation: popIn .22s ease both; }
-.ygLightX { position: absolute; top: 10px; right: 14px; background: none; border: none; color: var(--moon); font-size: 20px; cursor: pointer; z-index: 2; }
-.ygLightImg img { width: 100%; max-height: 60vh; object-fit: cover; border-radius: 12px; }
-.ygLightName { font-family: var(--serif); color: var(--moon); letter-spacing: .12em; font-size: 20px; margin-top: 12px; }
-.ygLightTag { color: var(--gold); font-size: 12px; letter-spacing: .16em; margin: 2px 0 8px; }
-.ygLightStory { color: var(--moon); font-size: 14px; line-height: 2; }
-.ygLightQuote { color: var(--gold); font-size: 13.5px; line-height: 2; margin-top: 6px; }
-.ygLightDim { color: var(--text-dim); font-size: 11.5px; margin-top: 10px; }
+/* 光集大卡弹层（已合并到下方 .yg-lux 桦版样式，此处旧 .ygLight 样式已删除） */
 
 /* 返回键最终定位：随导航栏（不再漂移到奇怪位置） */
 #ygBack { position: static !important; top: auto !important; left: auto !important; width: 36px !important; height: 36px !important; font-size: 22px !important; margin: 0 12px 0 2px !important; flex: none !important; }
@@ -3011,7 +3001,7 @@ html { overscroll-behavior-y: none; }
   linear-gradient(165deg, rgba(16, 24, 40, .97), rgba(8, 12, 22, .98)) !important; }
 .ai-msg.ai { position: relative; padding-left: 34px; }
 .ai-msg.ai::before { content: '🐰'; position: absolute; left: 0; top: 2px; width: 26px; height: 26px; border-radius: 50%; background: radial-gradient(circle at 32% 30%, #fff9e9, #e3c47c 70%); display: flex; align-items: center; justify-content: center; font-size: 13px; line-height: 1; box-shadow: 0 0 10px rgba(227, 196, 124, .35); }
-.ygLightX, .buyX { line-height: 1; }
+.yg-lux-x, .buyX { line-height: 1; }
 
 .gen-flash { animation: genFlash 1.5s ease; }
 @keyframes genFlash { 0%,100% { box-shadow: 0 0 0 0 rgba(227,196,124,0); } 18% { box-shadow: 0 0 0 6px rgba(227,196,124,.32); } }
@@ -3150,96 +3140,74 @@ html { overscroll-behavior-y: none; }
 .field textarea, .sb-form textarea { resize: none; width: 100%; min-height: 64px; overflow: hidden; }
 #unionNote { min-height: 64px; }
 
-/* 大图 + 设计理念 浮层（予光 · 夜蓝金星空背景，桦版上图下文） */
+/* ===== 大图浮层（桦版样式：全屏大图 + 底部玻璃信息条 · 予光星夜） ===== */
 html, body { background-color: #070a12; }
 html.lux-lock, body.lux-lock { overflow: hidden !important; width: 100%; height: 100%; scrollbar-width: none; }
 html.lux-lock::-webkit-scrollbar, body.lux-lock::-webkit-scrollbar { display: none; width: 0; }
-.yg-lux-box { scrollbar-color: rgba(227,196,124,.5) transparent; scrollbar-width: thin; }
-.yg-lux-box::-webkit-scrollbar { width: 6px; height: 6px; }
-.yg-lux-box::-webkit-scrollbar-thumb { background: rgba(227,196,124,.45); border-radius: 99px; }
-.yg-lux-box::-webkit-scrollbar-track { background: transparent; }
-.yg-lux { position: fixed; left: 0; top: 0; right: 0; bottom: 0; z-index: 9000; display: flex; align-items: center;
-  justify-content: center; padding: 16px; opacity: 0; pointer-events: none; transition: opacity .22s ease;
-  background:
-    radial-gradient(3.2px 3.2px at 6% 9%, rgba(255,246,224,1), transparent 62%),
-    radial-gradient(2px 2px at 12% 24%, rgba(143,163,217,.95), transparent 60%),
-    radial-gradient(4px 4px at 22% 68%, rgba(227,196,124,.95), transparent 62%),
-    radial-gradient(2.6px 2.6px at 31% 14%, rgba(255,246,224,.9), transparent 60%),
-    radial-gradient(2px 2px at 40% 88%, rgba(255,246,224,.8), transparent 60%),
-    radial-gradient(3.6px 3.6px at 52% 22%, rgba(143,163,217,.95), transparent 62%),
-    radial-gradient(2.4px 2.4px at 61% 56%, rgba(255,246,224,.85), transparent 60%),
-    radial-gradient(4px 4px at 70% 12%, rgba(255,246,224,.9), transparent 62%),
-    radial-gradient(2.6px 2.6px at 78% 40%, rgba(227,196,124,.9), transparent 60%),
-    radial-gradient(2px 2px at 86% 76%, rgba(143,163,217,.9), transparent 60%),
-    radial-gradient(3.4px 3.4px at 93% 20%, rgba(255,246,224,.95), transparent 62%),
-    radial-gradient(2px 2px at 47% 46%, rgba(255,246,224,.7), transparent 60%),
-    radial-gradient(2px 2px at 26% 40%, rgba(255,246,224,.7), transparent 60%),
-    radial-gradient(2px 2px at 72% 84%, rgba(255,246,224,.7), transparent 60%),
-    radial-gradient(2px 2px at 58% 74%, rgba(255,246,224,.7), transparent 60%),
-    radial-gradient(130% 90% at 50% 4%, rgba(92,122,214,.5), transparent 55%),
-    radial-gradient(70% 55% at 78% 92%, rgba(227,196,124,.3), transparent 60%),
-    radial-gradient(60% 48% at 18% 88%, rgba(96,128,205,.32), transparent 60%),
-    linear-gradient(172deg, #16224a 0%, #0d1530 38%, #080d1e 72%, #050810 100%); }
-.yg-lux.on { opacity: 1; pointer-events: auto; }
-.yg-lux-box { position: relative; width: 100%; max-width: 620px; max-height: 94vh; overflow: auto;
-  border: 1px solid rgba(227,196,124,.38); border-radius: 18px;
-  background: linear-gradient(170deg, #151d35, #0b0f1c); box-shadow: 0 0 70px rgba(0,0,0,.7); }
-.yg-lux-media { min-height: 0; background: #0b0f1d; }
-.yg-lux-media img { width: 100%; max-height: 60vh; object-fit: cover; display: block; }
-.yg-lux-body { padding: 22px 24px 24px; }
-.yg-lux-name { font-family: var(--serif); color: var(--gold); font-size: 21px; letter-spacing: .14em; margin-bottom: 14px; text-align: center; }
-.yg-lux-idea { color: var(--moon); font-size: 14px; line-height: 2.1; }
-.yg-lux-cmt { color: #efe9dc; font-size: 14px; line-height: 2; border-left: 2px solid var(--gold);
-  padding-left: 12px; margin-top: 14px; }
-.yg-lux-x { position: absolute; top: 10px; right: 12px; z-index: 3; background: rgba(6,10,18,.72);
-  border: 1px solid rgba(227,196,124,.5); color: var(--moon); width: 34px; height: 34px; border-radius: 50%;
-  cursor: pointer; font-size: 15px; line-height: 1; }
-.yg-lux-done { display: block; margin: 18px auto 2px; border: 1px solid rgba(227,196,124,.55);
-  background: transparent; color: var(--gold); border-radius: 999px; padding: 8px 26px; font-size: 13px;
-  letter-spacing: .2em; cursor: pointer; }
-.yg-lux-done:hover { background: rgba(227,196,124,.14); }
-.yg-share-img[data-lx], #ghGrid .gh-card, #galleryGrid .g-card { cursor: pointer; }
-
-/* ===== 大图浮层（桦版样式：全屏大图 + 底部玻璃信息条 · 予光星夜） ===== */
+.yg-lux-info { scrollbar-color: rgba(227,196,124,.5) transparent; scrollbar-width: thin; }
+.yg-lux-info::-webkit-scrollbar { width: 6px; height: 6px; }
+.yg-lux-info::-webkit-scrollbar-thumb { background: rgba(227,196,124,.45); border-radius: 99px; }
+.yg-lux-info::-webkit-scrollbar-track { background: transparent; }
 .yg-lux { position: fixed; left: 0; top: 0; right: 0; bottom: 0; z-index: 9000; display: flex;
   align-items: center; justify-content: center; overflow: hidden;
   pointer-events: none; opacity: 0; transition: opacity .25s ease;
+  /* 予光 · 夜蓝底 + 微光金 + 月白 + 星空（强化金光比例，让品牌调性更显） */
   background:
-    radial-gradient(2px 2px at 8% 12%, rgba(255,246,224,.95), transparent 60%),
-    radial-gradient(1.6px 1.6px at 20% 70%, rgba(143,163,217,.9), transparent 60%),
-    radial-gradient(3px 3px at 32% 30%, rgba(255,246,224,.9), transparent 62%),
-    radial-gradient(1.8px 1.8px at 46% 84%, rgba(227,196,124,.9), transparent 60%),
-    radial-gradient(2.4px 2.4px at 58% 16%, rgba(255,246,224,.9), transparent 62%),
-    radial-gradient(1.6px 1.6px at 70% 62%, rgba(143,163,217,.9), transparent 60%),
-    radial-gradient(3px 3px at 84% 34%, rgba(255,246,224,.85), transparent 62%),
-    radial-gradient(1.8px 1.8px at 93% 82%, rgba(255,246,224,.8), transparent 60%),
-    radial-gradient(1.8px 1.8px at 50% 48%, rgba(255,246,224,.6), transparent 60%),
-    radial-gradient(120% 80% at 50% 0%, rgba(96,126,216,.42), transparent 55%),
-    radial-gradient(80% 70% at 50% 115%, rgba(227,196,124,.3), transparent 60%),
-    radial-gradient(60% 55% at 8% 88%, rgba(96,126,216,.3), transparent 60%),
-    linear-gradient(172deg, #17234c 0%, #0c1430 42%, #070b1c 75%, #04060f 100%); }
+    radial-gradient(2.4px 2.4px at 6% 10%, rgba(255,246,224,.95), transparent 60%),
+    radial-gradient(1.8px 1.8px at 18% 72%, rgba(143,163,217,.92), transparent 60%),
+    radial-gradient(3px 3px at 30% 28%, rgba(227,196,124,.95), transparent 62%),
+    radial-gradient(2px 2px at 44% 86%, rgba(255,246,224,.9), transparent 60%),
+    radial-gradient(2.6px 2.6px at 56% 14%, rgba(227,196,124,.88), transparent 62%),
+    radial-gradient(1.8px 1.8px at 68% 64%, rgba(143,163,217,.92), transparent 60%),
+    radial-gradient(3px 3px at 82% 32%, rgba(255,246,224,.88), transparent 62%),
+    radial-gradient(2px 2px at 92% 84%, rgba(227,196,124,.82), transparent 60%),
+    radial-gradient(1.8px 1.8px at 50% 46%, rgba(255,246,224,.6), transparent 60%),
+    /* 大面积光晕：上方蓝紫微光 + 中下金辉 + 角落星云 */
+    radial-gradient(120% 80% at 50% 0%, rgba(96,126,216,.45), transparent 55%),
+    radial-gradient(95% 70% at 50% 118%, rgba(227,196,124,.42), transparent 60%),
+    radial-gradient(60% 55% at 6% 88%, rgba(96,126,216,.32), transparent 60%),
+    radial-gradient(55% 50% at 96% 12%, rgba(143,163,217,.28), transparent 60%),
+    /* 主底：夜蓝渐变（顶端略紫、中段深蓝、底部黑金） */
+    linear-gradient(178deg, #1a2755 0%, #0f1735 30%, #0a1126 58%, #06091a 88%, #050813 100%); }
 .yg-lux.on { opacity: 1; pointer-events: auto; }
 .yg-lux-stage { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column;
   align-items: center; justify-content: center; gap: 12px; padding: 16px 14px 18px; }
 .yg-lux-imgwrap { flex: 1 1 auto; min-height: 0; width: 100%; display: flex; align-items: center;
   justify-content: center; position: relative; }
-.yg-lux-imgwrap::before { content: ''; position: absolute; inset: -6% -3%;
-  background: radial-gradient(circle at 50% 50%, rgba(227,196,124,.2), transparent 68%);
-  filter: blur(30px); pointer-events: none; }
+.yg-lux-imgwrap::before { content: ''; position: absolute; inset: -8% -5%;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(227,196,124,.42), transparent 64%),
+    radial-gradient(circle at 50% 50%, rgba(255,246,224,.18), transparent 80%);
+  filter: blur(34px); pointer-events: none; }
 .yg-lux-imgwrap img { position: relative; max-width: 96vw; max-height: 100%; width: auto; height: auto;
   object-fit: contain; border-radius: 16px; display: block;
-  box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 30px 80px rgba(0,0,0,.55), 0 0 46px rgba(227,196,124,.22); }
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.14),
+    0 0 0 4px rgba(227,196,124,.08),
+    0 30px 80px rgba(0,0,0,.6),
+    0 0 90px rgba(227,196,124,.32),
+    inset 0 0 60px rgba(255,246,224,.04); }
 .yg-lux-info { flex: 0 0 auto; width: 100%; max-width: 660px;
-  background: linear-gradient(165deg, rgba(255,255,255,.18), rgba(255,255,255,.05) 55%, rgba(255,255,255,.02));
-  backdrop-filter: blur(14px) saturate(150%); -webkit-backdrop-filter: blur(14px) saturate(150%);
-  border: 1px solid rgba(255,255,255,.16); border-radius: 18px; padding: 12px 16px 14px; text-align: center;
-  box-shadow: 0 10px 34px rgba(0,0,0,.5), inset 0 1px rgba(255,255,255,.22); }
-.yg-lux-name { font-family: var(--serif); color: #e9c47c; font-size: 18px; letter-spacing: .16em;
-  margin-bottom: 6px; text-align: center; }
-.yg-lux-idea { color: rgba(250,244,232,.9); font-size: 13.5px; line-height: 1.85; text-align: left;
-  white-space: pre-wrap; word-break: break-word; max-height: 20vh; overflow-y: auto; }
-.yg-lux-cmt { color: #ffe9b8; font-size: 13.5px; line-height: 1.9; text-align: left;
-  border-left: 2px solid rgba(227,196,124,.7); padding-left: 10px; margin-top: 8px; }
+  /* 玻璃质感信息条：白偏金 + 夜蓝底，金色细描边 */
+  background:
+    linear-gradient(168deg, rgba(227,196,124,.16), rgba(255,246,224,.06) 38%, rgba(20,30,55,.78) 78%, rgba(11,15,28,.85)),
+    linear-gradient(165deg, rgba(255,255,255,.16), rgba(255,255,255,.04) 55%, rgba(255,255,255,.02));
+  backdrop-filter: blur(18px) saturate(160%); -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid rgba(227,196,124,.42); border-radius: 18px;
+  padding: 14px 20px 16px; text-align: center;
+  box-shadow:
+    0 0 0 1px rgba(227,196,124,.12),
+    0 14px 40px rgba(0,0,0,.55),
+    0 0 70px rgba(227,196,124,.18),
+    inset 0 1px rgba(255,246,224,.28); }
+.yg-lux-name { font-family: var(--serif); color: #f3d896; font-size: 18px; letter-spacing: .16em;
+  margin-bottom: 8px; text-align: center;
+  text-shadow: 0 0 18px rgba(227,196,124,.35); }
+.yg-lux-idea { color: rgba(250,244,232,.92); font-size: 13.5px; line-height: 1.95; text-align: left;
+  white-space: pre-wrap; word-break: break-word; max-height: 22vh; overflow-y: auto;
+  padding: 2px 0; }
+.yg-lux-cmt { color: #ffe9b8; font-size: 13.5px; line-height: 1.95; text-align: left;
+  border-left: 2px solid rgba(227,196,124,.85); padding-left: 12px; margin-top: 10px; }
 .yg-lux-x { position: absolute; top: 12px; right: 14px; z-index: 5; width: 40px; height: 40px;
   border-radius: 50%; border: 1px solid rgba(255,255,255,.25); cursor: pointer; font-size: 19px; color: #fff;
   background: linear-gradient(160deg, rgba(255,255,255,.24), rgba(255,255,255,.06));
@@ -3250,3 +3218,12 @@ html.lux-lock::-webkit-scrollbar, body.lux-lock::-webkit-scrollbar { display: no
   background: transparent; color: #e9c47c; border-radius: 999px; padding: 7px 26px; font-size: 13px;
   letter-spacing: .2em; cursor: pointer; }
 .yg-lux-done:hover { background: rgba(227,196,124,.16); }
+.yg-share-img[data-lx], #ghGrid .gh-card, #galleryGrid .g-card { cursor: pointer; }
+
+/* 予光星夜实拍底图 + 层级 */
+.yg-lux-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  opacity: .5; pointer-events: none; z-index: 0; }
+.yg-lux-stage { position: relative; z-index: 1; }
+.yg-lux-info { position: relative; z-index: 2; }
+.yg-lux-imgwrap { position: relative; z-index: 1; }
+.yg-lux-imgwrap img { position: relative; z-index: 2; }
