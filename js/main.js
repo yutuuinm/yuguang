@@ -3414,50 +3414,6 @@ body: JSON.stringify({ mode: 'product_img', bazi: ctxB, hex: ctxH, design: { nam
   }
 })();
 
-/* ===== 光集 / 首页光集：点击查看大卡弹层 ===== */
-(function () {
-  var ov = null;
-  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  function close() { if (ov) ov.classList.remove('show'); }
-  function openCard(card) {
-    var img = card.querySelector('img');
-    var nameEl = card.querySelector('.gh-name, .g-name');
-    var tagEl = card.querySelector('.gh-tag, .g-tag');
-    var storyEl = card.querySelector('.gh-story, .g-story');
-    var quoteEl = card.querySelector('.gh-q, .g-quote, .gh-story');
-    var name = nameEl ? String(nameEl.textContent || '').trim() : '予光 · 光集';
-    var tag = tagEl ? String(tagEl.textContent || '').trim() : '';
-    var story = storyEl ? String(storyEl.textContent || '').trim() : '';
-    var quote = (quoteEl && quoteEl !== storyEl) ? String(quoteEl.textContent || '').trim() : '';
-    var src = img ? (img.getAttribute('src') || '') : '';
-    if (!ov) {
-      ov = document.createElement('div');
-      ov.className = 'ygLight';
-      ov.innerHTML = '<div class="ygLightCard"><button class="ygLightX" type="button" aria-label="关闭">✕</button><div class="ygLightBody"></div></div>';
-      document.body.appendChild(ov);
-      ov.addEventListener('click', function (e) { if (e.target === ov) close(); });
-      ov.querySelector('.ygLightX').addEventListener('click', close);
-    }
-    var inner = '';
-    if (src) inner += '<div class="ygLightImg"><img src="' + esc(src) + '" alt="' + esc(name) + '" loading="lazy"></div>';
-    inner += '<div class="ygLightTxt"><div class="ygLightName">' + esc(name) + '</div>' +
-      (tag ? '<div class="ygLightTag">' + esc(tag) + '</div>' : '') +
-      (story ? '<p class="ygLightStory">' + esc(story) + '</p>' : '') +
-      (quote ? '<p class="ygLightQuote">' + esc(quote) + '</p>' : '') +
-      '<p class="ygLightDim">✦ 文化与陪伴的表达 · 仅展示已授权作品</p></div>';
-    ov.querySelector('.ygLightBody').innerHTML = inner;
-    ov.classList.add('show');
-  }
-  document.addEventListener('click', function (e) {
-    var t = e.target;
-    var card = (t && t.closest) ? t.closest('.g-card, .gh-card') : null;
-    if (!card) return;
-    if (t.closest && t.closest('button, a, input, textarea, select')) return;
-    e.stopPropagation();
-    openCard(card);
-  });
-})();
-
 /* ===== 星图志 · 需求选石速查 ===== */
 (function () {
   var sel = document.getElementById('needSel');
@@ -3778,11 +3734,14 @@ window.__askDesign = function (kind, info) {
 (function luxViewer() {
   function txt(el) { return el ? String(el.textContent || '').trim() : ''; }
   function ensure() {
-    var o = document.getElementById('ygLux');
+    /* 注意：必须用 className 查（元素只有 className，没 id）；用 getElementById 永远返回 null，导致每次都创建新元素、hide() 失效 */
+    var o = document.querySelector('.yg-lux');
     if (o) return o;
     o = document.createElement('div');
     o.className = 'yg-lux';
-    o.innerHTML = '<div class="yg-lux-stage">' +
+    o.innerHTML =
+      '<img class="yg-lux-photo" alt="" src="背景.jpg" onerror="this.style.display=\'none\';">' +
+      '<div class="yg-lux-stage">' +
       '<button class="yg-lux-x" type="button" aria-label="关闭">✕</button>' +
       '<div class="yg-lux-imgwrap"><img id="ygLuxImg" alt="作品大图"></div>' +
       '<div class="yg-lux-info">' +
@@ -3791,15 +3750,33 @@ window.__askDesign = function (kind, info) {
       '<div class="yg-lux-cmt" id="ygLuxCmt"></div>' +
       '<button class="yg-lux-done" type="button">关 闭</button></div></div>';
     document.body.appendChild(o);
+    /* 关闭判定：点大图 / 图片区 / 空白背景 / ✕ / 关闭按钮 都会关；文字区不误关（便于阅读滚动） */
     o.addEventListener('click', function (e) {
       var t = e.target;
       if (!t) return;
-      if (t === o || t.closest('.yg-lux-x') || t.closest('.yg-lux-done') || t.closest('.yg-lux-imgwrap')) hide();
+      if (t === o) { hide(); return; }
+      if (t.closest && (t.closest('.yg-lux-x') || t.closest('.yg-lux-done') || t.closest('.yg-lux-imgwrap') || t.closest('#ygLuxImg'))) { hide(); return; }
+      if (t.closest && t.closest('.yg-lux-info')) return; // 信息文字区：不关闭，可滚动阅读
+      hide(); // 其余区域（如 info 边上的留白）也直接关
+    });
+    /* pointer 兜底：手指按下/抬起在非文字区即关，避免某些浏览器不派发 click */
+    o.addEventListener('pointerup', function (e) {
+      var t = e.target;
+      if (!t || !t.closest) return;
+      if (t.closest('.yg-lux-info')) return;
+      hide();
+    });
+    o.addEventListener('pointerdown', function (e) {
+      var t = e.target;
+      if (!t || !t.closest) return;
+      if (t.closest('.yg-lux-info')) return;
+      hide();
     });
     return o;
   }
   function hide() {
-    var o = ensure();
+    var o = document.querySelector('.yg-lux');
+    if (!o) return;
     o.classList.remove('on');
     document.body.classList.remove('lux-lock');
     var de = document.documentElement;
@@ -3836,23 +3813,6 @@ window.__askDesign = function (kind, info) {
     });
   };
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') hide(); });
-  /* 兜底：浮层开着时，任意一次点击都关闭（capture 阶段先执行，防其它监听器抢先） */
-  document.addEventListener('click', function (ev) {
-    var o = document.getElementById('ygLux');
-    if (!o || !o.classList.contains('on')) return;
-    hide();
-    if (ev.stopPropagation) ev.stopPropagation();
-    if (ev.preventDefault) ev.preventDefault();
-  }, true);
-  /* 触摸兜底：按下即关（文字区除外，便于阅读滚动长理念） */
-  document.addEventListener('pointerdown', function (ev) {
-    var o = document.getElementById('ygLux');
-    if (!o || !o.classList.contains('on')) return;
-    if (ev.target && ev.target.closest && ev.target.closest('.yg-lux-idea,.yg-lux-name,.yg-lux-cmt')) return;
-    hide();
-    if (ev.stopPropagation) ev.stopPropagation();
-    if (ev.preventDefault) ev.preventDefault();
-  }, true);
 })();
 
 /* 光集卡（首页 #ghGrid / 光集页 #galleryGrid）：点击整卡 = 点开大图 + 设计理念 */
