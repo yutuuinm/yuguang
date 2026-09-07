@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>予光 · 管理后台</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="css/style.css?v=09071856">
+<link rel="stylesheet" href="css/style.css?v=09071953">
 <style>
   /* ============ 予光 · 管理后台（分区式） ============ */
   .adm{max-width:1280px;margin:0 auto;padding:132px 12px 90px;position:relative;z-index:5;}
@@ -890,8 +890,8 @@
 
 <footer class="footer"><div class="wrap"><div class="disclaimer">© 予光 YUGUANG · 管理后台 · 仅供内部使用</div></div></footer>
 
-<script src="js/supabase-config.js?v=09071856"></script>
-<script src="js/main.js?v=09071856"></script>
+<script src="js/supabase-config.js?v=09071953"></script>
+<script src="js/main.js?v=09071953"></script>
 <script>
 (function () {
   'use strict';
@@ -2465,9 +2465,8 @@
   /* ——— records 专属行渲染 ——— */
   function dbRecRowsHtml(rows) {
     var h = '<tr><th style="width:24px;"><input type="checkbox" id="dRecAllChk" class="chk" title="全选/取消当前列表"></th>' +
-      '<th>品名</th><th>专属编码</th><th>防伪码</th><th>光语</th><th>建档时间</th><th>操作</th></tr>';
+      '<th>品名</th><th>专属编码</th><th>防伪码</th><th>建档时间</th><th>操作</th></tr>';
     rows.forEach(function (row) {
-      var info = recInfo(row);
       var checked = DB.sel[String(row.id)] ? ' checked' : '';
       var sel = String(DB.curId) === String(row.id) ? ' class="db-row db-sel"' : ' class="db-row"';
       h += '<tr' + sel + ' data-id="' + row.id + '">' +
@@ -2475,7 +2474,6 @@
         '<td>' + esc(row.product_ref || '—') + '</td>' +
         '<td>' + esc(row.batch_no || '—') + '</td>' +
         '<td class="c-code">' + esc(row.code || '') + '</td>' +
-        '<td class="c-info">' + esc(String(info.text || '').slice(0, 60) || '—') + '</td>' +
         '<td class="dim">' + esc(fmtTime(row.created_at)) + '</td>' +
         '<td style="white-space:nowrap;">' +
         '<button class="btn-sm" data-rr="copy" data-id="' + row.id + '" title="复制该防伪码">📋 复制</button>' +
@@ -3794,6 +3792,24 @@
   }
   bindRcAr();
 
+})();
+</script>
+<script>
+/* 后台左上角返回兜底：无论前面逻辑是否执行，都保证能回官网主页 */
+(function () {
+  function goHome(ev) {
+    if (ev) { ev.preventDefault(); if (ev.stopPropagation) ev.stopPropagation(); }
+    try { location.href = 'index.html'; } catch (e) { window.location.assign('index.html'); }
+  }
+  var on = function (el) {
+    if (!el) return;
+    el.onclick = function (ev) { goHome(ev); return false; };
+  };
+  setTimeout(function () {
+    on(document.getElementById('ygBack'));
+    var brand = document.querySelector('#nav .nav-brand');
+    if (brand) on(brand);
+  }, 0);
 })();
 </script>
 </body>
